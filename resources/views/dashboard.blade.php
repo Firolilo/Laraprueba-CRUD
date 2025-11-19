@@ -47,6 +47,20 @@
         </div>
 
         <div class="col-lg-3 col-md-6">
+            <a href="{{ route('tipo-biomasas.index') }}" class="text-decoration-none">
+                <div class="small-box bg-olive text-white p-3">
+                    <div class="inner">
+                        <h4>Tipos de Biomasa</h4>
+                        <p>Catálogo de tipos</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-list"></i>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
             <a href="{{ route('simulaciones.index') }}" class="text-decoration-none">
                 <div class="small-box bg-warning text-white p-3">
                     <div class="inner">

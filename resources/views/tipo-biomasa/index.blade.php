@@ -1,8 +1,10 @@
 @extends('adminlte::page')
 
-@section('template_title')
-    Biomasas
-@endsection
+@section('title', 'Tipos de Biomasa')
+
+@section('content_header')
+    <h1>Tipos de Biomasa</h1>
+@stop
 
 @section('content')
     <div class="container-fluid">
@@ -11,16 +13,14 @@
                 <div class="card">
                     <div class="card-header">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
-
                             <span id="card_title">
-                                {{ __('Biomasas') }}
+                                {{ __('Tipos de Biomasa') }}
                             </span>
-
-                             <div class="float-right">
-                                <a href="{{ route('biomasas.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
-                                  {{ __('Create New') }}
+                            <div class="float-right">
+                                <a href="{{ route('tipo-biomasas.create') }}" class="btn btn-primary btn-sm float-right" data-placement="left">
+                                  {{ __('Crear Nuevo') }}
                                 </a>
-                              </div>
+                            </div>
                         </div>
                     </div>
                     @if ($message = Session::get('success'))
@@ -35,30 +35,22 @@
                                 <thead class="thead">
                                     <tr>
                                         <th>No</th>
-                                        <th>Nombre</th>
-                                        <th>Tipo</th>
-                                        <th>Área (m²)</th>
-                                        <th>Ubicación</th>
-
+                                        <th>Tipo de Biomasa</th>
                                         <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($biomasas as $biomasa)
+                                    @foreach ($tipoBiomasas as $tipoBiomasa)
                                         <tr>
                                             <td>{{ ++$i }}</td>
-                                            <td>{{ $biomasa->nombre }}</td>
-                                            <td>{{ $biomasa->tipoBiomasa->tipo_biomasa ?? 'N/A' }}</td>
-                                            <td>{{ $biomasa->area_m2 }}</td>
-                                            <td>{{ $biomasa->ubicacion }}</td>
-
+                                            <td>{{ $tipoBiomasa->tipo_biomasa }}</td>
                                             <td>
-                                                <form action="{{ route('biomasas.destroy', $biomasa->id) }}" method="POST">
-                                                    <a class="btn btn-sm btn-primary " href="{{ route('biomasas.show', $biomasa->id) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Show') }}</a>
-                                                    <a class="btn btn-sm btn-success" href="{{ route('biomasas.edit', $biomasa->id) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Edit') }}</a>
+                                                <form action="{{ route('tipo-biomasas.destroy', $tipoBiomasa->id) }}" method="POST">
+                                                    <a class="btn btn-sm btn-primary" href="{{ route('tipo-biomasas.show', $tipoBiomasa->id) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Ver') }}</a>
+                                                    <a class="btn btn-sm btn-success" href="{{ route('tipo-biomasas.edit', $tipoBiomasa->id) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Editar') }}</a>
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="event.preventDefault(); confirm('Are you sure to delete?') ? this.closest('form').submit() : false;"><i class="fa fa-fw fa-trash"></i> {{ __('Delete') }}</button>
+                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="event.preventDefault(); confirm('¿Estás seguro de eliminar?') ? this.closest('form').submit() : false;"><i class="fa fa-fw fa-trash"></i> {{ __('Eliminar') }}</button>
                                                 </form>
                                             </td>
                                         </tr>
@@ -68,8 +60,8 @@
                         </div>
                     </div>
                 </div>
-                {!! $biomasas->withQueryString()->links() !!}
+                {!! $tipoBiomasas->withQueryString()->links() !!}
             </div>
         </div>
     </div>
-@endsection
+@stop

@@ -8,9 +8,16 @@
     </div>
     <div class="col-md-6">
         <div class="form-group mb-3">
-            <label for="tipo">Tipo</label>
-            <input type="text" name="tipo" id="tipo" class="form-control @error('tipo') is-invalid @enderror" value="{{ old('tipo', $biomasa->tipo) }}">
-            @error('tipo')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            <label for="tipo_biomasa_id">Tipo de Biomasa</label>
+            <select name="tipo_biomasa_id" id="tipo_biomasa_id" class="form-control @error('tipo_biomasa_id') is-invalid @enderror">
+                <option value="">Seleccione un tipo</option>
+                @foreach($tipoBiomasas as $tipo)
+                    <option value="{{ $tipo->id }}" {{ old('tipo_biomasa_id', $biomasa->tipo_biomasa_id) == $tipo->id ? 'selected' : '' }}>
+                        {{ $tipo->tipo_biomasa }}
+                    </option>
+                @endforeach
+            </select>
+            @error('tipo_biomasa_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
     </div>
 

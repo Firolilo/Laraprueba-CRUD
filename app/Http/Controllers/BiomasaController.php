@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Biomasa;
+use App\Models\TipoBiomasa;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Http\Requests\BiomasaRequest;
@@ -28,8 +29,9 @@ class BiomasaController extends Controller
     public function create(): View
     {
         $biomasa = new Biomasa();
+        $tipoBiomasas = TipoBiomasa::all();
 
-        return view('biomasa.create', compact('biomasa'));
+        return view('biomasa.create', compact('biomasa', 'tipoBiomasas'));
     }
 
     /**
@@ -59,8 +61,9 @@ class BiomasaController extends Controller
     public function edit($id): View
     {
         $biomasa = Biomasa::find($id);
+        $tipoBiomasas = TipoBiomasa::all();
 
-        return view('biomasa.edit', compact('biomasa'));
+        return view('biomasa.edit', compact('biomasa', 'tipoBiomasas'));
     }
 
     /**

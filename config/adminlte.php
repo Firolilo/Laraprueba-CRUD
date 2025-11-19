@@ -332,6 +332,11 @@ return [
             'icon' => 'fas fa-leaf',
         ],
         [
+            'text' => 'Tipos de Biomasa',
+            'url' => '/tipo-biomasas',
+            'icon' => 'fas fa-list',
+        ],
+        [
             'text' => 'Simulaciones',
             'url' => '/simulaciones',
             'icon' => 'fas fa-fire-extinguisher',

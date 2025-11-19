@@ -26,7 +26,7 @@ class Biomasa extends Model
      */
     protected $fillable = [
         'nombre',
-        'tipo',
+        'tipo_biomasa_id',
         'area_m2',
         'densidad',
         'humedad',
@@ -40,6 +40,14 @@ class Biomasa extends Model
         'densidad' => 'float',
         'humedad' => 'float',
     ];
+    
+    /**
+     * Tipo de biomasa (catálogo)
+     */
+    public function tipoBiomasa()
+    {
+        return $this->belongsTo(\App\Models\TipoBiomasa::class, 'tipo_biomasa_id');
+    }
     
     /**
      * Usuario que creó esta biomasa (cualquiera puede crear)

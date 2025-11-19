@@ -23,7 +23,7 @@ class BiomasaRequest extends FormRequest
     {
         return [
             'nombre' => ['required','string','max:255'],
-            'tipo' => ['nullable','string','max:255'],
+            'tipo_biomasa_id' => ['nullable','exists:tipo_biomasa,id'],
             'area_m2' => ['nullable','integer','min:0'],
             'densidad' => ['nullable','numeric'],
             'humedad' => ['nullable','numeric'],

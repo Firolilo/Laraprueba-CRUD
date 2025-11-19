@@ -24,7 +24,7 @@
                             <dd class="col-sm-9">{{ $biomasa->nombre }}</dd>
 
                             <dt class="col-sm-3">Tipo</dt>
-                            <dd class="col-sm-9">{{ $biomasa->tipo }}</dd>
+                            <dd class="col-sm-9">{{ $biomasa->tipoBiomasa->tipo_biomasa ?? 'N/A' }}</dd>
 
                             <dt class="col-sm-3">Área (m²)</dt>
                             <dd class="col-sm-9">{{ $biomasa->area_m2 }}</dd>
