@@ -1,7 +1,7 @@
 @extends('adminlte::page')
 
 @section('template_title')
-    Simulaciones
+    Voluntarios
 @endsection
 
 @section('content')
@@ -11,17 +11,12 @@
                 <div class="card">
                     <div class="card-header">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
-
                             <span id="card_title">
-                                {{ __('Simulaciones') }}
+                                {{ __('Voluntarios') }}
                             </span>
-
                              <div class="float-right">
-                                <a href="{{ route('simulaciones.simulator') }}" class="btn btn-success btn-sm mr-2"  data-placement="left">
-                                  <i class="fas fa-fire"></i> {{ __('Simulador Avanzado') }}
-                                </a>
-                                <a href="{{ route('simulaciones.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
-                                  {{ __('Create New') }}
+                                <a href="{{ route('voluntarios.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
+                                  {{ __('Crear Nuevo') }}
                                 </a>
                               </div>
                         </div>
@@ -39,29 +34,29 @@
                                     <tr>
                                         <th>No</th>
                                         <th>Nombre</th>
-                                        <th>Fecha</th>
-                                        <th>Estado</th>
-                                        <th>Focos activos</th>
-
+                                        <th>Email</th>
+                                        <th>Ciudad</th>
+                                        <th>Zona</th>
+                                        <th>Dirección</th>
                                         <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($simulaciones as $simulacione)
+                                    @foreach ($voluntarios as $voluntario)
                                         <tr>
                                             <td>{{ ++$i }}</td>
-                                            <td>{{ $simulacione->nombre }}</td>
-                                            <td>{{ optional($simulacione->fecha)->format('Y-m-d H:i') }}</td>
-                                            <td>{{ $simulacione->estado }}</td>
-                                            <td>{{ $simulacione->focos_activos }}</td>
-
+                                            <td>{{ $voluntario->user->name }}</td>
+                                            <td>{{ $voluntario->user->email }}</td>
+                                            <td>{{ $voluntario->ciudad }}</td>
+                                            <td>{{ $voluntario->zona }}</td>
+                                            <td>{{ $voluntario->direccion }}</td>
                                             <td>
-                                                <form action="{{ route('simulaciones.destroy', $simulacione->id) }}" method="POST">
-                                                    <a class="btn btn-sm btn-primary " href="{{ route('simulaciones.show', $simulacione->id) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Show') }}</a>
-                                                    <a class="btn btn-sm btn-success" href="{{ route('simulaciones.edit', $simulacione->id) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Edit') }}</a>
+                                                <form action="{{ route('voluntarios.destroy', $voluntario->id) }}" method="POST">
+                                                    <a class="btn btn-sm btn-primary " href="{{ route('voluntarios.show', $voluntario->id) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Ver') }}</a>
+                                                    <a class="btn btn-sm btn-success" href="{{ route('voluntarios.edit', $voluntario->id) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Editar') }}</a>
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="event.preventDefault(); confirm('Are you sure to delete?') ? this.closest('form').submit() : false;"><i class="fa fa-fw fa-trash"></i> {{ __('Delete') }}</button>
+                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="event.preventDefault(); confirm('¿Está seguro de eliminar este voluntario?') ? this.closest('form').submit() : false;"><i class="fa fa-fw fa-trash"></i> {{ __('Eliminar') }}</button>
                                                 </form>
                                             </td>
                                         </tr>
@@ -71,7 +66,7 @@
                         </div>
                     </div>
                 </div>
-                {!! $simulaciones->withQueryString()->links() !!}
+                {!! $voluntarios->withQueryString()->links() !!}
             </div>
         </div>
     </div>

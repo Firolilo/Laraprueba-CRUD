@@ -27,6 +27,17 @@ class Simulacione extends Model
         'num_voluntarios_enviados',
         'estado',
         'admin_id',
+        'temperature',
+        'humidity',
+        'wind_speed',
+        'wind_direction',
+        'simulation_speed',
+        'fire_risk',
+        'map_center_lat',
+        'map_center_lng',
+        'initial_fires',
+        'mitigation_strategies',
+        'auto_stopped',
     ];
 
     protected $casts = [
@@ -34,6 +45,17 @@ class Simulacione extends Model
         'duracion' => 'integer',
         'focos_activos' => 'integer',
         'num_voluntarios_enviados' => 'integer',
+        'temperature' => 'decimal:2',
+        'humidity' => 'decimal:2',
+        'wind_speed' => 'decimal:2',
+        'wind_direction' => 'integer',
+        'simulation_speed' => 'decimal:1',
+        'fire_risk' => 'integer',
+        'map_center_lat' => 'decimal:7',
+        'map_center_lng' => 'decimal:7',
+        'initial_fires' => 'array',
+        'mitigation_strategies' => 'array',
+        'auto_stopped' => 'boolean',
     ];
 
     /**
@@ -52,5 +74,13 @@ class Simulacione extends Model
         return $this->belongsToMany(\App\Models\FocosIncendio::class, 'foco_simulacion', 'simulacion_id', 'foco_incendio_id')
                     ->withPivot(['agregado_at', 'activo'])
                     ->withTimestamps();
+    }
+
+    /**
+     * Historial de propagación de focos durante la simulación
+     */
+    public function fireHistory()
+    {
+        return $this->hasMany(\App\Models\SimulationFireHistory::class, 'simulacion_id');
     }
 }

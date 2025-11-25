@@ -1,8 +1,10 @@
 @extends('adminlte::page')
 
-@section('template_title')
-    {{ __('Actualizar') }} Foco de Incendio
-@endsection
+@section('title', 'Editar Predicción')
+
+@section('content_header')
+    <h1>Editar Predicción</h1>
+@stop
 
 @section('content')
     <section class="content container-fluid">
@@ -11,14 +13,14 @@
 
                 <div class="card card-default">
                     <div class="card-header">
-                        <span class="card-title">{{ __('Actualizar') }} Foco de Incendio</span>
+                        <span class="card-title">{{ __('Actualizar') }} Predicción</span>
                     </div>
                     <div class="card-body bg-white">
-                        <form method="POST" action="{{ route('focos-incendios.update', $focosIncendio->id) }}"  role="form" enctype="multipart/form-data">
+                        <form method="POST" action="{{ route('predictions.update', $prediction->id) }}" role="form" enctype="multipart/form-data">
                             {{ method_field('PATCH') }}
                             @csrf
 
-                            @include('focos-incendio.form')
+                            @include('prediction.form')
 
                         </form>
                     </div>
@@ -26,12 +28,4 @@
             </div>
         </div>
     </section>
-@endsection
-
-@section('css')
-    @stack('css')
-@endsection
-
-@section('js')
-    @stack('js')
-@endsection
+@stop

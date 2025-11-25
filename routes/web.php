@@ -10,6 +10,16 @@ Route::get('/', function () {
 Route::resource('users', App\Http\Controllers\UserController::class);
 Route::resource('biomasas', App\Http\Controllers\BiomasaController::class);
 Route::resource('tipo-biomasas', App\Http\Controllers\TipoBiomasaController::class);
+Route::resource('administradores', App\Http\Controllers\AdministradorController::class);
+Route::resource('voluntarios', App\Http\Controllers\VoluntarioController::class);
+
+// Simulation routes
+Route::get('simulaciones/simulator', [App\Http\Controllers\SimulacioneController::class, 'simulator'])->name('simulaciones.simulator');
+Route::post('simulaciones/save-simulation', [App\Http\Controllers\SimulacioneController::class, 'saveSimulation'])->name('simulaciones.save');
+Route::get('simulaciones/history', [App\Http\Controllers\SimulacioneController::class, 'getHistory'])->name('simulaciones.history');
+Route::delete('simulaciones/delete/{id}', [App\Http\Controllers\SimulacioneController::class, 'deleteSimulation'])->name('simulaciones.delete');
+
 // Note: generator created 'SimulacioneController' (singular/plural auto name) — keep the generated name
 Route::resource('simulaciones', App\Http\Controllers\SimulacioneController::class);
 Route::resource('focos-incendios', App\Http\Controllers\FocosIncendioController::class);
+Route::resource('predictions', App\Http\Controllers\PredictionController::class);

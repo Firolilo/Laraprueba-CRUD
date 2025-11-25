@@ -1,5 +1,122 @@
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
+# Sistema de Gestión de Incendios Forestales
+
+Sistema completo de gestión y simulación de incendios forestales desarrollado en Laravel con AdminLTE.
+
+## Características Principales
+
+### 🔥 Simulador Avanzado de Incendios
+- **Simulación en tiempo real** de propagación de incendios con factores ambientales
+- **Mapa interactivo Leaflet** para colocación de focos
+- **Algoritmo probabilístico** de propagación basado en riesgo de incendio
+  - Mayor riesgo = mayor probabilidad de expansión
+  - Focos desaparecen si no se expanden en 5 segundos
+- **Parámetros dinámicos**: temperatura, humedad, viento (velocidad y dirección)
+- **Cálculo automático** de riesgo de incendio y voluntarios necesarios
+- **Estrategias de mitigación** generadas automáticamente
+- **Historial completo** de propagación guardado en base de datos
+- **Repetición de simulaciones** anteriores con parámetros exactos
+
+### 📊 Módulos CRUD
+- **Usuarios**: Gestión de usuarios del sistema
+- **Voluntarios**: Registro de voluntarios con datos personales
+- **Administradores**: Gestión de administradores del sistema
+- **Biomasa**: Observación y delimitación de áreas de biomasa
+- **Tipos de Biomasa**: Catálogo paramétrico de tipos
+- **Focos de Incendio**: Seguimiento de focos (API externa)
+- **Simulaciones**: Gestión de simulaciones guardadas
+- **Predicciones**: Predicciones de rutas de propagación
+
+### 🗄️ Base de Datos
+- **PostgreSQL** con esquema normalizado
+- **Tablas relacionales** con foreign keys
+- **JSON columns** para datos complejos (historial, estrategias)
+- **Pivot tables** para relaciones many-to-many
+- **Soft deletes** donde corresponde
+
+## Tecnologías
+
+- **Backend**: Laravel 12.37.0, PHP 8.2.12
+- **Frontend**: AdminLTE 3.x, Alpine.js 3.x, Blade
+- **Mapas**: Leaflet.js 1.9.4
+- **Base de datos**: PostgreSQL
+- **CRUD Generator**: ibex/crud-generator
+
+## Instalación
+
+```bash
+# Clonar repositorio
+git clone https://github.com/Firolilo/Laraprueba-CRUD.git
+cd Laraprueba-CRUD
+
+# Instalar dependencias
+composer install
+npm install
+
+# Configurar .env
+cp .env.example .env
+php artisan key:generate
+
+# Configurar base de datos en .env
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=nombre_bd
+DB_USERNAME=usuario
+DB_PASSWORD=contraseña
+
+# Migrar base de datos
+php artisan migrate
+
+# Servir aplicación
+php artisan serve
+```
+
+## Uso del Simulador
+
+1. Accede a `/simulaciones/simulator`
+2. Click en el mapa para añadir focos iniciales
+3. Ajusta parámetros ambientales (temperatura, humedad, viento)
+4. Click "Iniciar Simulación"
+5. Observa la propagación en tiempo real
+6. Detén y guarda la simulación
+
+Ver documentación detallada en [SIMULADOR.md](SIMULADOR.md)
+
+## Estructura del Proyecto
+
+```
+app/
+├── Http/Controllers/    # Controladores CRUD + Simulator
+├── Models/             # Eloquent models
+└── Providers/          # Service providers
+
+database/
+├── migrations/         # Schema migrations
+└── seeders/           # Database seeders
+
+resources/
+├── views/
+│   ├── simulacione/   # Vistas de simulaciones
+│   ├── biomasa/       # Vistas de biomasa
+│   └── ...
+└── js/                # Alpine.js components
+
+routes/
+└── web.php           # Rutas de la aplicación
+```
+
+## Contribución
+
+Las contribuciones son bienvenidas. Por favor, abre un issue primero para discutir cambios mayores.
+
+## Licencia
+
+Este proyecto es de código abierto bajo licencia MIT.
+
+---
+
 <p align="center">
 <a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>

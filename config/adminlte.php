@@ -337,6 +337,11 @@ return [
             'icon' => 'fas fa-list',
         ],
         [
+            'text' => 'Simulador Avanzado',
+            'url' => '/simulaciones/simulator',
+            'icon' => 'fas fa-fire text-warning',
+        ],
+        [
             'text' => 'Simulaciones',
             'url' => '/simulaciones',
             'icon' => 'fas fa-fire-extinguisher',
@@ -345,6 +350,11 @@ return [
             'text' => 'Focos de incendio',
             'url' => '/focos-incendios',
             'icon' => 'fas fa-fire',
+        ],
+        [
+            'text' => 'Predicciones',
+            'url' => '/predictions',
+            'icon' => 'fas fa-chart-line',
         ],
     ],
 

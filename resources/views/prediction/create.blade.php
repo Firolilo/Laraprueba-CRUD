@@ -1,35 +1,30 @@
 @extends('adminlte::page')
 
-@section('template_title')
-    {{ __('Crear') }} Foco de Incendio
-@endsection
+@section('title', 'Generar Predicción')
+
+@section('content_header')
+    <h1><i class="fas fa-chart-line text-primary"></i> Generar Predicción de Propagación</h1>
+@stop
 
 @section('content')
     <section class="content container-fluid">
         <div class="row">
             <div class="col-md-12">
-
-                <div class="card card-default">
+                <div class="card card-primary">
                     <div class="card-header">
-                        <span class="card-title">{{ __('Crear') }} Foco de Incendio</span>
+                        <h3 class="card-title">Nueva Predicción</h3>
                     </div>
                     <div class="card-body bg-white">
-                        <form method="POST" action="{{ route('focos-incendios.store') }}"  role="form" enctype="multipart/form-data">
+                        <form method="POST" action="{{ route('predictions.store') }}" role="form" enctype="multipart/form-data">
                             @csrf
-
-                            @include('focos-incendio.form')
-
+                            @include('prediction.form')
                         </form>
                     </div>
                 </div>
             </div>
         </div>
     </section>
-@endsection
-
-@section('css')
-    @stack('css')
-@endsection
+@stop
 
 @section('js')
     @stack('js')
