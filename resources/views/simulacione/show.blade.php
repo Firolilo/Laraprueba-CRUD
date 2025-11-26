@@ -1,7 +1,7 @@
 @extends('adminlte::page')
 
 @section('template_title')
-    {{ $simulacione->name ?? __('Show') . " " . __('Simulacione') }}
+    {{ $simulacione->name ?? __('Show') . " " . __('Simulaciones') }}
 @endsection
 
 @section('content')
@@ -11,7 +11,7 @@
                 <div class="card">
                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
                         <div class="float-left">
-                            <span class="card-title">{{ __('Show') }} Simulacione</span>
+                            <span class="card-title">{{ __('Show') }} Simulaciones</span>
                         </div>
                         <div class="float-right">
                             <a class="btn btn-primary btn-sm" href="{{ route('simulaciones.index') }}"> {{ __('Back') }}</a>
