@@ -237,6 +237,15 @@
     .modal.show {
         display: block !important;
     }
+    .biomasa-tooltip {
+        background-color: rgba(40, 167, 69, 0.9) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 4px !important;
+        padding: 5px 10px !important;
+        font-weight: bold !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+    }
 </style>
 @stop
 
@@ -263,6 +272,8 @@ function fireSimulator() {
         adminId: null,
         historyData: [],
         interval: null,
+        biomasas: @json($biomasas ?? []),
+        biomasaLayers: [],
         
         // Parameters
         temperature: 25,
@@ -272,12 +283,16 @@ function fireSimulator() {
         simulationSpeed: 1,
         
         // Config
-        MAX_ACTIVE_FIRES: 50,
+        MAX_ACTIVE_FIRES: 500,
         MERGE_DISTANCE: 0.02,
         
         init() {
+            console.log('Biomasas cargadas:', this.biomasas.length);
             this.initMap();
             this.loadHistory();
+            
+            // Calculate initial fire risk
+            this.calculateFireRisk();
             
             // Watch parameters for fire risk calculation
             this.$watch('temperature', () => this.calculateFireRisk());
@@ -292,11 +307,84 @@ function fireSimulator() {
                 attribution: '© OpenStreetMap contributors'
             }).addTo(this.map);
             
+            // Dibujar biomasas en el mapa
+            this.drawBiomasas();
+            
             this.map.on('click', (e) => {
                 if (!this.simulationActive && this.fires.length < this.MAX_ACTIVE_FIRES * 2) {
                     this.addFire(e.latlng.lat, e.latlng.lng);
                 }
             });
+        },
+        
+        drawBiomasas() {
+            this.biomasas.forEach((biomasa) => {
+                if (!biomasa.coordenadas || biomasa.coordenadas.length < 3) return;
+                
+                const tipo = biomasa.tipo_biomasa?.tipo_biomasa || 'Desconocido';
+                const color = biomasa.tipo_biomasa?.color || '#808080';
+                const modifier = biomasa.tipo_biomasa?.modificador_intensidad || 1.0;
+                
+                const latLngs = biomasa.coordenadas.map(coord => {
+                    if (Array.isArray(coord)) {
+                        return [parseFloat(coord[0]), parseFloat(coord[1])];
+                    }
+                    return [parseFloat(coord.lat || coord[0]), parseFloat(coord.lng || coord[1])];
+                });
+                
+                const polygon = L.polygon(latLngs, {
+                    color: color,
+                    fillColor: color,
+                    fillOpacity: 0.15,
+                    weight: 2,
+                    opacity: 0.5,
+                    dashArray: '5, 5',
+                    interactive: false
+                }).addTo(this.map);
+                
+                this.biomasaLayers.push({
+                    polygon: polygon,
+                    coords: latLngs,
+                    tipo: tipo,
+                    modifier: parseFloat(modifier),
+                    id: biomasa.id
+                });
+            });
+        },
+        
+        // Función para detectar si un punto está dentro de una biomasa
+        getBiomasaModifier(lat, lng) {
+            for (let biomasa of this.biomasaLayers) {
+                if (this.isPointInPolygon(lat, lng, biomasa.coords)) {
+                    return {
+                        inside: true,
+                        tipo: biomasa.tipo,
+                        modifier: biomasa.modifier,
+                        id: biomasa.id
+                    };
+                }
+            }
+            return { inside: false, modifier: 1.0 };
+        },
+        
+        // Ray Casting algorithm para detectar punto en polígono
+        isPointInPolygon(lat, lng, polygon) {
+            const numVertices = polygon.length;
+            let inside = false;
+
+            for (let i = 0, j = numVertices - 1; i < numVertices; j = i++) {
+                const xi = polygon[i][0];
+                const yi = polygon[i][1];
+                const xj = polygon[j][0];
+                const yj = polygon[j][1];
+
+                const intersect = ((yi > lng) !== (yj > lng))
+                    && (lat < (xj - xi) * (lng - yi) / (yj - yi) + xi);
+
+                if (intersect) inside = !inside;
+            }
+
+            return inside;
         },
         
         addFire(lat, lng, initialIntensity = 1) {
@@ -400,8 +488,12 @@ function fireSimulator() {
                 // SE EXPANDE: calcular dirección y crear nuevo foco
                 fire.lastExpansionTime = this.timeElapsed; // Actualizar tiempo de última expansión
                 
+                // Detectar si el fuego está en una biomasa
+                const biomasaData = this.getBiomasaModifier(fire.position[0], fire.position[1]);
+                const biomasaModifier = biomasaData.modifier;
+                
                 const spreadRate = (this.fireRisk / 100) * (this.windSpeed / 20) * 
-                                 (this.temperature / 30) * (1 - (this.humidity / 150));
+                                 (this.temperature / 30) * (1 - (this.humidity / 150)) * biomasaModifier;
                 const spreadDistance = 0.01 * spreadRate * this.simulationSpeed;
                 
                 if (spreadDistance < 0.001) {
@@ -418,7 +510,9 @@ function fireSimulator() {
                 const lat = fire.position[0] + Math.cos(angleRad) * spreadDistance;
                 const lng = fire.position[1] + Math.sin(angleRad) * spreadDistance;
                 
-                const newIntensity = fire.intensity * 0.95;
+                // Aplicar modificador de biomasa a la intensidad
+                const intensityDecay = biomasaModifier > 1.0 ? 0.98 : 0.95; // Biomasa densa = declive más lento
+                const newIntensity = fire.intensity * intensityDecay * biomasaModifier;
                 
                 // Verificar si hay espacio para más focos
                 if (this.fires.length + newFires.length < this.MAX_ACTIVE_FIRES) {
@@ -452,16 +546,29 @@ function fireSimulator() {
                         }
                         
                         if (!merged) {
+                            // Detectar biomasa para el nuevo fuego
+                            const newBiomasaData = this.getBiomasaModifier(lat, lng);
+                            
                             newFire.circle = L.circle([lat, lng], {
-                                color: this.getFireColor(newFire.intensity),
-                                fillColor: this.getFireColor(newFire.intensity),
+                                color: this.getFireColor(newFire.intensity, newBiomasaData),
+                                fillColor: this.getFireColor(newFire.intensity, newBiomasaData),
                                 fillOpacity: 0.6,
                                 radius: 80 + newFire.spread * 800
                             }).addTo(this.map);
                             
+                            // Agregar tooltip si está en biomasa
+                            if (newBiomasaData.inside) {
+                                newFire.circle.bindTooltip(
+                                    `<strong>Intensidad: ${newFire.intensity.toFixed(2)}</strong><br>` +
+                                    `<small>Biomasa: ${newBiomasaData.tipo}</small><br>` +
+                                    `<small>Modificador: ${newBiomasaData.modifier}x</small>`,
+                                    { sticky: true }
+                                );
+                            }
+                            
                             newFires.push(newFire);
                             
-                            // Guardar en historial completo
+                            // Guardar en historial completo con información de biomasa
                             this.allFiresHistory.push({
                                 fire_id: newFire.id.toString(),
                                 time_step: this.timeElapsed,
@@ -469,7 +576,12 @@ function fireSimulator() {
                                 lng: lng,
                                 intensity: newFire.intensity,
                                 spread: newFire.spread,
-                                active: true
+                                active: true,
+                                biomasa: newBiomasaData.inside ? {
+                                    tipo: newBiomasaData.tipo,
+                                    modifier: newBiomasaData.modifier,
+                                    id: newBiomasaData.id
+                                } : null
                             });
                         }
                     }
@@ -543,8 +655,20 @@ function fireSimulator() {
             this.stopSimulation();
         },
         
-        getFireColor(intensity) {
+        getFireColor(intensity, biomasaData = null) {
             const heat = Math.min(255, Math.floor(intensity * 51));
+            
+            // Si está en biomasa, añadir un tinte según el modificador
+            if (biomasaData && biomasaData.inside) {
+                if (biomasaData.modifier > 1.0) {
+                    // Biomasa que acelera (más rojo)
+                    return `rgb(255, ${Math.max(0, 255 - heat - 30)}, 0)`;
+                } else if (biomasaData.modifier < 1.0) {
+                    // Biomasa que frena (más naranja/amarillo)
+                    return `rgb(255, ${Math.min(255, 255 - heat + 30)}, 30)`;
+                }
+            }
+            
             return `rgb(255, ${255 - heat}, 0)`;
         },
         

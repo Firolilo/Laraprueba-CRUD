@@ -210,6 +210,67 @@
         </div>
     </div>
 
+    @if(isset($meta['biomasas_encountered']) && count($meta['biomasas_encountered']) > 0)
+    <!-- Biomasas Atravesadas -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card card-success">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-leaf"></i> Zonas de Biomasa Atravesadas
+                        <span class="badge badge-light ml-2">{{ $meta['total_biomasas_crossed'] ?? 0 }}</span>
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> 
+                        El fuego atravesó <strong>{{ $meta['total_biomasas_crossed'] ?? 0 }}</strong> zona(s) de biomasa registrada(s), 
+                        lo que afectó su velocidad de propagación e intensidad.
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-clock"></i> Hora de Entrada</th>
+                                    <th><i class="fas fa-tree"></i> Tipo de Biomasa</th>
+                                    <th><i class="fas fa-chart-line"></i> Modificador de Intensidad</th>
+                                    <th><i class="fas fa-fire"></i> Efecto</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($meta['biomasas_encountered'] as $biomasa)
+                                <tr>
+                                    <td><strong>Hora {{ $biomasa['entered_at_hour'] }}</strong></td>
+                                    <td>
+                                        <span class="badge badge-success">{{ $biomasa['tipo'] }}</span>
+                                    </td>
+                                    <td>
+                                        <strong style="color: {{ $biomasa['modifier'] > 1.0 ? '#dc3545' : ($biomasa['modifier'] < 1.0 ? '#28a745' : '#6c757d') }}">
+                                            {{ number_format($biomasa['modifier'], 2) }}x
+                                        </strong>
+                                    </td>
+                                    <td>
+                                        @if($biomasa['modifier'] > 1.5)
+                                            <span class="badge badge-danger"><i class="fas fa-arrow-up"></i> Propagación MUY RÁPIDA</span>
+                                        @elseif($biomasa['modifier'] > 1.0)
+                                            <span class="badge badge-warning"><i class="fas fa-arrow-up"></i> Propagación Acelerada</span>
+                                        @elseif($biomasa['modifier'] < 0.8)
+                                            <span class="badge badge-success"><i class="fas fa-arrow-down"></i> Propagación Reducida</span>
+                                        @else
+                                            <span class="badge badge-secondary"><i class="fas fa-equals"></i> Propagación Normal</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <!-- Recursos Necesarios -->
     <div class="row">
         <div class="col-md-12">
@@ -661,6 +722,20 @@
             opacity: 1;
         }
     }
+    
+    .biomasa-tooltip {
+        background-color: rgba(40, 167, 69, 0.9) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 4px !important;
+        padding: 5px 10px !important;
+        font-weight: bold !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+    }
+    
+    .biomasa-tooltip::before {
+        border-top-color: rgba(40, 167, 69, 0.9) !important;
+    }
 </style>
 @endsection
 
@@ -670,6 +745,7 @@
     // Datos de la trayectoria
     const trajectoryData = @json($trajectory);
     const initialFoco = @json($foco);
+    const biomasasData = @json($biomasas ?? []);
     
     // Variables globales
     let map;
@@ -681,6 +757,7 @@
     let circles = [];
     let polyline;
     let allCircles = [];
+    let biomasaLayers = [];
     
     // Inicializar mapa
     function initMap() {
@@ -727,6 +804,9 @@
             maxZoom: 18
         }).addTo(map);
         console.log('Tiles added');
+        
+        // Dibujar biomasas en el mapa
+        drawBiomasas();
         
         // Marcador del foco inicial
         L.marker([lat, lng], {
@@ -787,12 +867,31 @@
             radius: point.spread_radius_km * 1000, // Convertir a metros
             color: getIntensityColor(point.intensity),
             fillColor: getIntensityColor(point.intensity),
-            fillOpacity: 0.4,
+            fillOpacity: 0.35,
             weight: 3,
+            opacity: 0.8,
             className: 'pulse-animation'
         }).addTo(map);
         
+        // Círculo de borde para mostrar claramente el radio
+        const radiusCircle = L.circle([point.lat, point.lng], {
+            radius: point.spread_radius_km * 1000,
+            color: '#fff',
+            fillColor: 'transparent',
+            fillOpacity: 0,
+            weight: 2,
+            opacity: 0.9,
+            dashArray: '10, 5'
+        }).addTo(map);
+        
+        radiusCircle.bindTooltip(`Radio de propagación: ${point.spread_radius_km.toFixed(2)} km`, {
+            permanent: false,
+            direction: 'top',
+            offset: [0, -10]
+        });
+        
         circles.push(circle);
+        circles.push(radiusCircle);
         
         // Crear marcador para el punto
         const marker = L.circleMarker([point.lat, point.lng], {
@@ -807,6 +906,10 @@
         marker.bindPopup(`
             <div class="popup-title"><i class="far fa-clock"></i> Hora ${point.hour}</div>
             ${point.extinguished ? '<div class="alert alert-success mb-2" style="padding: 5px; margin: 0;"><small><i class="fas fa-fire-extinguisher"></i> Fuego Extinguido</small></div>' : ''}
+            ${point.biomasa ? `<div class="alert alert-info mb-2" style="padding: 5px; margin: 0; background: #17a2b8; color: white;">
+                <small><i class="fas fa-leaf"></i> Zona de Biomasa: <strong>${point.biomasa.tipo}</strong></small><br>
+                <small>Modificador: <strong>${point.biomasa.modifier}x</strong> | Densidad: ${point.biomasa.densidad || 'N/A'}</small>
+            </div>` : ''}
             <div class="popup-stat">
                 <span class="popup-stat-label">Intensidad:</span>
                 <span class="popup-stat-value" style="color:${getIntensityColor(point.intensity)}">${point.intensity.toFixed(2)}</span>
@@ -972,26 +1075,38 @@
         
         // Dibujar todos los círculos con opacidad reducida
         trajectoryData.forEach((point, index) => {
+            // Círculo de propagación (radio del fuego)
             const circle = L.circle([point.lat, point.lng], {
-                radius: point.spread_radius_km * 1000,
+                radius: point.spread_radius_km * 1000, // Convertir a metros
                 color: getIntensityColor(point.intensity),
                 fillColor: getIntensityColor(point.intensity),
-                fillOpacity: 0.15,
-                weight: 1,
-                opacity: 0.4
+                fillOpacity: 0.2,
+                weight: 2,
+                opacity: 0.5,
+                dashArray: '5, 5'
             }).addTo(map);
             
-            // Marcador pequeño
+            circle.bindTooltip(`Hora ${point.hour} - Radio: ${point.spread_radius_km.toFixed(2)} km`, {
+                permanent: false,
+                direction: 'center'
+            });
+            
+            // Marcador del punto central
             const marker = L.circleMarker([point.lat, point.lng], {
-                radius: 4,
+                radius: 5,
                 fillColor: getIntensityColor(point.intensity),
                 color: '#fff',
-                weight: 1,
-                opacity: 0.8,
-                fillOpacity: 0.8
+                weight: 2,
+                opacity: 1,
+                fillOpacity: 1
             }).addTo(map);
             
-            marker.bindPopup(`<strong>Hora ${point.hour}</strong><br>Intensidad: ${point.intensity.toFixed(2)}`);
+            marker.bindPopup(`
+                <strong>Hora ${point.hour}</strong><br>
+                Intensidad: ${point.intensity.toFixed(2)}<br>
+                Radio: ${point.spread_radius_km.toFixed(2)} km<br>
+                Área: ${point.affected_area_km2.toFixed(2)} km²
+            `);
             
             allCircles.push(circle);
             allCircles.push(marker);
@@ -1000,6 +1115,84 @@
         // Ajustar vista para mostrar toda la trayectoria
         const bounds = L.latLngBounds(trajectoryData.map(p => [p.lat, p.lng]));
         map.fitBounds(bounds, { padding: [50, 50] });
+    }
+    
+    // Dibujar biomasas en el mapa
+    function drawBiomasas() {
+        console.log('Drawing biomasas:', biomasasData.length);
+        
+        biomasasData.forEach((biomasa) => {
+            if (!biomasa.coordenadas || biomasa.coordenadas.length < 3) {
+                console.warn('Biomasa sin coordenadas válidas:', biomasa.id);
+                return;
+            }
+            
+            const tipo = biomasa.tipo_biomasa?.tipo_biomasa || 'Desconocido';
+            const color = biomasa.tipo_biomasa?.color || '#808080';
+            const modifier = biomasa.tipo_biomasa?.modificador_intensidad || 1.0;
+            
+            // Convertir coordenadas a formato Leaflet [[lat, lng], ...]
+            const latLngs = biomasa.coordenadas.map(coord => {
+                if (Array.isArray(coord)) {
+                    return [parseFloat(coord[0]), parseFloat(coord[1])];
+                }
+                return [parseFloat(coord.lat || coord[0]), parseFloat(coord.lng || coord[1])];
+            });
+            
+            // Crear polígono de biomasa
+            const polygon = L.polygon(latLngs, {
+                color: color,
+                fillColor: color,
+                fillOpacity: 0.15,
+                weight: 2,
+                opacity: 0.5,
+                dashArray: '5, 5'
+            }).addTo(map);
+            
+            // Tooltip y popup para la biomasa
+            polygon.bindTooltip(`<strong>${tipo}</strong>`, {
+                sticky: true,
+                direction: 'center',
+                className: 'biomasa-tooltip'
+            });
+            
+            polygon.bindPopup(`
+                <div class="popup-title">
+                    <i class="fas fa-leaf"></i> Zona de Biomasa
+                </div>
+                <div class="popup-stat">
+                    <span class="popup-stat-label">Tipo:</span>
+                    <span class="popup-stat-value"><strong>${tipo}</strong></span>
+                </div>
+                <div class="popup-stat">
+                    <span class="popup-stat-label">Modificador:</span>
+                    <span class="popup-stat-value" style="color: ${modifier > 1.0 ? '#dc3545' : (modifier < 1.0 ? '#28a745' : '#6c757d')}">
+                        <strong>${modifier}x</strong>
+                    </span>
+                </div>
+                <div class="popup-stat">
+                    <span class="popup-stat-label">Área:</span>
+                    <span class="popup-stat-value">${(biomasa.area_m2 / 1000000).toFixed(2)} km²</span>
+                </div>
+                <div class="popup-stat">
+                    <span class="popup-stat-label">Densidad:</span>
+                    <span class="popup-stat-value">${biomasa.densidad || 'N/A'}</span>
+                </div>
+                <div class="popup-stat">
+                    <span class="popup-stat-label">Efecto:</span>
+                    <span class="popup-stat-value">
+                        ${modifier > 1.5 ? '<span class="badge badge-danger">Propagación MUY RÁPIDA</span>' : 
+                          modifier > 1.0 ? '<span class="badge badge-warning">Propagación Acelerada</span>' :
+                          modifier < 0.8 ? '<span class="badge badge-success">Propagación Reducida</span>' :
+                          '<span class="badge badge-secondary">Propagación Normal</span>'}
+                    </span>
+                </div>
+            `);
+            
+            biomasaLayers.push(polygon);
+        });
+        
+        console.log('Biomasas drawn:', biomasaLayers.length);
     }
     
     // Event listener para el slider

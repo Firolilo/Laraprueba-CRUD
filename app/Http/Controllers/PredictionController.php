@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Prediction;
 use App\Models\FocosIncendio;
+use App\Models\Biomasa;
 use App\Http\Requests\PredictionRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -82,8 +83,19 @@ class PredictionController extends Controller
     {
         $prediction = Prediction::with('focoIncendio')->findOrFail($id);
         $foco = $prediction->focoIncendio;
+        
+        // Cargar biomasas para mostrar en el mapa
+        $biomasas = Biomasa::with('tipoBiomasa')
+            ->whereNotNull('coordenadas')
+            ->get()
+            ->map(function ($biomasa) {
+                if (is_string($biomasa->coordenadas)) {
+                    $biomasa->coordenadas = json_decode($biomasa->coordenadas, true);
+                }
+                return $biomasa;
+            });
 
-        return view('prediction.show', compact('prediction', 'foco'));
+        return view('prediction.show', compact('prediction', 'foco', 'biomasas'));
     }
 
     /**
@@ -181,8 +193,25 @@ class PredictionController extends Controller
         // Contador para detectar extinción del fuego
         $lowIntensityCount = 0; // Contador de horas consecutivas en intensidad 1
         $fireExtinguished = false; // Flag para marcar si el fuego se extinguió
+        
+        // Tracking de biomasas atravesadas
+        $biomasasEncountered = [];
 
         for ($hour = 0; $hour <= $hours; $hour++) {
+            // Detectar si el fuego está en una zona de biomasa
+            $biomasaData = $this->getBiomasaModifier($currentLat, $currentLng);
+            $biomasaModifier = $biomasaData['modifier'];
+            
+            // Registrar biomasa encontrada
+            if ($biomasaData['inside_biomasa'] && !in_array($biomasaData['biomasa_id'], array_column($biomasasEncountered, 'id'))) {
+                $biomasasEncountered[] = [
+                    'id' => $biomasaData['biomasa_id'],
+                    'tipo' => $biomasaData['tipo_biomasa'],
+                    'modifier' => $biomasaModifier,
+                    'entered_at_hour' => $hour,
+                ];
+            }
+            
             // Si el fuego ya se extinguió, mantener el último estado sin movimiento
             if ($fireExtinguished) {
                 $path[] = [
@@ -216,6 +245,11 @@ class PredictionController extends Controller
                 // La intensidad puede CRECER en condiciones favorables
                 $intensityGrowth = $tempFactor * (0.5 + $humidityFactor * 0.5) * $windFactor * $terrainFactor;
                 
+                // APLICAR MODIFICADOR DE BIOMASA
+                // Un bosque seco (modifier > 1.0) hace que el fuego crezca más rápido
+                // Pastizal húmedo (modifier < 1.0) ralentiza el crecimiento
+                $intensityGrowth *= $biomasaModifier;
+                
                 // Limitar crecimiento (no puede superar 10)
                 $currentIntensity = min(10, $intensity * $intensityGrowth * (1 + $hour * 0.03));
                 
@@ -224,7 +258,12 @@ class PredictionController extends Controller
                 $declineRate = ($hour - ($hours * 0.7)) / ($hours * 0.3);
                 $biomassAvailability = 1 - ($declineRate * 0.6); // Combustible se reduce
                 
-                $currentIntensity = max(1, $currentIntensity * $biomassAvailability);
+                // El modificador de biomasa también afecta qué tan rápido se agota el combustible
+                // Biomasa densa (modifier > 1.0) = más combustible disponible = declive más lento
+                $biomasaDeclineFactor = 1.0 / max(0.5, $biomasaModifier);
+                $biomassAvailability = max(0, $biomassAvailability * $biomasaDeclineFactor);
+                
+                $currentIntensity = max(1, $currentIntensity * (0.5 + $biomassAvailability * 0.5));
             }
             
             // Variación aleatoria para simular fluctuaciones naturales
@@ -297,6 +336,11 @@ class PredictionController extends Controller
                 'affected_area_km2' => round($area, 3),
                 'perimeter_km' => round($perimeter, 2),
                 'extinguished' => false,
+                'biomasa' => $biomasaData['inside_biomasa'] ? [
+                    'tipo' => $biomasaData['tipo_biomasa'],
+                    'modifier' => $biomasaData['modifier'],
+                    'densidad' => $biomasaData['densidad'],
+                ] : null,
             ];
         }
 
@@ -335,6 +379,10 @@ class PredictionController extends Controller
             
             // Trayectoria completa para el mapa interactivo
             'trajectory' => $path,
+            
+            // Información de biomasas atravesadas
+            'biomasas_encountered' => $biomasasEncountered,
+            'total_biomasas_crossed' => count($biomasasEncountered),
             
             // Información de extinción
             'fire_extinguished' => $fireExtinguished,
@@ -560,5 +608,78 @@ class PredictionController extends Controller
         if ($windSpeed > 50) $confidence -= 0.15;
         
         return max(0.3, min(0.95, $confidence));
+    }
+
+    /**
+     * Detectar biomasa en la ubicación actual del fuego
+     * Retorna el modificador de intensidad de la biomasa (1.0 si no hay biomasa)
+     */
+    private function getBiomasaModifier(float $lat, float $lng): array
+    {
+        // Cargar todas las biomasas con sus tipos
+        $biomasas = Biomasa::with('tipoBiomasa')
+            ->whereNotNull('coordenadas')
+            ->get();
+
+        foreach ($biomasas as $biomasa) {
+            // Parsear coordenadas si es string
+            $coords = is_string($biomasa->coordenadas) 
+                ? json_decode($biomasa->coordenadas, true) 
+                : $biomasa->coordenadas;
+
+            if (!$coords || !is_array($coords) || count($coords) < 3) {
+                continue;
+            }
+
+            // Verificar si el punto está dentro del polígono
+            if ($this->isPointInPolygon($lat, $lng, $coords)) {
+                $modifier = floatval($biomasa->tipoBiomasa->modificador_intensidad ?? 1.0);
+                return [
+                    'inside_biomasa' => true,
+                    'biomasa_id' => $biomasa->id,
+                    'tipo_biomasa' => $biomasa->tipoBiomasa->tipo_biomasa ?? 'Desconocido',
+                    'modifier' => $modifier,
+                    'densidad' => $biomasa->densidad,
+                ];
+            }
+        }
+
+        // No está en ninguna biomasa
+        return [
+            'inside_biomasa' => false,
+            'biomasa_id' => null,
+            'tipo_biomasa' => null,
+            'modifier' => 1.0,
+            'densidad' => null,
+        ];
+    }
+
+    /**
+     * Algoritmo Ray Casting para detectar si un punto está dentro de un polígono
+     * @param float $lat Latitud del punto
+     * @param float $lng Longitud del punto
+     * @param array $polygon Array de coordenadas [[lat, lng], [lat, lng], ...]
+     * @return bool True si el punto está dentro del polígono
+     */
+    private function isPointInPolygon(float $lat, float $lng, array $polygon): bool
+    {
+        $numVertices = count($polygon);
+        $inside = false;
+
+        for ($i = 0, $j = $numVertices - 1; $i < $numVertices; $j = $i++) {
+            $xi = floatval($polygon[$i][0]); // lat
+            $yi = floatval($polygon[$i][1]); // lng
+            $xj = floatval($polygon[$j][0]); // lat
+            $yj = floatval($polygon[$j][1]); // lng
+
+            $intersect = (($yi > $lng) != ($yj > $lng))
+                && ($lat < ($xj - $xi) * ($lng - $yi) / ($yj - $yi) + $xi);
+
+            if ($intersect) {
+                $inside = !$inside;
+            }
+        }
+
+        return $inside;
     }
 }

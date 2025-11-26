@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Simulacione;
 use App\Models\SimulationFireHistory;
 use App\Models\Administrador;
+use App\Models\Biomasa;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -33,7 +34,19 @@ class SimulacioneController extends Controller
     public function simulator(): View
     {
         $administradores = Administrador::with('user')->where('activo', true)->get();
-        return view('simulacione.simulator', compact('administradores'));
+        
+        // Cargar biomasas para el mapa
+        $biomasas = Biomasa::with('tipoBiomasa')
+            ->whereNotNull('coordenadas')
+            ->get()
+            ->map(function ($biomasa) {
+                if (is_string($biomasa->coordenadas)) {
+                    $biomasa->coordenadas = json_decode($biomasa->coordenadas, true);
+                }
+                return $biomasa;
+            });
+        
+        return view('simulacione.simulator', compact('administradores', 'biomasas'));
     }
 
     /**
