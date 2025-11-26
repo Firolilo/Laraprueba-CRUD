@@ -8,30 +8,9 @@
 
 @section('content')
 <div x-data="fireSimulator()" x-init="init()">
-    <!-- Controles principales -->
+    <!-- Controles principales debajo de estadísticas -->
     <div class="card">
         <div class="card-body">
-            <div class="row mb-3">
-                <div class="col-md-12">
-                    <div class="btn-group" role="group">
-                        <button type="button" class="btn" 
-                                :class="simulationActive ? 'btn-danger' : 'btn-success'"
-                                @click="toggleSimulation()"
-                                x-text="simulationActive ? 'Detener Simulación' : 'Iniciar Simulación'">
-                        </button>
-                        <button type="button" class="btn btn-warning" @click="clearFires()">
-                            Limpiar Todo
-                        </button>
-                        <button type="button" class="btn btn-info" @click="showHistory = true">
-                            Ver Historial
-                        </button>
-                        <button type="button" class="btn btn-primary" @click="downloadSimulation()">
-                            Descargar JSON
-                        </button>
-                    </div>
-                </div>
-            </div>
-
             <!-- Estadísticas -->
             <div class="row mb-3">
                 <div class="col-md-3">
@@ -72,12 +51,79 @@
                 </div>
             </div>
 
+
+            <div class="row mb-3">
+                <div class="col-auto mb-2">
+                    <button type="button" 
+                            class="btn btn-lg btn-success shadow icon-text"
+                            :class="simulationActive ? 'btn-danger' : 'btn-success'"
+                            @click="toggleSimulation()">
+                        <i :class="simulationActive ? 'fas fa-stop-circle' : 'fas fa-play-circle'"></i>
+                        <span x-text="simulationActive ? 'Detener Simulación' : 'Iniciar Simulación'"></span>
+                    </button>
+                </div>
+
+                <div class="col-auto mb-2">
+                    <button type="button" class="btn btn-warning btn-lg shadow icon-text" @click="clearFires()">
+                        <i class="fas fa-broom"></i>
+                        <span>Limpiar Todo</span>
+                    </button>
+                </div>
+
+                <div class="col-auto mb-2">
+                    <button type="button" class="btn btn-info btn-lg shadow icon-text" @click="showHistory = true">
+                        <i class="fas fa-history"></i>
+                        <span>Ver Historial</span>
+                    </button>
+                </div>
+
+                <div class="col-auto mb-2">
+                    <button type="button" class="btn btn-primary btn-lg shadow icon-text" @click="downloadSimulation()">
+                        <i class="fas fa-download"></i>
+                        <span>Descargar JSON</span>
+                    </button>
+                </div>
+            </div>
+
+            <style>
+            /* Botones compactos, solo icono por defecto */
+            .icon-text {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0; /* No espacio entre icono y texto inicialmente */
+                transition: all 0.3s ease;
+                overflow: hidden;
+                padding: 0.5rem 0.6rem; /* Ajusta según tamaño del botón */
+            }
+
+            /* Texto oculto inicialmente */
+            .icon-text span {
+                display: inline-block;
+                max-width: 0;
+                opacity: 0;
+                overflow: hidden;
+                white-space: nowrap;
+                transition: max-width 0.3s ease, opacity 0.3s ease, margin-left 0.3s ease;
+                margin-left: 0;
+            }
+
+            /* Mostrar texto al hover */
+            .icon-text:hover span {
+                max-width: 200px; /* ancho máximo del texto visible */
+                opacity: 1;
+                margin-left: 8px; /* separación del icono */
+            }
+            </style>
+
+
             <!-- Mapa -->
             <div class="row mb-3">
                 <div class="col-md-12">
                     <div id="map" style="height: 500px; border-radius: 8px;"></div>
                 </div>
             </div>
+
 
             <!-- Controles de parámetros -->
             <div class="row">
