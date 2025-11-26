@@ -1,0 +1,40 @@
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class BiomasaResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(Request $request): array
+    {
+        return [
+            'id' => $this->id,
+            'tipo_biomasa_id' => $this->tipo_biomasa_id,
+            'densidad' => $this->densidad,
+            'coordenadas' => $this->coordenadas,
+            'area_m2' => $this->area_m2,
+            'perimetro_m' => $this->perimetro_m,
+            'descripcion' => $this->descripcion,
+            'fecha_reporte' => $this->fecha_reporte,
+            'user_id' => $this->user_id,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+            
+            // Relaciones
+            'tipo_biomasa' => new TipoBiomasaResource($this->whenLoaded('tipoBiomasa')),
+            'user' => $this->whenLoaded('user', function() {
+                return [
+                    'id' => $this->user->id,
+                    'name' => $this->user->name,
+                ];
+            }),
+        ];
+    }
+}
