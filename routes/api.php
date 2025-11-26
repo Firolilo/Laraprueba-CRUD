@@ -51,4 +51,5 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // Rutas públicas de solo lectura (sin autenticación)
 Route::get('/public/focos-incendios', [FocosIncendioController::class, 'index']);
+Route::get('/public/biomasas', [BiomasaController::class, 'index']);
 Route::get('/public/tipos-biomasa', [TipoBiomasaController::class, 'index']);
