@@ -1,7 +1,7 @@
 @extends('adminlte::page')
 
 @section('template_title')
-    Users
+    Usuarios
 @endsection
 
 @section('content')
@@ -13,12 +13,12 @@
                         <div style="display: flex; justify-content: space-between; align-items: center;">
 
                             <span id="card_title">
-                                {{ __('Users') }}
+                                {{ __('Usuarios') }}
                             </span>
 
                              <div class="float-right">
                                 <a href="{{ route('users.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
-                                  {{ __('Create New') }}
+                                  {{ __('Crear Nuevo') }}
                                 </a>
                               </div>
                         </div>
@@ -36,12 +36,12 @@
                                     <tr>
                                         <th>No</th>
                                         
-									<th >Name</th>
-									<th >Email</th>
+                                        <th>Nombre</th>
+                                        <th>Correo Electrónico</th>
                                         <th>Teléfono</th>
                                         <th>C.I.</th>
 
-                                        <th></th>
+                                        <th>Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -49,18 +49,18 @@
                                         <tr>
                                             <td>{{ ++$i }}</td>
                                             
-										<td >{{ $user->name }}</td>
-										<td >{{ $user->email }}</td>
-                                                <td>{{ $user->telefono }}</td>
-                                                <td>{{ $user->cedula_identidad }}</td>
+                                            <td>{{ $user->name }}</td>
+                                            <td>{{ $user->email }}</td>
+                                            <td>{{ $user->telefono }}</td>
+                                            <td>{{ $user->cedula_identidad }}</td>
 
                                             <td>
                                                 <form action="{{ route('users.destroy', $user->id) }}" method="POST">
-                                                    <a class="btn btn-sm btn-primary " href="{{ route('users.show', $user->id) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Show') }}</a>
-                                                    <a class="btn btn-sm btn-success" href="{{ route('users.edit', $user->id) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Edit') }}</a>
+                                                    <a class="btn btn-sm btn-primary" href="{{ route('users.show', $user->id) }}"><i class="fa fa-fw fa-eye"></i> Ver</a>
+                                                    <a class="btn btn-sm btn-success" href="{{ route('users.edit', $user->id) }}"><i class="fa fa-fw fa-edit"></i> Editar</a>
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="event.preventDefault(); confirm('Are you sure to delete?') ? this.closest('form').submit() : false;"><i class="fa fa-fw fa-trash"></i> {{ __('Delete') }}</button>
+                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="event.preventDefault(); confirm('¿Está seguro de eliminar?') ? this.closest('form').submit() : false;"><i class="fa fa-fw fa-trash"></i> Eliminar</button>
                                                 </form>
                                             </td>
                                         </tr>
