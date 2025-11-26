@@ -1,7 +1,7 @@
 @extends('adminlte::page')
 
 @section('template_title')
-    Focos Incendios
+    Focos de Incendios
 @endsection
 
 @section('content')
