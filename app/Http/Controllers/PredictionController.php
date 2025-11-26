@@ -81,8 +81,9 @@ class PredictionController extends Controller
     public function show($id): View
     {
         $prediction = Prediction::with('focoIncendio')->findOrFail($id);
+        $foco = $prediction->focoIncendio;
 
-        return view('prediction.show', compact('prediction'));
+        return view('prediction.show', compact('prediction', 'foco'));
     }
 
     /**
@@ -132,9 +133,11 @@ class PredictionController extends Controller
         int $hours,
         string $terrainType
     ): array {
-        $startLat = $foco->coordenadas[0];
-        $startLng = $foco->coordenadas[1];
-        $intensity = $foco->intensidad ?? 5;
+        // Parsear coordenadas si están en JSON
+        $coords = is_string($foco->coordenadas) ? json_decode($foco->coordenadas, true) : $foco->coordenadas;
+        $startLat = (float) $coords[0];
+        $startLng = (float) $coords[1];
+        $intensity = (float) ($foco->intensidad ?? 5);
 
         // Factores de propagación según tipo de terreno
         $terrainFactors = [
@@ -171,32 +174,113 @@ class PredictionController extends Controller
         // Área afectada acumulada
         $totalArea = 0;
         $perimeterGrowth = [];
+        
+        // Factores de crecimiento de intensidad
+        $biomassAvailability = 1.0; // Disponibilidad inicial de combustible (100%)
+        
+        // Contador para detectar extinción del fuego
+        $lowIntensityCount = 0; // Contador de horas consecutivas en intensidad 1
+        $fireExtinguished = false; // Flag para marcar si el fuego se extinguió
 
         for ($hour = 0; $hour <= $hours; $hour++) {
+            // Si el fuego ya se extinguió, mantener el último estado sin movimiento
+            if ($fireExtinguished) {
+                $path[] = [
+                    'hour' => $hour,
+                    'lat' => round($currentLat, 6),
+                    'lng' => round($currentLng, 6),
+                    'intensity' => 1.0,
+                    'spread_radius_km' => round($radius, 3),
+                    'affected_area_km2' => round($area, 3),
+                    'perimeter_km' => round($perimeter, 2),
+                    'extinguished' => true,
+                ];
+                continue;
+            }
+            
+            // MODELO REALISTA DE INTENSIDAD
+            // La intensidad aumenta o se mantiene según condiciones, luego decrece por falta de combustible
+            
+            if ($hour <= $hours * 0.7) {
+                // Fase de crecimiento/estabilidad (primeras 70% de horas)
+                
+                // Factor de temperatura: más calor = más intensidad
+                $tempFactor = ($temperature > 30) ? (1 + ($temperature - 30) / 100) : 1.0;
+                
+                // Factor de humedad: menos humedad = más intensidad
+                $humidityFactor = (100 - $humidity) / 100;
+                
+                // Factor de viento: más viento = más intensidad (oxigenación)
+                $windFactor = 1 + ($windSpeed / 50);
+                
+                // La intensidad puede CRECER en condiciones favorables
+                $intensityGrowth = $tempFactor * (0.5 + $humidityFactor * 0.5) * $windFactor * $terrainFactor;
+                
+                // Limitar crecimiento (no puede superar 10)
+                $currentIntensity = min(10, $intensity * $intensityGrowth * (1 + $hour * 0.03));
+                
+            } else {
+                // Fase de declive (últimas 30% de horas) - combustible agotándose
+                $declineRate = ($hour - ($hours * 0.7)) / ($hours * 0.3);
+                $biomassAvailability = 1 - ($declineRate * 0.6); // Combustible se reduce
+                
+                $currentIntensity = max(1, $currentIntensity * $biomassAvailability);
+            }
+            
+            // Variación aleatoria para simular fluctuaciones naturales
+            $randomVariation = 1 + (rand(-10, 10) / 100);
+            $currentIntensity = min(10, max(1, $currentIntensity * $randomVariation));
+            
+            // Verificar si la intensidad está en 1 (fuego muy débil)
+            if (round($currentIntensity, 1) <= 1.0) {
+                $lowIntensityCount++;
+                
+                // Si ha estado en intensidad 1 por más de 3 horas consecutivas, el fuego se extingue
+                if ($lowIntensityCount > 3) {
+                    $fireExtinguished = true;
+                    $currentIntensity = 1.0;
+                    
+                    // El fuego no se mueve más
+                    $path[] = [
+                        'hour' => $hour,
+                        'lat' => round($currentLat, 6),
+                        'lng' => round($currentLng, 6),
+                        'intensity' => 1.0,
+                        'spread_radius_km' => round($radius, 3),
+                        'affected_area_km2' => round($area, 3),
+                        'perimeter_km' => round($perimeter, 2),
+                        'extinguished' => true,
+                    ];
+                    continue;
+                }
+            } else {
+                // Si la intensidad sube, resetear el contador
+                $lowIntensityCount = 0;
+            }
+            
             // Calcular desplazamiento basado en viento y variación aleatoria
             $mainDirection = $windRad;
             $lateralSpread = 0.3; // propagación lateral
             
             // Distancia recorrida en esta hora (en grados)
-            $distance = ($spreadSpeed / 111) * (1 + ($hour * 0.1)); // aumenta con el tiempo
+            // Aumenta con intensidad y velocidad del viento
+            $speedMultiplier = 1 + ($currentIntensity / 10) + ($windSpeed / 30);
+            $distance = ($spreadSpeed / 111) * $speedMultiplier * (0.8 + ($hour * 0.05));
             
             // Componente principal (dirección del viento)
             $latOffset = $distance * cos($mainDirection) * (0.8 + rand(0, 40) / 100);
             $lngOffset = $distance * sin($mainDirection) * (0.8 + rand(0, 40) / 100);
             
-            // Añadir propagación lateral
-            $lateralOffset = $distance * $lateralSpread * (rand(-50, 50) / 100);
+            // Añadir propagación lateral (más caótica con alta intensidad)
+            $lateralOffset = $distance * $lateralSpread * (rand(-50, 50) / 100) * ($currentIntensity / 5);
             $latOffset += $lateralOffset * sin($mainDirection);
             $lngOffset += $lateralOffset * cos($mainDirection);
 
             $currentLat += $latOffset;
             $currentLng += $lngOffset;
 
-            // Calcular intensidad decreciente con el tiempo
-            $currentIntensity = max(1, $intensity * (1 - ($hour * 0.05)));
-
-            // Calcular área afectada (círculo de radio creciente)
-            $radius = $spreadSpeed * $hour; // km
+            // Calcular área afectada (crece exponencialmente con intensidad)
+            $radius = $spreadSpeed * sqrt($hour + 1) * ($currentIntensity / 5); // km
             $area = pi() * pow($radius, 2); // km²
             $totalArea = $area;
 
@@ -212,11 +296,15 @@ class PredictionController extends Controller
                 'spread_radius_km' => round($radius, 3),
                 'affected_area_km2' => round($area, 3),
                 'perimeter_km' => round($perimeter, 2),
+                'extinguished' => false,
             ];
         }
 
         // Punto final predicho
         $finalPoint = end($path);
+        
+        // Determinar si el fuego se extinguió antes del tiempo predicho
+        $actualDuration = $fireExtinguished ? ($hour - 1) : $hours;
 
         // Calcular distancia total recorrida
         $totalDistance = $this->calculateDistance(
@@ -244,6 +332,14 @@ class PredictionController extends Controller
                 'terrain_type' => $terrainType,
                 'initial_intensity' => $intensity,
             ],
+            
+            // Trayectoria completa para el mapa interactivo
+            'trajectory' => $path,
+            
+            // Información de extinción
+            'fire_extinguished' => $fireExtinguished,
+            'actual_duration_hours' => $actualDuration,
+            'extinguished_early' => $fireExtinguished && $actualDuration < $hours,
             
             // Índices calculados
             'fire_risk_index' => $fireRisk,

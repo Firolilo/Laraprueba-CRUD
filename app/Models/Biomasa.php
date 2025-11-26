@@ -25,12 +25,12 @@ class Biomasa extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'nombre',
+        'fecha_reporte',
         'tipo_biomasa_id',
         'area_m2',
         'densidad',
-        'humedad',
         'ubicacion',
+        'coordenadas',
         'descripcion',
         'user_id',
     ];
@@ -38,7 +38,8 @@ class Biomasa extends Model
     protected $casts = [
         'area_m2' => 'integer',
         'densidad' => 'float',
-        'humedad' => 'float',
+        'coordenadas' => 'array',
+        'fecha_reporte' => 'date',
     ];
     
     /**

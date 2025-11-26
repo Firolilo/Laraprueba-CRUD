@@ -22,12 +22,12 @@ class BiomasaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nombre' => ['required','string','max:255'],
-            'tipo_biomasa_id' => ['nullable','exists:tipo_biomasa,id'],
+            'fecha_reporte' => ['required','date'],
+            'tipo_biomasa_id' => ['required','exists:tipo_biomasa,id'],
             'area_m2' => ['nullable','integer','min:0'],
-            'densidad' => ['nullable','numeric'],
-            'humedad' => ['nullable','numeric'],
+            'densidad' => ['required','string','in:baja,media,alta'],
             'ubicacion' => ['nullable','string','max:255'],
+            'coordenadas' => ['nullable','json'],
             'descripcion' => ['nullable','string'],
         ];
     }

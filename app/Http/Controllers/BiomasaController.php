@@ -17,10 +17,19 @@ class BiomasaController extends Controller
      */
     public function index(Request $request): View
     {
-        $biomasas = Biomasa::paginate();
+        // Load all biomasas with tipo and coordinates for map display
+        $biomasas = Biomasa::with('tipoBiomasa')
+            ->whereNotNull('coordenadas')
+            ->get()
+            ->map(function ($biomasa) {
+                // Ensure coordenadas is parsed as array for JSON serialization
+                if (is_string($biomasa->coordenadas)) {
+                    $biomasa->coordenadas = json_decode($biomasa->coordenadas, true);
+                }
+                return $biomasa;
+            });
 
-        return view('biomasa.index', compact('biomasas'))
-            ->with('i', ($request->input('page', 1) - 1) * $biomasas->perPage());
+        return view('biomasa.index', compact('biomasas'));
     }
 
     /**

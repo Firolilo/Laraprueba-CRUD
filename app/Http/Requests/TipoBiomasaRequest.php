@@ -19,8 +19,12 @@ class TipoBiomasaRequest extends FormRequest
      */
     public function rules(): array
     {
+        $tipoBiomasaId = $this->route('tipo_biomasa') ? $this->route('tipo_biomasa')->id : null;
+        
         return [
-            'tipo_biomasa' => 'required|string|max:255|unique:tipo_biomasa,tipo_biomasa,' . ($this->route('tipo_biomasa') ?? 'NULL'),
+            'tipo_biomasa' => 'required|string|max:255|unique:tipo_biomasa,tipo_biomasa,' . $tipoBiomasaId,
+            'color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'modificador_intensidad' => ['required', 'numeric', 'min:0.5', 'max:2.0'],
         ];
     }
 
@@ -31,6 +35,8 @@ class TipoBiomasaRequest extends FormRequest
     {
         return [
             'tipo_biomasa' => 'tipo de biomasa',
+            'color' => 'color de identificación',
+            'modificador_intensidad' => 'modificador de intensidad',
         ];
     }
 }

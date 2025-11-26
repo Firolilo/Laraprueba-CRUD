@@ -16,6 +16,12 @@ class TipoBiomasa extends Model
 
     protected $fillable = [
         'tipo_biomasa',
+        'color',
+        'modificador_intensidad',
+    ];
+
+    protected $casts = [
+        'modificador_intensidad' => 'decimal:2',
     ];
 
     /**
