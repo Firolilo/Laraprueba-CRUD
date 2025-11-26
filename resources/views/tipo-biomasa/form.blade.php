@@ -7,18 +7,18 @@
         </div>
 
         <div class="form-group mb-3">
-            <label for="color" class="form-label"><i class="fas fa-palette"></i> {{ __('Color de Identificación') }}</label>
+            <label for="color" class="form-label"><i class="fas fa-palette"></i> {{ __('Color Representativo') }}</label>
             <div class="input-group">
-                <input type="color" name="color" class="form-control form-control-color @error('color') is-invalid @enderror" value="{{ old('color', $tipoBiomasa?->color ?? '#4CAF50') }}" id="color" title="Seleccione un color">
+                <input type="color" name="color" class="form-control form-control-color @error('color') is-invalid @enderror" value="{{ old('color', $tipoBiomasa?->color ?? '#4CAF50') }}" id="color" title="Elija un color">
                 <input type="text" class="form-control" id="colorHex" value="{{ old('color', $tipoBiomasa?->color ?? '#4CAF50') }}" readonly>
             </div>
-            <small class="form-text text-muted">Este color se usará para mostrar este tipo de biomasa en el mapa</small>
+            <small class="form-text text-muted">Este color se utilizará para identificar visualmente este tipo de biomasa en el mapa</small>
             {!! $errors->first('color', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
         </div>
 
         <div class="form-group mb-3">
             <label for="modificador_intensidad" class="form-label">
-                <i class="fas fa-fire"></i> {{ __('Modificador de Intensidad de Fuego') }}
+                <i class="fas fa-fire"></i> {{ __('Factor de Propagación del Fuego') }}
             </label>
             <div class="row align-items-center">
                 <div class="col-8">
@@ -47,9 +47,9 @@
                 </div>
             </div>
             <small class="form-text text-muted">
-                Define qué tan rápido se propaga el fuego en este tipo de biomasa. 
-                <strong>0.5x</strong> = Muy lento (rocoso), 
-                <strong>1.0x</strong> = Normal, 
+                Indica la velocidad a la que el fuego se propaga en esta biomasa. 
+                <strong>0.5x</strong> = Muy lento (áreas rocosas), 
+                <strong>1.0x</strong> = Estándar, 
                 <strong>2.0x</strong> = Muy rápido (bosque seco)
             </small>
             {!! $errors->first('modificador_intensidad', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
@@ -61,24 +61,21 @@
             <i class="fas fa-save"></i> {{ __('Guardar Tipo de Biomasa') }}
         </button>
         <a href="{{ route('tipo-biomasas.index') }}" class="btn btn-secondary btn-lg">
-            <i class="fas fa-arrow-left"></i> Cancelar
+            <i class="fas fa-arrow-left"></i> Regresar
         </a>
     </div>
 </div>
 
 @push('js')
 <script>
-    // Sincronizar color picker con input de texto
     document.getElementById('color').addEventListener('input', function(e) {
         document.getElementById('colorHex').value = e.target.value;
     });
     
-    // Actualizar display del modificador desde el slider
     function updateModifierDisplay(value) {
         document.getElementById('modifierDisplay').value = parseFloat(value).toFixed(1);
     }
     
-    // Actualizar slider desde el input numérico
     function updateModifierSlider(value) {
         document.getElementById('modificador_intensidad').value = value;
     }
