@@ -1,7 +1,7 @@
 @extends('adminlte::page')
 
 @section('template_title')
-    {{ $user->name ?? __('Show') . " " . __('User') }}
+    {{ $user->name ?? __('Ver') . " " . __('Usuario') }}
 @endsection
 
 @section('content')
@@ -11,31 +11,31 @@
                 <div class="card">
                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
                         <div class="float-left">
-                            <span class="card-title">{{ __('Show') }} User</span>
+                            <span class="card-title">{{ __('Ver') }} Usuario</span>
                         </div>
                         <div class="float-right">
-                            <a class="btn btn-primary btn-sm" href="{{ route('users.index') }}"> {{ __('Back') }}</a>
+                            <a class="btn btn-primary btn-sm" href="{{ route('users.index') }}"> {{ __('Volver') }}</a>
                         </div>
                     </div>
 
                     <div class="card-body bg-white">
                         
-                                <div class="form-group mb-2 mb20">
-                                    <strong>Name:</strong>
-                                    {{ $user->name }}
-                                </div>
-                                <div class="form-group mb-2 mb20">
-                                    <strong>Email:</strong>
-                                    {{ $user->email }}
-                                </div>
-                                <div class="form-group mb-2 mb20">
-                                    <strong>Teléfono:</strong>
-                                    {{ $user->telefono }}
-                                </div>
-                                <div class="form-group mb-2 mb20">
-                                    <strong>Cédula de identidad:</strong>
-                                    {{ $user->cedula_identidad }}
-                                </div>
+                        <div class="form-group mb-2 mb20">
+                            <strong>Nombre:</strong>
+                            {{ $user->name }}
+                        </div>
+                        <div class="form-group mb-2 mb20">
+                            <strong>Correo Electrónico:</strong>
+                            {{ $user->email }}
+                        </div>
+                        <div class="form-group mb-2 mb20">
+                            <strong>Teléfono:</strong>
+                            {{ $user->telefono }}
+                        </div>
+                        <div class="form-group mb-2 mb20">
+                            <strong>Cédula de identidad:</strong>
+                            {{ $user->cedula_identidad }}
+                        </div>
 
                     </div>
                 </div>
