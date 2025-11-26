@@ -1,32 +1,41 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SIPII - Panel Web de Administración
 
-# Sistema de Gestión de Incendios Forestales
+Sistema de administración web para gestión de incendios forestales con interfaz AdminLTE.
 
-Sistema completo de gestión y simulación de incendios forestales desarrollado en Laravel con AdminLTE.
+## ⚠️ Importante
+
+**Esta aplicación es SOLO el panel web administrativo.**
+
+Para la API REST que usa la app móvil, ver: `../sipii-api/`
+
+## 🚀 Inicio Rápido
+
+```bash
+cd "C:\Users\lenovo\OneDrive\Desktop\Proyectos\SIPII Laravel\Laraprueba-CRUD\Laraprueba-CRUD"
+php artisan serve --port=8000
+```
+
+Acceder en: **http://localhost:8000**
 
 ## Características Principales
 
 ### 🔥 Simulador Avanzado de Incendios
-- **Simulación en tiempo real** de propagación de incendios con factores ambientales
+- **Simulación en tiempo real** de propagación de incendios
 - **Mapa interactivo Leaflet** para colocación de focos
-- **Algoritmo probabilístico** de propagación basado en riesgo de incendio
-  - Mayor riesgo = mayor probabilidad de expansión
-  - Focos desaparecen si no se expanden en 5 segundos
-- **Parámetros dinámicos**: temperatura, humedad, viento (velocidad y dirección)
-- **Cálculo automático** de riesgo de incendio y voluntarios necesarios
-- **Estrategias de mitigación** generadas automáticamente
-- **Historial completo** de propagación guardado en base de datos
-- **Repetición de simulaciones** anteriores con parámetros exactos
+- **Algoritmo probabilístico** de propagación basado en riesgo
+- **Parámetros dinámicos**: temperatura, humedad, viento
+- **Cálculo automático** de riesgo y voluntarios necesarios
+- **Historial completo** guardado en base de datos
 
 ### 📊 Módulos CRUD
 - **Usuarios**: Gestión de usuarios del sistema
-- **Voluntarios**: Registro de voluntarios con datos personales
-- **Administradores**: Gestión de administradores del sistema
-- **Biomasa**: Observación y delimitación de áreas de biomasa
-- **Tipos de Biomasa**: Catálogo paramétrico de tipos
-- **Focos de Incendio**: Seguimiento de focos (API externa)
-- **Simulaciones**: Gestión de simulaciones guardadas
-- **Predicciones**: Predicciones de rutas de propagación
+- **Voluntarios**: Registro de voluntarios
+- **Administradores**: Gestión de administradores
+- **Biomasas**: Delimitación de áreas de biomasa
+- **Tipos de Biomasa**: Catálogo paramétrico
+- **Focos de Incendio**: Seguimiento de focos
+- **Simulaciones**: Gestión de simulaciones
+- **Predicciones**: Rutas de propagación
 
 ### 🗄️ Base de Datos
 - **PostgreSQL** con esquema normalizado

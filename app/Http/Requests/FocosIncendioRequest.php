@@ -22,10 +22,23 @@ class FocosIncendioRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'fecha' => ['nullable','date'],
-            'ubicacion' => ['nullable','string','max:255'],
-            'coordenadas' => ['nullable','json'],
-            'intensidad' => ['nullable','numeric'],
+            'fecha' => ['required','date'],
+            'ubicacion' => ['required','string','max:255'],
+            'coordenadas' => ['required','json'],
+            'intensidad' => ['required','numeric','min:0','max:10'],
         ];
+    }
+
+    /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        // Si coordenadas viene como string JSON, parsearlo a array
+        if ($this->has('coordenadas') && is_string($this->coordenadas)) {
+            $this->merge([
+                'coordenadas' => json_decode($this->coordenadas, true),
+            ]);
+        }
     }
 }

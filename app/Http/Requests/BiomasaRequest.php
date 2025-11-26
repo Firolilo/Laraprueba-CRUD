@@ -23,12 +23,25 @@ class BiomasaRequest extends FormRequest
     {
         return [
             'fecha_reporte' => ['required','date'],
-            'tipo_biomasa_id' => ['required','exists:tipo_biomasa,id'],
+            'tipo_biomasa_id' => ['required','exists:tipo_biomasas,id'],
             'area_m2' => ['nullable','integer','min:0'],
-            'densidad' => ['required','string','in:baja,media,alta'],
-            'ubicacion' => ['nullable','string','max:255'],
-            'coordenadas' => ['nullable','json'],
+            'perimetro_m' => ['nullable','numeric','min:0'],
+            'densidad' => ['required','string','in:Baja,Media,Alta'],
+            'coordenadas' => ['required','json'],
             'descripcion' => ['nullable','string'],
         ];
+    }
+
+    /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        // Si coordenadas viene como string JSON, parsearlo a array
+        if ($this->has('coordenadas') && is_string($this->coordenadas)) {
+            $this->merge([
+                'coordenadas' => json_decode($this->coordenadas, true),
+            ]);
+        }
     }
 }
