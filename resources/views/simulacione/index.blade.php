@@ -21,7 +21,7 @@
                                   <i class="fas fa-fire"></i> {{ __('Simulador Avanzado') }}
                                 </a>
                                 <a href="{{ route('simulaciones.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
-                                  {{ __('Create New') }}
+                                  {{ __('Crear Nueva Simulación') }}
                                 </a>
                               </div>
                         </div>
@@ -41,9 +41,8 @@
                                         <th>Nombre</th>
                                         <th>Fecha</th>
                                         <th>Estado</th>
-                                        <th>Focos activos</th>
-
-                                        <th></th>
+                                        <th>Focos Activos</th>
+                                        <th>Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -57,11 +56,11 @@
 
                                             <td>
                                                 <form action="{{ route('simulaciones.destroy', $simulacione->id) }}" method="POST">
-                                                    <a class="btn btn-sm btn-primary " href="{{ route('simulaciones.show', $simulacione->id) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Show') }}</a>
-                                                    <a class="btn btn-sm btn-success" href="{{ route('simulaciones.edit', $simulacione->id) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Edit') }}</a>
+                                                    <a class="btn btn-sm btn-primary" href="{{ route('simulaciones.show', $simulacione->id) }}"><i class="fa fa-fw fa-eye"></i> Ver</a>
+                                                    <a class="btn btn-sm btn-success" href="{{ route('simulaciones.edit', $simulacione->id) }}"><i class="fa fa-fw fa-edit"></i> Editar</a>
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="event.preventDefault(); confirm('Are you sure to delete?') ? this.closest('form').submit() : false;"><i class="fa fa-fw fa-trash"></i> {{ __('Delete') }}</button>
+                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="event.preventDefault(); confirm('¿Está seguro de eliminar?') ? this.closest('form').submit() : false;"><i class="fa fa-fw fa-trash"></i> Eliminar</button>
                                                 </form>
                                             </td>
                                         </tr>
