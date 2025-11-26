@@ -36,7 +36,7 @@
                                     <tr>
                                         <th>No</th>
                                         <th>Foco de Incendio</th>
-                                        <th>Fecha Predicción</th>
+                                        <th>Fecha de Predicción</th>
                                         <th>Horas</th>
                                         <th>Riesgo</th>
                                         <th>Área Afectada</th>
