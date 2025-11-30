@@ -108,24 +108,6 @@ services:
     networks:
       - sipii-network
 
-  # pgAdmin (Opcional - herramienta de gestión de PostgreSQL)
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: sipii-pgadmin
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@sipii.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-      PGADMIN_LISTEN_PORT: 80
-    ports:
-      - "5050:80"
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    depends_on:
-      - postgres
-    networks:
-      - sipii-network
-
 networks:
   sipii-network:
     driver: bridge
@@ -146,6 +128,4 @@ volumes:
   api_storage:
     driver: local
   api_bootstrap_cache:
-    driver: local
-  pgadmin_data:
     driver: local
