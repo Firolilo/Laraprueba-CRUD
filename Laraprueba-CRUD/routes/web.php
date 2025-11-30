@@ -17,6 +17,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/', function () {
         return view('dashboard');
     })->name('dashboard');
+
+    // Test endpoint to preview OpenWeather and FIRMS data
+    Route::get('/test', [\App\Http\Controllers\TestController::class, 'index'])
+        ->name('test.index');
     
     Route::get('/home', function () {
         return redirect('/');

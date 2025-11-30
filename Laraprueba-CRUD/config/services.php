@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+        // Custom external services
+        'openweather' => [
+            'key' => env('OPENWEATHER_API_KEY'),
+        ],
+        'firms' => [
+            'key' => env('FIRMS_API_KEY'),
+        ],
+
 ];
