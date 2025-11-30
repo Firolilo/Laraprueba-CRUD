@@ -21,16 +21,21 @@ El proyecto contiene los siguientes servicios:
 
 ### 1. Preparar archivos de configuración
 
-Antes de iniciar los contenedores, asegúrate de tener los archivos `.env`:
+**IMPORTANTE**: Los archivos `.env` se generan automáticamente desde `.env.docker` al iniciar los contenedores. NO necesitas copiarlos manualmente.
+
+Si anteriormente creaste un `.env` manualmente y tienes problemas:
 
 ```powershell
-# En el directorio raíz del proyecto
-cd "c:\Users\lenovo\OneDrive\Desktop\Proyectos\SIPII Laravel\Laraprueba-CRUD"
-
-# Copiar archivos de configuración para Docker
-Copy-Item "Laraprueba-CRUD\.env.docker" "Laraprueba-CRUD\.env"
-Copy-Item "sipii-api\.env.docker" "sipii-api\.env"
+# Eliminar .env si es un directorio (error común)
+Remove-Item "Laraprueba-CRUD\.env" -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item "sipii-api\.env" -Recurse -Force -ErrorAction SilentlyContinue
 ```
+
+Los archivos `.env.docker` ya están configurados con:
+- ✅ Conexión a PostgreSQL en Docker
+- ✅ Locale en español
+- ✅ Configuración de sesiones y caché en base de datos
+- ✅ Variables de entorno optimizadas para producción
 
 ### 2. Construir e iniciar los contenedores
 
@@ -202,13 +207,28 @@ docker-compose up -d --force-recreate
 
 ### Error "APP_KEY not set"
 
+El `docker-entrypoint.sh` genera automáticamente la APP_KEY. Si aún así tienes este error:
+
 ```powershell
 # Generar una nueva APP_KEY
-docker-compose exec app php artisan key:generate
-docker-compose exec api php artisan key:generate
+docker-compose exec app php artisan key:generate --force
+docker-compose exec api php artisan key:generate --force
 
 # Reiniciar los servicios
 docker-compose restart app api
+```
+
+### Error ".env es un directorio"
+
+Si ves este error en los logs, significa que se creó `.env` como carpeta por error:
+
+```powershell
+# El entrypoint lo detecta y elimina automáticamente
+# Pero si persiste, ejecuta:
+docker-compose down
+Remove-Item "Laraprueba-CRUD\.env" -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item "sipii-api\.env" -Recurse -Force -ErrorAction SilentlyContinue
+docker-compose up -d
 ```
 
 ### Error de permisos en storage

@@ -42,12 +42,12 @@ services:
       SESSION_DRIVER: database
       CACHE_STORE: database
       QUEUE_CONNECTION: database
-      RUN_SEEDERS: "false"
+      RUN_SEEDERS: "true"
     ports:
       - "8000:80"
     volumes:
       # Montar solo archivos específicos (sin vendor ni node_modules)
-      - ./Laraprueba-CRUD/.env:/var/www/html/.env
+      # NO montar .env directamente - se copia desde .env.docker en el entrypoint
       - ./Laraprueba-CRUD/app:/var/www/html/app:delegated
       - ./Laraprueba-CRUD/config:/var/www/html/config:delegated
       - ./Laraprueba-CRUD/database:/var/www/html/database:delegated
@@ -91,7 +91,7 @@ services:
       - "8001:80"
     volumes:
       # Montar solo archivos específicos (sin vendor)
-      - ./sipii-api/.env:/var/www/html/.env
+      # NO montar .env directamente - se copia desde .env.docker en el entrypoint
       - ./sipii-api/app:/var/www/html/app:delegated
       - ./sipii-api/config:/var/www/html/config:delegated
       - ./sipii-api/database:/var/www/html/database:delegated

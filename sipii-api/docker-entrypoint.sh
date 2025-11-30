@@ -9,11 +9,23 @@ done
 
 echo "PostgreSQL está listo!"
 
-# Generar key si no existe
+# Copiar .env.docker a .env si no existe o si .env es un directorio (error común)
+if [ -d .env ]; then
+    echo "ERROR: .env es un directorio. Eliminando..."
+    rm -rf .env
+fi
+
 if [ ! -f .env ]; then
-    cp .env.example .env
+    if [ -f .env.docker ]; then
+        echo "Copiando .env.docker a .env..."
+        cp .env.docker .env
+    else
+        echo "ERROR: .env.docker no encontrado. Usando .env.example como fallback..."
+        cp .env.example .env
+    fi
+    
     echo "Generando application key..."
-    php artisan key:generate
+    php artisan key:generate --force
     
     # Limpiar caché solo en primera ejecución
     echo "Limpiando caché..."
