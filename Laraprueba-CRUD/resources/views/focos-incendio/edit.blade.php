@@ -1,31 +1,28 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 
-@section('template_title')
-    {{ __('Actualizar') }} Foco de Incendio
-@endsection
+@section('subtitle', 'Editar Foco de Incendio')
+@section('content_header_title', 'Focos de Incendio')
+@section('content_header_subtitle', 'Editar')
 
-@section('content')
-    <section class="content container-fluid">
-        <div class="">
+@section('content_body')
+    <div class="container-fluid">
+        <div class="row">
             <div class="col-md-12">
+                <x-adminlte-card title="Editar Foco de Incendio: {{ $focosIncendio->ubicacion }}" theme="warning" icon="fas fa-edit">
+                    <x-slot name="toolsSlot">
+                        <x-adminlte-button label="Volver" icon="fas fa-arrow-left" 
+                            class="btn-sm" theme="secondary" href="{{ route('focos-incendios.index') }}"/>
+                    </x-slot>
 
-                <div class="card card-default">
-                    <div class="card-header">
-                        <span class="card-title">{{ __('Actualizar') }} Foco de Incendio</span>
-                    </div>
-                    <div class="card-body bg-white">
-                        <form method="POST" action="{{ route('focos-incendios.update', $focosIncendio->id) }}"  role="form" enctype="multipart/form-data">
-                            {{ method_field('PATCH') }}
-                            @csrf
-
-                            @include('focos-incendio.form')
-
-                        </form>
-                    </div>
-                </div>
+                    <form method="POST" action="{{ route('focos-incendios.update', $focosIncendio->id) }}" role="form" enctype="multipart/form-data">
+                        {{ method_field('PATCH') }}
+                        @csrf
+                        @include('focos-incendio.form')
+                    </form>
+                </x-adminlte-card>
             </div>
         </div>
-    </section>
+    </div>
 @endsection
 
 @section('css')

@@ -315,46 +315,70 @@ return [
             'type' => 'sidebar-menu-search',
             'text' => 'search',
         ],
-        ['header' => 'Gestión'],
+        
+        // Dashboard - Todos los usuarios autenticados
+        ['header' => 'NAVEGACIÓN'],
         [
             'text' => 'Dashboard',
             'url' => '/',
             'icon' => 'fas fa-tachometer-alt',
         ],
+        
+        // Módulos disponibles para Voluntarios y Administradores
+        ['header' => 'MÓDULOS'],
         [
-            'text' => 'Usuarios',
-            'url' => '/users',
-            'icon' => 'fas fa-users',
-        ],
-        [
-            'text' => 'Biomasas',
+            'text' => 'Biomasa',
             'url' => '/biomasas',
-            'icon' => 'fas fa-leaf',
+            'icon' => 'fas fa-leaf text-success',
         ],
         [
-            'text' => 'Tipos de Biomasa',
-            'url' => '/tipo-biomasas',
-            'icon' => 'fas fa-list',
-        ],
-        [
-            'text' => 'Simulador Avanzado',
+            'text' => 'Simulador',
             'url' => '/simulaciones/simulator',
             'icon' => 'fas fa-fire text-warning',
         ],
         [
-            'text' => 'Simulaciones',
-            'url' => '/simulaciones',
-            'icon' => 'fas fa-fire-extinguisher',
-        ],
-        [
-            'text' => 'Focos de incendio',
-            'url' => '/focos-incendios',
-            'icon' => 'fas fa-fire',
-        ],
-        [
             'text' => 'Predicciones',
             'url' => '/predictions',
-            'icon' => 'fas fa-chart-line',
+            'icon' => 'fas fa-chart-line text-purple',
+        ],
+        
+        // Módulos solo para Administradores
+        ['header' => 'ADMINISTRACIÓN', 'can' => 'viewAdmin'],
+        [
+            'text' => 'Usuarios',
+            'url' => '/users',
+            'icon' => 'fas fa-users text-info',
+            'can' => 'viewAdmin',
+        ],
+        [
+            'text' => 'Tipos de Biomasa',
+            'url' => '/tipo-biomasas',
+            'icon' => 'fas fa-list text-olive',
+            'can' => 'viewAdmin',
+        ],
+        [
+            'text' => 'Simulaciones',
+            'url' => '/simulaciones',
+            'icon' => 'fas fa-play-circle text-orange',
+            'can' => 'viewAdmin',
+        ],
+        [
+            'text' => 'Focos de Incendio',
+            'url' => '/focos-incendios',
+            'icon' => 'fas fa-fire text-danger',
+            'can' => 'viewAdmin',
+        ],
+        [
+            'text' => 'Administradores',
+            'url' => '/administradores',
+            'icon' => 'fas fa-user-shield text-primary',
+            'can' => 'viewAdmin',
+        ],
+        [
+            'text' => 'Voluntarios',
+            'url' => '/voluntarios',
+            'icon' => 'fas fa-hands-helping text-teal',
+            'can' => 'viewAdmin',
         ],
     ],
 
@@ -394,7 +418,7 @@ return [
 
     'plugins' => [
         'Datatables' => [
-            'active' => false,
+            'active' => true,
             'files' => [
                 [
                     'type' => 'js',
@@ -414,7 +438,7 @@ return [
             ],
         ],
         'Select2' => [
-            'active' => false,
+            'active' => true,
             'files' => [
                 [
                     'type' => 'js',
@@ -429,7 +453,7 @@ return [
             ],
         ],
         'Chartjs' => [
-            'active' => false,
+            'active' => true,
             'files' => [
                 [
                     'type' => 'js',
@@ -439,12 +463,12 @@ return [
             ],
         ],
         'Sweetalert2' => [
-            'active' => false,
+            'active' => true,
             'files' => [
                 [
                     'type' => 'js',
                     'asset' => false,
-                    'location' => '//cdn.jsdelivr.net/npm/sweetalert2@8',
+                    'location' => '//cdn.jsdelivr.net/npm/sweetalert2@11',
                 ],
             ],
         ],

@@ -1,76 +1,70 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 
-@section('template_title')
-    Usuarios
-@endsection
+@section('subtitle', 'Usuarios')
+@section('content_header_title', 'Gestión de Usuarios')
+@section('content_header_subtitle', 'Listado')
 
-@section('content')
+@section('content_body')
     <div class="container-fluid">
         <div class="row">
-            <div class="col-sm-12">
-                <div class="card">
-                    <div class="card-header">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="col-12">
+                @if ($message = Session::get('success'))
+                    <x-adminlte-alert theme="success" dismissable>
+                        {{ $message }}
+                    </x-adminlte-alert>
+                @endif
 
-                            <span id="card_title">
-                                {{ __('Usuarios') }}
-                            </span>
+                <x-adminlte-card title="Usuarios" theme="primary" icon="fas fa-users">
+                    <x-slot name="toolsSlot">
+                        <x-adminlte-button label="Crear Nuevo" icon="fas fa-plus" 
+                            class="btn-sm" theme="success" href="{{ route('users.create') }}"/>
+                    </x-slot>
 
-                             <div class="float-right">
-                                <a href="{{ route('users.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
-                                  {{ __('Crear Nuevo') }}
-                                </a>
-                              </div>
-                        </div>
-                    </div>
-                    @if ($message = Session::get('success'))
-                        <div class="alert alert-success m-4">
-                            <p>{{ $message }}</p>
-                        </div>
-                    @endif
-
-                    <div class="card-body bg-white">
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead class="thead">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nombre</th>
+                                    <th>Correo Electrónico</th>
+                                    <th>Teléfono</th>
+                                    <th>C.I.</th>
+                                    <th style="width: 180px;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($users as $user)
                                     <tr>
-                                        <th>No</th>
-                                        
-                                        <th>Nombre</th>
-                                        <th>Correo Electrónico</th>
-                                        <th>Teléfono</th>
-                                        <th>C.I.</th>
-
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($users as $user)
-                                        <tr>
-                                            <td>{{ ++$i }}</td>
-                                            
-                                            <td>{{ $user->name }}</td>
-                                            <td>{{ $user->email }}</td>
-                                            <td>{{ $user->telefono }}</td>
-                                            <td>{{ $user->cedula_identidad }}</td>
-
-                                            <td>
-                                                <form action="{{ route('users.destroy', $user->id) }}" method="POST">
-                                                    <a class="btn btn-sm btn-primary" href="{{ route('users.show', $user->id) }}"><i class="fa fa-fw fa-eye"></i> Ver</a>
-                                                    <a class="btn btn-sm btn-success" href="{{ route('users.edit', $user->id) }}"><i class="fa fa-fw fa-edit"></i> Editar</a>
+                                        <td>{{ ++$i }}</td>
+                                        <td>{{ $user->name }}</td>
+                                        <td>{{ $user->email }}</td>
+                                        <td>{{ $user->telefono }}</td>
+                                        <td>{{ $user->cedula_identidad }}</td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <x-adminlte-button icon="fas fa-eye" theme="info" 
+                                                    href="{{ route('users.show', $user->id) }}" size="sm" title="Ver"/>
+                                                <x-adminlte-button icon="fas fa-edit" theme="success" 
+                                                    href="{{ route('users.edit', $user->id) }}" size="sm" title="Editar"/>
+                                                <form action="{{ route('users.destroy', $user->id) }}" method="POST" style="display: inline;" 
+                                                    onsubmit="return confirm('¿Está seguro de eliminar este usuario?');">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="event.preventDefault(); confirm('¿Está seguro de eliminar?') ? this.closest('form').submit() : false;"><i class="fa fa-fw fa-trash"></i> Eliminar</button>
+                                                    <x-adminlte-button type="submit" icon="fas fa-trash" 
+                                                        theme="danger" size="sm" title="Eliminar"/>
                                                 </form>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
-                </div>
-                {!! $users->withQueryString()->links() !!}
+
+                    <div class="mt-3">
+                        {!! $users->withQueryString()->links() !!}
+                    </div>
+                </x-adminlte-card>
             </div>
         </div>
     </div>

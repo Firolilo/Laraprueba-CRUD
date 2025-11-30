@@ -1,66 +1,63 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 
-@section('template_title')
-    {{ $focosIncendio->ubicacion ?? __('Ver') . " Foco de Incendio" }}
-@endsection
+@section('subtitle', 'Ver Foco de Incendio')
+@section('content_header_title', 'Focos de Incendio')
+@section('content_header_subtitle', 'Detalle')
 
-@section('content')
-    <section class="content container-fluid">
+@section('content_body')
+    <div class="container-fluid">
         <div class="row">
             <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-                        <div class="float-left">
-                            <span class="card-title">{{ __('Ver') }} Foco de Incendio</span>
+                <x-adminlte-card title="Información del Foco de Incendio: {{ $focosIncendio->ubicacion }}" theme="info" icon="fas fa-fire">
+                    <x-slot name="toolsSlot">
+                        <x-adminlte-button label="Volver" icon="fas fa-arrow-left" 
+                            class="btn-sm" theme="secondary" href="{{ route('focos-incendios.index') }}"/>
+                        <x-adminlte-button label="Editar" icon="fas fa-edit" 
+                            class="btn-sm" theme="warning" href="{{ route('focos-incendios.edit', $focosIncendio->id) }}"/>
+                    </x-slot>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <x-adminlte-callout theme="danger" title="Fecha">
+                                {{ optional($focosIncendio->fecha)->format('d/m/Y H:i') }}
+                            </x-adminlte-callout>
                         </div>
-                        <div class="float-right">
-                            <a class="btn btn-primary btn-sm" href="{{ route('focos-incendios.index') }}"> {{ __('Volver') }}</a>
+                        <div class="col-md-6">
+                            <x-adminlte-callout theme="primary" title="Ubicación">
+                                {{ $focosIncendio->ubicacion }}
+                            </x-adminlte-callout>
                         </div>
-                    </div>
-
-                    <div class="card-body bg-white">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <dl class="row mb-0">
-                                    <dt class="col-sm-4">Fecha:</dt>
-                                    <dd class="col-sm-8">{{ optional($focosIncendio->fecha)->format('d/m/Y H:i') }}</dd>
-
-                                    <dt class="col-sm-4">Ubicación:</dt>
-                                    <dd class="col-sm-8">{{ $focosIncendio->ubicacion }}</dd>
-
-                                    <dt class="col-sm-4">Intensidad:</dt>
-                                    <dd class="col-sm-8">
-                                        <span class="badge badge-{{ $focosIncendio->intensidad > 7 ? 'danger' : ($focosIncendio->intensidad > 4 ? 'warning' : 'info') }}">
-                                            {{ $focosIncendio->intensidad }}
-                                        </span>
-                                    </dd>
-
-                                    <dt class="col-sm-4">Coordenadas:</dt>
-                                    <dd class="col-sm-8">
-                                        @if($focosIncendio->coordenadas)
-                                            Latitud: {{ $focosIncendio->coordenadas[0] }}<br>
-                                            Longitud: {{ $focosIncendio->coordenadas[1] }}
-                                        @else
-                                            <span class="text-muted">No disponibles</span>
-                                        @endif
-                                    </dd>
-                                </dl>
-                            </div>
-                            
-                            <div class="col-md-6">
+                        <div class="col-md-6">
+                            <x-adminlte-callout theme="warning" title="Intensidad">
+                                <span class="badge badge-{{ $focosIncendio->intensidad > 7 ? 'danger' : ($focosIncendio->intensidad > 4 ? 'warning' : 'info') }}" style="font-size: 18px;">
+                                    {{ $focosIncendio->intensidad }}
+                                </span>
+                            </x-adminlte-callout>
+                        </div>
+                        <div class="col-md-6">
+                            <x-adminlte-callout theme="info" title="Coordenadas">
                                 @if($focosIncendio->coordenadas)
-                                <div class="form-group">
-                                    <label>Ubicación en el mapa</label>
-                                    <div id="map" style="height: 300px; border-radius: 8px; border: 1px solid #ddd;"></div>
-                                </div>
+                                    Latitud: {{ $focosIncendio->coordenadas[0] }}<br>
+                                    Longitud: {{ $focosIncendio->coordenadas[1] }}
+                                @else
+                                    <span class="text-muted">No disponibles</span>
                                 @endif
+                            </x-adminlte-callout>
+                        </div>
+                        
+                        @if($focosIncendio->coordenadas)
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Ubicación en el mapa</label>
+                                <div id="map" style="height: 300px; border-radius: 8px; border: 1px solid #ddd;"></div>
                             </div>
                         </div>
+                        @endif
                     </div>
-                </div>
+                </x-adminlte-card>
             </div>
         </div>
-    </section>
+    </div>
 @endsection
 
 @section('css')

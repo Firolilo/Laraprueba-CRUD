@@ -1,45 +1,45 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 
-@section('template_title')
-    {{ $user->name ?? __('Ver') . " " . __('Usuario') }}
-@endsection
+@section('subtitle', 'Ver Usuario')
+@section('content_header_title', 'Usuarios')
+@section('content_header_subtitle', 'Detalle')
 
-@section('content')
-    <section class="content container-fluid">
+@section('content_body')
+    <div class="container-fluid">
         <div class="row">
             <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-                        <div class="float-left">
-                            <span class="card-title">{{ __('Ver') }} Usuario</span>
+                <x-adminlte-card title="Información del Usuario: {{ $user->name }}" theme="info" icon="fas fa-user">
+                    <x-slot name="toolsSlot">
+                        <x-adminlte-button label="Volver" icon="fas fa-arrow-left" 
+                            class="btn-sm" theme="secondary" href="{{ route('users.index') }}"/>
+                        <x-adminlte-button label="Editar" icon="fas fa-edit" 
+                            class="btn-sm" theme="warning" href="{{ route('users.edit', $user->id) }}"/>
+                    </x-slot>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <x-adminlte-callout theme="primary" title="Nombre">
+                                {{ $user->name }}
+                            </x-adminlte-callout>
                         </div>
-                        <div class="float-right">
-                            <a class="btn btn-primary btn-sm" href="{{ route('users.index') }}"> {{ __('Volver') }}</a>
+                        <div class="col-md-6">
+                            <x-adminlte-callout theme="info" title="Correo Electrónico">
+                                {{ $user->email }}
+                            </x-adminlte-callout>
+                        </div>
+                        <div class="col-md-6">
+                            <x-adminlte-callout theme="success" title="Teléfono">
+                                {{ $user->telefono ?? 'No especificado' }}
+                            </x-adminlte-callout>
+                        </div>
+                        <div class="col-md-6">
+                            <x-adminlte-callout theme="warning" title="Cédula de Identidad">
+                                {{ $user->cedula_identidad ?? 'No especificado' }}
+                            </x-adminlte-callout>
                         </div>
                     </div>
-
-                    <div class="card-body bg-white">
-                        
-                        <div class="form-group mb-2 mb20">
-                            <strong>Nombre:</strong>
-                            {{ $user->name }}
-                        </div>
-                        <div class="form-group mb-2 mb20">
-                            <strong>Correo Electrónico:</strong>
-                            {{ $user->email }}
-                        </div>
-                        <div class="form-group mb-2 mb20">
-                            <strong>Teléfono:</strong>
-                            {{ $user->telefono }}
-                        </div>
-                        <div class="form-group mb-2 mb20">
-                            <strong>Cédula de identidad:</strong>
-                            {{ $user->cedula_identidad }}
-                        </div>
-
-                    </div>
-                </div>
+                </x-adminlte-card>
             </div>
         </div>
-    </section>
+    </div>
 @endsection

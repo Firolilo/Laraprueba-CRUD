@@ -1,30 +1,25 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 
-@section('title', 'Crear Tipo de Biomasa')
+@section('subtitle', 'Crear Tipo de Biomasa')
+@section('content_header_title', 'Tipos de Biomasa')
+@section('content_header_subtitle', 'Crear Nuevo')
 
-@section('content_header')
-    <h1>Crear Tipo de Biomasa</h1>
-@stop
-
-@section('content')
-    <section class="content container-fluid">
+@section('content_body')
+    <div class="container-fluid">
         <div class="row">
             <div class="col-md-12">
+                <x-adminlte-card title="Crear Tipo de Biomasa" theme="success" icon="fas fa-leaf">
+                    <x-slot name="toolsSlot">
+                        <x-adminlte-button label="Volver" icon="fas fa-arrow-left" 
+                            class="btn-sm" theme="secondary" href="{{ route('tipo-biomasas.index') }}"/>
+                    </x-slot>
 
-                <div class="card card-default">
-                    <div class="card-header">
-                        <span class="card-title">{{ __('Crear') }} Tipo de Biomasa</span>
-                    </div>
-                    <div class="card-body bg-white">
-                        <form method="POST" action="{{ route('tipo-biomasas.store') }}" role="form" enctype="multipart/form-data">
-                            @csrf
-
-                            @include('tipo-biomasa.form')
-
-                        </form>
-                    </div>
-                </div>
+                    <form method="POST" action="{{ route('tipo-biomasas.store') }}" role="form" enctype="multipart/form-data">
+                        @csrf
+                        @include('tipo-biomasa.form')
+                    </form>
+                </x-adminlte-card>
             </div>
         </div>
-    </section>
-@stop
+    </div>
+@endsection

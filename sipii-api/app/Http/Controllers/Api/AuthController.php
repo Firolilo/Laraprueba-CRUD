@@ -62,6 +62,9 @@ class AuthController extends Controller
             ]);
         }
 
+        // Cargar relaciones de roles
+        $user->load(['administrador', 'voluntario']);
+
         // Eliminar tokens anteriores (opcional, para seguridad)
         $user->tokens()->delete();
 
@@ -74,6 +77,9 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
             ],
+            'role' => $user->getRoleType(),
+            'is_admin' => $user->isAdministrador(),
+            'is_volunteer' => $user->isVoluntario(),
             'token' => $token,
         ]);
     }

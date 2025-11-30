@@ -1,25 +1,25 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 
-@section('template_title')
-    {{ __('Crear') }} Administrador
-@endsection
+@section('subtitle', 'Crear Administrador')
+@section('content_header_title', 'Administradores')
+@section('content_header_subtitle', 'Crear Nuevo')
 
-@section('content')
-    <section class="content container-fluid">
+@section('content_body')
+    <div class="container-fluid">
         <div class="row">
             <div class="col-md-12">
-                <div class="card card-default">
-                    <div class="card-header">
-                        <span class="card-title">{{ __('Crear') }} Administrador</span>
-                    </div>
-                    <div class="card-body bg-white">
-                        <form method="POST" action="{{ route('administradores.store') }}"  role="form" enctype="multipart/form-data">
-                            @csrf
-                            @include('administrador.form')
-                        </form>
-                    </div>
-                </div>
+                <x-adminlte-card title="Crear Administrador" theme="success" icon="fas fa-user-shield">
+                    <x-slot name="toolsSlot">
+                        <x-adminlte-button label="Volver" icon="fas fa-arrow-left" 
+                            class="btn-sm" theme="secondary" href="{{ route('administradores.index') }}"/>
+                    </x-slot>
+
+                    <form method="POST" action="{{ route('administradores.store') }}" role="form" enctype="multipart/form-data">
+                        @csrf
+                        @include('administrador.form')
+                    </form>
+                </x-adminlte-card>
             </div>
         </div>
-    </section>
+    </div>
 @endsection

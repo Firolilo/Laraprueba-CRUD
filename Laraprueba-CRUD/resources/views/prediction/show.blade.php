@@ -1,12 +1,10 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 
-@section('title', 'Resultado de Predicción')
+@section('subtitle', 'Resultado de Predicción')
+@section('content_header_title', 'Predicciones')
+@section('content_header_subtitle', 'Resultado de Predicción')
 
-@section('content_header')
-    <h1><i class="fas fa-chart-area text-success"></i> Resultado de Predicción</h1>
-@stop
-
-@section('content')
+@section('content_body')
 @php
     $meta = $prediction->meta ?? [];
     $inputParams = $meta['input_parameters'] ?? [];
@@ -548,7 +546,7 @@
         </div>
     </div>
 </div>
-@stop
+@endsection
 
 @section('css')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />

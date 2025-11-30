@@ -1,76 +1,78 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 
-@section('template_title')
-    Simulaciones
-@endsection
+@section('subtitle', 'Simulaciones')
+@section('content_header_title', 'Simulaciones de Incendios')
+@section('content_header_subtitle', 'Listado')
 
-@section('content')
+@section('content_body')
     <div class="container-fluid">
         <div class="row">
-            <div class="col-sm-12">
-                <div class="card">
-                    <div class="card-header">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="col-12">
+                @if ($message = Session::get('success'))
+                    <x-adminlte-alert theme="success" dismissable>
+                        {{ $message }}
+                    </x-adminlte-alert>
+                @endif
 
-                            <span id="card_title">
-                                {{ __('Simulaciones') }}
-                            </span>
+                <x-adminlte-card title="Simulaciones" theme="orange" icon="fas fa-play-circle">
+                    <x-slot name="toolsSlot">
+                        <x-adminlte-button label="Simulador Avanzado" icon="fas fa-fire" 
+                            class="btn-sm" theme="warning" href="{{ route('simulaciones.simulator') }}"/>
+                        <x-adminlte-button label="Crear Nueva" icon="fas fa-plus" 
+                            class="btn-sm" theme="success" href="{{ route('simulaciones.create') }}"/>
+                    </x-slot>
 
-                             <div class="float-right">
-                                <a href="{{ route('simulaciones.simulator') }}" class="btn btn-success btn-sm mr-2"  data-placement="left">
-                                  <i class="fas fa-fire"></i> {{ __('Simulador Avanzado') }}
-                                </a>
-                                <a href="{{ route('simulaciones.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
-                                  {{ __('Crear Nueva Simulación') }}
-                                </a>
-                              </div>
-                        </div>
-                    </div>
-                    @if ($message = Session::get('success'))
-                        <div class="alert alert-success m-4">
-                            <p>{{ $message }}</p>
-                        </div>
-                    @endif
-
-                    <div class="card-body bg-white">
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead class="thead">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nombre</th>
+                                    <th>Fecha</th>
+                                    <th>Estado</th>
+                                    <th>Focos Activos</th>
+                                    <th style="width: 180px;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($simulaciones as $simulacione)
                                     <tr>
-                                        <th>No</th>
-                                        <th>Nombre</th>
-                                        <th>Fecha</th>
-                                        <th>Estado</th>
-                                        <th>Focos Activos</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($simulaciones as $simulacione)
-                                        <tr>
-                                            <td>{{ ++$i }}</td>
-                                            <td>{{ $simulacione->nombre }}</td>
-                                            <td>{{ optional($simulacione->fecha)->format('Y-m-d H:i') }}</td>
-                                            <td>{{ $simulacione->estado }}</td>
-                                            <td>{{ $simulacione->focos_activos }}</td>
-
-                                            <td>
-                                                <form action="{{ route('simulaciones.destroy', $simulacione->id) }}" method="POST">
-                                                    <a class="btn btn-sm btn-primary" href="{{ route('simulaciones.show', $simulacione->id) }}"><i class="fa fa-fw fa-eye"></i> Ver</a>
-                                                    <a class="btn btn-sm btn-success" href="{{ route('simulaciones.edit', $simulacione->id) }}"><i class="fa fa-fw fa-edit"></i> Editar</a>
+                                        <td>{{ ++$i }}</td>
+                                        <td>{{ $simulacione->nombre }}</td>
+                                        <td>{{ optional($simulacione->fecha)->format('Y-m-d H:i') }}</td>
+                                        <td>
+                                            <span class="badge badge-{{ $simulacione->estado === 'activa' ? 'success' : 'secondary' }}">
+                                                {{ $simulacione->estado }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-danger">{{ $simulacione->focos_activos }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <x-adminlte-button icon="fas fa-eye" theme="info" 
+                                                    href="{{ route('simulaciones.show', $simulacione->id) }}" size="sm" title="Ver"/>
+                                                <x-adminlte-button icon="fas fa-edit" theme="success" 
+                                                    href="{{ route('simulaciones.edit', $simulacione->id) }}" size="sm" title="Editar"/>
+                                                <form action="{{ route('simulaciones.destroy', $simulacione->id) }}" method="POST" style="display: inline;" 
+                                                    onsubmit="return confirm('¿Está seguro de eliminar esta simulación?');">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="event.preventDefault(); confirm('¿Está seguro de eliminar?') ? this.closest('form').submit() : false;"><i class="fa fa-fw fa-trash"></i> Eliminar</button>
+                                                    <x-adminlte-button type="submit" icon="fas fa-trash" 
+                                                        theme="danger" size="sm" title="Eliminar"/>
                                                 </form>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
-                </div>
-                {!! $simulaciones->withQueryString()->links() !!}
+
+                    <div class="mt-3">
+                        {!! $simulaciones->withQueryString()->links() !!}
+                    </div>
+                </x-adminlte-card>
             </div>
         </div>
     </div>

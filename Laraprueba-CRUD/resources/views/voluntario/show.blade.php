@@ -1,63 +1,63 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 
-@section('template_title')
-    {{ $voluntario->user->name ?? __('Ver') . " Voluntario" }}
-@endsection
+@section('subtitle', 'Ver Voluntario')
+@section('content_header_title', 'Voluntarios')
+@section('content_header_subtitle', 'Detalle')
 
-@section('content')
-    <section class="content container-fluid">
+@section('content_body')
+    <div class="container-fluid">
         <div class="row">
             <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-                        <div class="float-left">
-                            <span class="card-title">{{ __('Ver') }} Voluntario</span>
-                        </div>
-                        <div class="float-right">
-                            <a class="btn btn-primary btn-sm" href="{{ route('voluntarios.index') }}"> {{ __('Volver') }}</a>
-                        </div>
-                    </div>
+                <x-adminlte-card title="Información del Voluntario: {{ $voluntario->user->name }}" theme="info" icon="fas fa-hands-helping">
+                    <x-slot name="toolsSlot">
+                        <x-adminlte-button label="Volver" icon="fas fa-arrow-left" 
+                            class="btn-sm" theme="secondary" href="{{ route('voluntarios.index') }}"/>
+                        <x-adminlte-button label="Editar" icon="fas fa-edit" 
+                            class="btn-sm" theme="warning" href="{{ route('voluntarios.edit', $voluntario->id) }}"/>
+                    </x-slot>
 
-                    <div class="card-body bg-white">
-                        
-                        <div class="form-group mb-2 mb20">
-                            <strong>Nombre:</strong>
-                            {{ $voluntario->user->name }}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <x-adminlte-callout theme="teal" title="Nombre">
+                                {{ $voluntario->user->name }}
+                            </x-adminlte-callout>
                         </div>
-                        <div class="form-group mb-2 mb20">
-                            <strong>Email:</strong>
-                            {{ $voluntario->user->email }}
+                        <div class="col-md-6">
+                            <x-adminlte-callout theme="info" title="Email">
+                                {{ $voluntario->user->email }}
+                            </x-adminlte-callout>
                         </div>
-                        <div class="form-group mb-2 mb20">
-                            <strong>Dirección:</strong>
-                            {{ $voluntario->direccion }}
+                        <div class="col-md-12">
+                            <x-adminlte-callout theme="success" title="Dirección">
+                                {{ $voluntario->direccion }}
+                            </x-adminlte-callout>
                         </div>
-                        <div class="form-group mb-2 mb20">
-                            <strong>Ciudad:</strong>
-                            {{ $voluntario->ciudad }}
+                        <div class="col-md-6">
+                            <x-adminlte-callout theme="primary" title="Ciudad">
+                                {{ $voluntario->ciudad }}
+                            </x-adminlte-callout>
                         </div>
-                        <div class="form-group mb-2 mb20">
-                            <strong>Zona:</strong>
-                            {{ $voluntario->zona }}
+                        <div class="col-md-6">
+                            <x-adminlte-callout theme="warning" title="Zona">
+                                {{ $voluntario->zona }}
+                            </x-adminlte-callout>
                         </div>
                         @if($voluntario->notas)
-                        <div class="form-group mb-2 mb20">
-                            <strong>Notas:</strong>
-                            <p>{{ $voluntario->notas }}</p>
+                        <div class="col-md-12">
+                            <x-adminlte-callout theme="light" title="Notas">
+                                {{ $voluntario->notas }}
+                            </x-adminlte-callout>
                         </div>
                         @endif
-                        <div class="form-group mb-2 mb20">
-                            <strong>Creado:</strong>
-                            {{ $voluntario->created_at->format('d/m/Y H:i') }}
+                        <div class="col-md-12">
+                            <x-adminlte-callout theme="secondary" title="Fechas">
+                                <strong>Creado:</strong> {{ $voluntario->created_at->format('d/m/Y H:i') }}<br>
+                                <strong>Actualizado:</strong> {{ $voluntario->updated_at->format('d/m/Y H:i') }}
+                            </x-adminlte-callout>
                         </div>
-                        <div class="form-group mb-2 mb20">
-                            <strong>Actualizado:</strong>
-                            {{ $voluntario->updated_at->format('d/m/Y H:i') }}
-                        </div>
-
                     </div>
-                </div>
+                </x-adminlte-card>
             </div>
         </div>
-    </section>
+    </div>
 @endsection

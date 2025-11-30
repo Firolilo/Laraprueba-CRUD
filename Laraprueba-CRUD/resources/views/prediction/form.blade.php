@@ -1,10 +1,9 @@
-<div class="row padding-1 p-1">
+<div class="row">
     <div class="col-md-12">
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle"></i>
+        <x-adminlte-alert theme="info" icon="fas fa-info-circle">
             <strong>Sistema de Predicción de Propagación de Incendios</strong>
             <p class="mb-0">Seleccione un foco de incendio existente y configure los parámetros ambientales para generar una predicción de su propagación.</p>
-        </div>
+        </x-adminlte-alert>
     </div>
 
     <div class="col-md-6">
@@ -38,17 +37,18 @@
     </div>
 
     <div class="col-md-6">
-        <div class="form-group mb-3">
-            <label for="prediction_hours" class="form-label">
-                <i class="fas fa-clock text-primary"></i> Horas de Predicción <span class="text-danger">*</span>
-            </label>
-            <input type="number" name="prediction_hours" id="prediction_hours" 
-                   class="form-control @error('prediction_hours') is-invalid @enderror" 
-                   value="{{ old('prediction_hours', 24) }}" 
-                   min="1" max="72" required>
-            {!! $errors->first('prediction_hours', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
-            <small class="form-text text-muted">Entre 1 y 72 horas</small>
-        </div>
+        <x-adminlte-input name="prediction_hours" label="Horas de Predicción" type="number"
+            value="{{ old('prediction_hours', 24) }}" 
+            min="1" max="72" enable-old-support>
+            <x-slot name="prependSlot">
+                <div class="input-group-text">
+                    <i class="fas fa-clock text-primary"></i>
+                </div>
+            </x-slot>
+            <x-slot name="bottomSlot">
+                Entre 1 y 72 horas <span class="text-danger">*</span>
+            </x-slot>
+        </x-adminlte-input>
 
         <div class="form-group mb-3">
             <label for="terrain_type" class="form-label">
@@ -70,65 +70,69 @@
     </div>
 
     <div class="col-md-3">
-        <div class="form-group mb-3">
-            <label for="temperature" class="form-label">
-                <i class="fas fa-thermometer-half text-danger"></i> Temperatura (°C) <span class="text-danger">*</span>
-            </label>
-            <input type="number" name="temperature" id="temperature" 
-                   class="form-control @error('temperature') is-invalid @enderror" 
-                   value="{{ old('temperature', 25) }}" 
-                   min="0" max="60" step="0.1" required>
-            {!! $errors->first('temperature', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
-        </div>
+        <x-adminlte-input name="temperature" label="Temperatura (°C)" type="number"
+            value="{{ old('temperature', 25) }}" 
+            min="0" max="60" step="0.1" enable-old-support>
+            <x-slot name="prependSlot">
+                <div class="input-group-text">
+                    <i class="fas fa-thermometer-half text-danger"></i>
+                </div>
+            </x-slot>
+            <x-slot name="bottomSlot">
+                <span class="text-danger">*</span>
+            </x-slot>
+        </x-adminlte-input>
     </div>
 
     <div class="col-md-3">
-        <div class="form-group mb-3">
-            <label for="humidity" class="form-label">
-                <i class="fas fa-tint text-info"></i> Humedad (%) <span class="text-danger">*</span>
-            </label>
-            <input type="number" name="humidity" id="humidity" 
-                   class="form-control @error('humidity') is-invalid @enderror" 
-                   value="{{ old('humidity', 50) }}" 
-                   min="0" max="100" step="0.1" required>
-            {!! $errors->first('humidity', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
-        </div>
+        <x-adminlte-input name="humidity" label="Humedad (%)" type="number"
+            value="{{ old('humidity', 50) }}" 
+            min="0" max="100" step="0.1" enable-old-support>
+            <x-slot name="prependSlot">
+                <div class="input-group-text">
+                    <i class="fas fa-tint text-info"></i>
+                </div>
+            </x-slot>
+            <x-slot name="bottomSlot">
+                <span class="text-danger">*</span>
+            </x-slot>
+        </x-adminlte-input>
     </div>
 
     <div class="col-md-3">
-        <div class="form-group mb-3">
-            <label for="wind_speed" class="form-label">
-                <i class="fas fa-wind text-primary"></i> Velocidad del Viento (km/h) <span class="text-danger">*</span>
-            </label>
-            <input type="number" name="wind_speed" id="wind_speed" 
-                   class="form-control @error('wind_speed') is-invalid @enderror" 
-                   value="{{ old('wind_speed', 10) }}" 
-                   min="0" max="200" step="0.1" required>
-            {!! $errors->first('wind_speed', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
-        </div>
+        <x-adminlte-input name="wind_speed" label="Velocidad del Viento (km/h)" type="number"
+            value="{{ old('wind_speed', 10) }}" 
+            min="0" max="200" step="0.1" enable-old-support>
+            <x-slot name="prependSlot">
+                <div class="input-group-text">
+                    <i class="fas fa-wind text-primary"></i>
+                </div>
+            </x-slot>
+            <x-slot name="bottomSlot">
+                <span class="text-danger">*</span>
+            </x-slot>
+        </x-adminlte-input>
     </div>
 
     <div class="col-md-3">
-        <div class="form-group mb-3">
-            <label for="wind_direction" class="form-label">
-                <i class="fas fa-compass text-secondary"></i> Dirección del Viento (°) <span class="text-danger">*</span>
-            </label>
-            <input type="number" name="wind_direction" id="wind_direction" 
-                   class="form-control @error('wind_direction') is-invalid @enderror" 
-                   value="{{ old('wind_direction', 0) }}" 
-                   min="0" max="360" required>
-            {!! $errors->first('wind_direction', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
-            <small class="form-text text-muted">0° = Norte, 90° = Este, 180° = Sur, 270° = Oeste</small>
-        </div>
+        <x-adminlte-input name="wind_direction" label="Dirección del Viento (°)" type="number"
+            value="{{ old('wind_direction', 0) }}" 
+            min="0" max="360" enable-old-support>
+            <x-slot name="prependSlot">
+                <div class="input-group-text">
+                    <i class="fas fa-compass text-secondary"></i>
+                </div>
+            </x-slot>
+            <x-slot name="bottomSlot">
+                0° = Norte, 90° = Este, 180° = Sur, 270° = Oeste <span class="text-danger">*</span>
+            </x-slot>
+        </x-adminlte-input>
     </div>
 
     <div class="col-md-12 mt-3">
-        <button type="submit" class="btn btn-primary btn-lg">
-            <i class="fas fa-chart-line"></i> Generar Predicción
-        </button>
-        <a href="{{ route('predictions.index') }}" class="btn btn-secondary btn-lg">
-            <i class="fas fa-times"></i> Cancelar
-        </a>
+        <x-adminlte-button type="submit" label="Generar Predicción" theme="primary" icon="fas fa-chart-line" class="btn-lg"/>
+        <x-adminlte-button label="Cancelar" theme="secondary" icon="fas fa-times" class="btn-lg"
+            href="{{ route('predictions.index') }}"/>
     </div>
 </div>
 

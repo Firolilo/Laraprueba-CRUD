@@ -1,25 +1,25 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 
-@section('template_title')
-    {{ __('Crear') }} Voluntario
-@endsection
+@section('subtitle', 'Crear Voluntario')
+@section('content_header_title', 'Voluntarios')
+@section('content_header_subtitle', 'Crear Nuevo')
 
-@section('content')
-    <section class="content container-fluid">
+@section('content_body')
+    <div class="container-fluid">
         <div class="row">
             <div class="col-md-12">
-                <div class="card card-default">
-                    <div class="card-header">
-                        <span class="card-title">{{ __('Crear') }} Voluntario</span>
-                    </div>
-                    <div class="card-body bg-white">
-                        <form method="POST" action="{{ route('voluntarios.store') }}"  role="form" enctype="multipart/form-data">
-                            @csrf
-                            @include('voluntario.form')
-                        </form>
-                    </div>
-                </div>
+                <x-adminlte-card title="Crear Voluntario" theme="success" icon="fas fa-hands-helping">
+                    <x-slot name="toolsSlot">
+                        <x-adminlte-button label="Volver" icon="fas fa-arrow-left" 
+                            class="btn-sm" theme="secondary" href="{{ route('voluntarios.index') }}"/>
+                    </x-slot>
+
+                    <form method="POST" action="{{ route('voluntarios.store') }}" role="form" enctype="multipart/form-data">
+                        @csrf
+                        @include('voluntario.form')
+                    </form>
+                </x-adminlte-card>
             </div>
         </div>
-    </section>
+    </div>
 @endsection

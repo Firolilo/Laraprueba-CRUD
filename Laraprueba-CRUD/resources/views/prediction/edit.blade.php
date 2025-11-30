@@ -1,31 +1,26 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 
-@section('title', 'Editar Predicción')
+@section('subtitle', 'Editar Predicción')
+@section('content_header_title', 'Predicciones')
+@section('content_header_subtitle', 'Editar')
 
-@section('content_header')
-    <h1>Editar Predicción</h1>
-@stop
-
-@section('content')
-    <section class="content container-fluid">
-        <div class="">
+@section('content_body')
+    <div class="container-fluid">
+        <div class="row">
             <div class="col-md-12">
+                <x-adminlte-card title="Editar Predicción" theme="warning" icon="fas fa-edit">
+                    <x-slot name="toolsSlot">
+                        <x-adminlte-button label="Volver" icon="fas fa-arrow-left" 
+                            class="btn-sm" theme="secondary" href="{{ route('predictions.index') }}"/>
+                    </x-slot>
 
-                <div class="card card-default">
-                    <div class="card-header">
-                        <span class="card-title">{{ __('Actualizar') }} Predicción</span>
-                    </div>
-                    <div class="card-body bg-white">
-                        <form method="POST" action="{{ route('predictions.update', $prediction->id) }}" role="form" enctype="multipart/form-data">
-                            {{ method_field('PATCH') }}
-                            @csrf
-
-                            @include('prediction.form')
-
-                        </form>
-                    </div>
-                </div>
+                    <form method="POST" action="{{ route('predictions.update', $prediction->id) }}" role="form" enctype="multipart/form-data">
+                        {{ method_field('PATCH') }}
+                        @csrf
+                        @include('prediction.form')
+                    </form>
+                </x-adminlte-card>
             </div>
         </div>
-    </section>
-@stop
+    </div>
+@endsection

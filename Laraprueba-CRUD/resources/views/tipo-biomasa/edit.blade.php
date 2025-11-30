@@ -1,31 +1,26 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 
-@section('title', 'Editar Tipo de Biomasa')
+@section('subtitle', 'Editar Tipo de Biomasa')
+@section('content_header_title', 'Tipos de Biomasa')
+@section('content_header_subtitle', 'Editar')
 
-@section('content_header')
-    <h1>Editar Tipo de Biomasa</h1>
-@stop
-
-@section('content')
-    <section class="content container-fluid">
-        <div class="">
+@section('content_body')
+    <div class="container-fluid">
+        <div class="row">
             <div class="col-md-12">
+                <x-adminlte-card title="Editar Tipo de Biomasa: {{ $tipoBiomasa->tipo_biomasa }}" theme="warning" icon="fas fa-edit">
+                    <x-slot name="toolsSlot">
+                        <x-adminlte-button label="Volver" icon="fas fa-arrow-left" 
+                            class="btn-sm" theme="secondary" href="{{ route('tipo-biomasas.index') }}"/>
+                    </x-slot>
 
-                <div class="card card-default">
-                    <div class="card-header">
-                        <span class="card-title">{{ __('Actualizar') }} Tipo de Biomasa</span>
-                    </div>
-                    <div class="card-body bg-white">
-                        <form method="POST" action="{{ route('tipo-biomasas.update', $tipoBiomasa->id) }}" role="form" enctype="multipart/form-data">
-                            {{ method_field('PATCH') }}
-                            @csrf
-
-                            @include('tipo-biomasa.form')
-
-                        </form>
-                    </div>
-                </div>
+                    <form method="POST" action="{{ route('tipo-biomasas.update', $tipoBiomasa->id) }}" role="form" enctype="multipart/form-data">
+                        @csrf
+                        @method('PATCH')
+                        @include('tipo-biomasa.form')
+                    </form>
+                </x-adminlte-card>
             </div>
         </div>
-    </section>
-@stop
+    </div>
+@endsection

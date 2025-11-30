@@ -1,39 +1,74 @@
-<div class="row padding-1 p-1">
-    <div class="col-md-12">
-        
-        <div class="form-group mb-2 mb20">
-            <label for="name" class="form-label">{{ __('Nombre') }}</label>
-            <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $user?->name) }}" id="name" placeholder="Nombre">
-            {!! $errors->first('name', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
-        </div>
-        <div class="form-group mb-2 mb20">
-            <label for="email" class="form-label">{{ __('Correo Electrónico') }}</label>
-            <input type="text" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $user?->email) }}" id="email" placeholder="Correo Electrónico">
-            {!! $errors->first('email', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
-        </div>
-        <div class="form-group mb-2 mb20">
-            <label for="telefono" class="form-label">{{ __('Teléfono') }}</label>
-            <input type="text" name="telefono" class="form-control @error('telefono') is-invalid @enderror" value="{{ old('telefono', $user?->telefono) }}" id="telefono" placeholder="(+591) 70000000">
-            {!! $errors->first('telefono', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
-        </div>
-        <div class="form-group mb-2 mb20">
-            <label for="cedula_identidad" class="form-label">{{ __('Cédula de identidad') }}</label>
-            <input type="text" name="cedula_identidad" class="form-control @error('cedula_identidad') is-invalid @enderror" value="{{ old('cedula_identidad', $user?->cedula_identidad) }}" id="cedula_identidad" placeholder="C.I.">
-            {!! $errors->first('cedula_identidad', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
-        </div>
-        <div class="form-group mb-2 mb20">
-            <label for="password" class="form-label">{{ __('Contraseña') }}</label>
-            <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" id="password" placeholder="{{ $user && $user->exists ? __('Dejar en blanco para mantener la actual') : __('Contraseña') }}">
-            {!! $errors->first('password', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
-        </div>
-        <div class="form-group mb-2 mb20">
-            <label for="password_confirmation" class="form-label">{{ __('Confirmar Contraseña') }}</label>
-            <input type="password" name="password_confirmation" class="form-control @error('password_confirmation') is-invalid @enderror" id="password_confirmation" placeholder="{{ __('Confirmar Contraseña') }}">
-            {!! $errors->first('password_confirmation', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
-        </div>
-
+<div class="row">
+    <div class="col-md-6">
+        <x-adminlte-input name="name" label="Nombre" placeholder="Nombre completo" 
+            value="{{ old('name', $user?->name) }}" enable-old-support>
+            <x-slot name="prependSlot">
+                <div class="input-group-text">
+                    <i class="fas fa-user text-primary"></i>
+                </div>
+            </x-slot>
+        </x-adminlte-input>
     </div>
-    <div class="col-md-12 mt20 mt-2">
-        <button type="submit" class="btn btn-primary">{{ __('Guardar') }}</button>
+
+    <div class="col-md-6">
+        <x-adminlte-input name="email" label="Correo Electrónico" placeholder="correo@ejemplo.com" 
+            type="email" value="{{ old('email', $user?->email) }}" enable-old-support>
+            <x-slot name="prependSlot">
+                <div class="input-group-text">
+                    <i class="fas fa-envelope text-info"></i>
+                </div>
+            </x-slot>
+        </x-adminlte-input>
+    </div>
+
+    <div class="col-md-6">
+        <x-adminlte-input name="telefono" label="Teléfono" placeholder="(+591) 70000000" 
+            value="{{ old('telefono', $user?->telefono) }}" enable-old-support>
+            <x-slot name="prependSlot">
+                <div class="input-group-text">
+                    <i class="fas fa-phone text-success"></i>
+                </div>
+            </x-slot>
+        </x-adminlte-input>
+    </div>
+
+    <div class="col-md-6">
+        <x-adminlte-input name="cedula_identidad" label="Cédula de Identidad" placeholder="C.I." 
+            value="{{ old('cedula_identidad', $user?->cedula_identidad) }}" enable-old-support>
+            <x-slot name="prependSlot">
+                <div class="input-group-text">
+                    <i class="fas fa-id-card text-warning"></i>
+                </div>
+            </x-slot>
+        </x-adminlte-input>
+    </div>
+
+    <div class="col-md-6">
+        <x-adminlte-input name="password" label="Contraseña" type="password" 
+            placeholder="{{ $user && $user->exists ? 'Dejar en blanco para mantener la actual' : 'Contraseña' }}" 
+            enable-old-support>
+            <x-slot name="prependSlot">
+                <div class="input-group-text">
+                    <i class="fas fa-lock text-danger"></i>
+                </div>
+            </x-slot>
+        </x-adminlte-input>
+    </div>
+
+    <div class="col-md-6">
+        <x-adminlte-input name="password_confirmation" label="Confirmar Contraseña" 
+            type="password" placeholder="Confirmar Contraseña" enable-old-support>
+            <x-slot name="prependSlot">
+                <div class="input-group-text">
+                    <i class="fas fa-lock text-danger"></i>
+                </div>
+            </x-slot>
+        </x-adminlte-input>
+    </div>
+
+    <div class="col-12 mt-3">
+        <x-adminlte-button type="submit" label="Guardar" theme="primary" icon="fas fa-save"/>
+        <x-adminlte-button label="Cancelar" theme="secondary" icon="fas fa-times" 
+            onclick="window.history.back();"/>
     </div>
 </div>

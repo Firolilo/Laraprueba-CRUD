@@ -1,88 +1,99 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 
-@section('template_title')
-    {{ $administrador->user->name ?? __('Ver') . " Administrador" }}
-@endsection
+@section('subtitle', 'Ver Administrador')
+@section('content_header_title', 'Administradores')
+@section('content_header_subtitle', 'Detalle')
 
-@section('content')
-    <section class="content container-fluid">
+@section('content_body')
+    <div class="container-fluid">
         <div class="row">
             <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-                        <div class="float-left">
-                            <span class="card-title">{{ __('Ver') }} Administrador</span>
-                        </div>
-                        <div class="float-right">
-                            <a class="btn btn-primary btn-sm" href="{{ route('administradores.index') }}"> {{ __('Volver') }}</a>
-                        </div>
-                    </div>
+                <x-adminlte-card title="Información del Administrador: {{ $administrador->user->name }}" theme="info" icon="fas fa-user-shield">
+                    <x-slot name="toolsSlot">
+                        <x-adminlte-button label="Volver" icon="fas fa-arrow-left" 
+                            class="btn-sm" theme="secondary" href="{{ route('administradores.index') }}"/>
+                        <x-adminlte-button label="Editar" icon="fas fa-edit" 
+                            class="btn-sm" theme="warning" href="{{ route('administradores.edit', $administrador->id) }}"/>
+                    </x-slot>
 
-                    <div class="card-body bg-white">
-                        
-                        <div class="form-group mb-2 mb20">
-                            <strong>Nombre:</strong>
-                            {{ $administrador->user->name }}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <x-adminlte-callout theme="primary" title="Nombre">
+                                {{ $administrador->user->name }}
+                            </x-adminlte-callout>
                         </div>
-                        <div class="form-group mb-2 mb20">
-                            <strong>Email:</strong>
-                            {{ $administrador->user->email }}
+                        <div class="col-md-6">
+                            <x-adminlte-callout theme="info" title="Email">
+                                {{ $administrador->user->email }}
+                            </x-adminlte-callout>
                         </div>
-                        <div class="form-group mb-2 mb20">
-                            <strong>Departamento:</strong>
-                            {{ $administrador->departamento }}
+                        <div class="col-md-6">
+                            <x-adminlte-callout theme="success" title="Departamento">
+                                {{ $administrador->departamento }}
+                            </x-adminlte-callout>
                         </div>
-                        <div class="form-group mb-2 mb20">
-                            <strong>Nivel de Acceso:</strong>
-                            {{ $administrador->nivel_acceso }}
+                        <div class="col-md-6">
+                            <x-adminlte-callout theme="warning" title="Nivel de Acceso">
+                                <span class="badge badge-warning" style="font-size: 16px;">{{ $administrador->nivel_acceso }}</span>
+                                <br>
+                                <small class="text-muted">
+                                    @if($administrador->nivel_acceso == 5)
+                                        Nivel Máximo - Acceso Total
+                                    @elseif($administrador->nivel_acceso >= 3)
+                                        Nivel Alto - Acceso Avanzado
+                                    @else
+                                        Nivel Básico - Acceso Limitado
+                                    @endif
+                                </small>
+                            </x-adminlte-callout>
                         </div>
-                        <div class="form-group mb-2 mb20">
-                            <strong>Activo:</strong>
-                            @if($administrador->activo)
-                                <span class="badge badge-success">Sí</span>
-                            @else
-                                <span class="badge badge-secondary">No</span>
-                            @endif
+                        <div class="col-md-6">
+                            <x-adminlte-callout theme="{{ $administrador->activo ? 'success' : 'secondary' }}" title="Estado">
+                                @if($administrador->activo)
+                                    <span class="badge badge-success">Activo</span>
+                                @else
+                                    <span class="badge badge-secondary">Inactivo</span>
+                                @endif
+                            </x-adminlte-callout>
                         </div>
-                        <div class="form-group mb-2 mb20">
-                            <strong>Creado:</strong>
-                            {{ $administrador->created_at->format('d/m/Y H:i') }}
-                        </div>
-                        <div class="form-group mb-2 mb20">
-                            <strong>Actualizado:</strong>
-                            {{ $administrador->updated_at->format('d/m/Y H:i') }}
+                        <div class="col-md-6">
+                            <x-adminlte-callout theme="light" title="Fechas">
+                                <strong>Creado:</strong> {{ $administrador->created_at->format('d/m/Y H:i') }}<br>
+                                <strong>Actualizado:</strong> {{ $administrador->updated_at->format('d/m/Y H:i') }}
+                            </x-adminlte-callout>
                         </div>
 
                         @if($administrador->simulaciones->count() > 0)
-                        <hr>
-                        <h5>Simulaciones creadas ({{ $administrador->simulaciones->count() }})</h5>
-                        <div class="table-responsive">
-                            <table class="table table-sm table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Nombre</th>
-                                        <th>Fecha</th>
-                                        <th>Duración</th>
-                                        <th>Estado</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($administrador->simulaciones as $sim)
-                                    <tr>
-                                        <td>{{ $sim->nombre }}</td>
-                                        <td>{{ $sim->created_at->format('d/m/Y') }}</td>
-                                        <td>{{ $sim->duracion }}h</td>
-                                        <td>{{ $sim->estado }}</td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                        <div class="col-md-12">
+                            <hr>
+                            <h5>Simulaciones creadas ({{ $administrador->simulaciones->count() }})</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Nombre</th>
+                                            <th>Fecha</th>
+                                            <th>Duración</th>
+                                            <th>Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($administrador->simulaciones as $sim)
+                                        <tr>
+                                            <td>{{ $sim->nombre }}</td>
+                                            <td>{{ $sim->created_at->format('d/m/Y') }}</td>
+                                            <td>{{ $sim->duracion }}h</td>
+                                            <td>{{ $sim->estado }}</td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                         @endif
-
                     </div>
-                </div>
+                </x-adminlte-card>
             </div>
         </div>
-    </section>
+    </div>
 @endsection

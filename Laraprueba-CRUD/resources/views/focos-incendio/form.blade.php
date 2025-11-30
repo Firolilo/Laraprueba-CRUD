@@ -1,31 +1,53 @@
-<div class="row padding-1 p-1">
+<div class="row">
     <div class="col-md-6">
-        <div class="form-group mb-3">
-            <label for="fecha">Fecha</label>
-            <input type="datetime-local" name="fecha" id="fecha" class="form-control @error('fecha') is-invalid @enderror" value="{{ old('fecha', optional($focosIncendio->fecha)->format('Y-m-d\TH:i')) }}">
-            @error('fecha')<div class="invalid-feedback">{{ $message }}</div>@enderror
-        </div>
+        <x-adminlte-input name="fecha" label="Fecha" type="datetime-local"
+            value="{{ old('fecha', optional($focosIncendio->fecha)->format('Y-m-d\TH:i')) }}" enable-old-support>
+            <x-slot name="prependSlot">
+                <div class="input-group-text">
+                    <i class="fas fa-calendar text-danger"></i>
+                </div>
+            </x-slot>
+        </x-adminlte-input>
     </div>
     <div class="col-md-6">
-        <div class="form-group mb-3">
-            <label for="ubicacion">Ubicación</label>
-            <input type="text" name="ubicacion" id="ubicacion" class="form-control @error('ubicacion') is-invalid @enderror" value="{{ old('ubicacion', $focosIncendio->ubicacion) }}">
-            @error('ubicacion')<div class="invalid-feedback">{{ $message }}</div>@enderror
-        </div>
+        <x-adminlte-input name="ubicacion" label="Ubicación" 
+            placeholder="Nombre del lugar"
+            value="{{ old('ubicacion', $focosIncendio->ubicacion) }}" enable-old-support>
+            <x-slot name="prependSlot">
+                <div class="input-group-text">
+                    <i class="fas fa-map-marker-alt text-danger"></i>
+                </div>
+            </x-slot>
+        </x-adminlte-input>
     </div>
 
     <div class="col-md-6">
-        <div class="form-group mb-3">
-            <label for="intensidad">Intensidad</label>
-            <input type="number" step="0.01" name="intensidad" id="intensidad" class="form-control @error('intensidad') is-invalid @enderror" value="{{ old('intensidad', $focosIncendio->intensidad) }}">
-            @error('intensidad')<div class="invalid-feedback">{{ $message }}</div>@enderror
-        </div>
+        <x-adminlte-input name="intensidad" label="Intensidad" type="number" step="0.01"
+            value="{{ old('intensidad', $focosIncendio->intensidad) }}" enable-old-support>
+            <x-slot name="prependSlot">
+                <div class="input-group-text">
+                    <i class="fas fa-fire text-danger"></i>
+                </div>
+            </x-slot>
+        </x-adminlte-input>
     </div>
     <div class="col-md-6">
-        <div class="form-group mb-3">
+        <div class="form-group">
             <label for="coordenadas">Coordenadas [lat, lng]</label>
-            <input type="text" name="coordenadas" id="coordenadas" class="form-control @error('coordenadas') is-invalid @enderror" value="{{ old('coordenadas', $focosIncendio->coordenadas ? json_encode($focosIncendio->coordenadas) : '') }}" placeholder='[-17.8, -61.5]' readonly>
-            @error('coordenadas')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">
+                        <i class="fas fa-location-arrow text-danger"></i>
+                    </span>
+                </div>
+                <input type="text" name="coordenadas" id="coordenadas" 
+                    class="form-control @error('coordenadas') is-invalid @enderror" 
+                    value="{{ old('coordenadas', $focosIncendio->coordenadas ? json_encode($focosIncendio->coordenadas) : '') }}" 
+                    placeholder='[-17.8, -61.5]' readonly>
+                @error('coordenadas')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
             <small class="form-text text-muted">Haga clic en el mapa para seleccionar las coordenadas</small>
         </div>
     </div>
@@ -38,9 +60,10 @@
         </div>
     </div>
 
-    <div class="col-md-12 mt20 mt-2">
-        <button type="submit" class="btn btn-primary">{{ __('Guardar') }}</button>
-        <a href="{{ route('focos-incendios.index') }}" class="btn btn-secondary">{{ __('Cancelar') }}</a>
+    <div class="col-12 mt-3">
+        <x-adminlte-button type="submit" label="Guardar" theme="primary" icon="fas fa-save"/>
+        <x-adminlte-button label="Cancelar" theme="secondary" icon="fas fa-arrow-left" 
+            href="{{ route('focos-incendios.index') }}"/>
     </div>
 </div>
 

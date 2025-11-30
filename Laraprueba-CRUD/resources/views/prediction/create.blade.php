@@ -1,30 +1,28 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 
-@section('title', 'Generar Predicción')
+@section('subtitle', 'Generar Predicción')
+@section('content_header_title', 'Predicciones')
+@section('content_header_subtitle', 'Generar Nueva Predicción')
 
-@section('content_header')
-    <h1><i class="fas fa-chart-line text-primary"></i> Generar Predicción de Propagación</h1>
-@stop
-
-@section('content')
-    <section class="content container-fluid">
+@section('content_body')
+    <div class="container-fluid">
         <div class="row">
             <div class="col-md-12">
-                <div class="card card-primary">
-                    <div class="card-header">
-                        <h3 class="card-title">Nueva Predicción</h3>
-                    </div>
-                    <div class="card-body bg-white">
-                        <form method="POST" action="{{ route('predictions.store') }}" role="form" enctype="multipart/form-data">
-                            @csrf
-                            @include('prediction.form')
-                        </form>
-                    </div>
-                </div>
+                <x-adminlte-card title="Nueva Predicción de Propagación" theme="success" icon="fas fa-chart-line">
+                    <x-slot name="toolsSlot">
+                        <x-adminlte-button label="Volver" icon="fas fa-arrow-left" 
+                            class="btn-sm" theme="secondary" href="{{ route('predictions.index') }}"/>
+                    </x-slot>
+
+                    <form method="POST" action="{{ route('predictions.store') }}" role="form" enctype="multipart/form-data">
+                        @csrf
+                        @include('prediction.form')
+                    </form>
+                </x-adminlte-card>
             </div>
         </div>
-    </section>
-@stop
+    </div>
+@endsection
 
 @section('js')
     @stack('js')

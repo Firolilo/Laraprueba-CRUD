@@ -1,72 +1,72 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 
-@section('template_title')
-    Voluntarios
-@endsection
+@section('subtitle', 'Voluntarios')
+@section('content_header_title', 'Gestión de Voluntarios')
+@section('content_header_subtitle', 'Listado')
 
-@section('content')
+@section('content_body')
     <div class="container-fluid">
         <div class="row">
-            <div class="col-sm-12">
-                <div class="card">
-                    <div class="card-header">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span id="card_title">
-                                {{ __('Voluntarios') }}
-                            </span>
-                             <div class="float-right">
-                                <a href="{{ route('voluntarios.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
-                                  {{ __('Crear Nuevo') }}
-                                </a>
-                              </div>
-                        </div>
-                    </div>
-                    @if ($message = Session::get('success'))
-                        <div class="alert alert-success m-4">
-                            <p>{{ $message }}</p>
-                        </div>
-                    @endif
+            <div class="col-12">
+                @if ($message = Session::get('success'))
+                    <x-adminlte-alert theme="success" dismissable>
+                        {{ $message }}
+                    </x-adminlte-alert>
+                @endif
 
-                    <div class="card-body bg-white">
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead class="thead">
+                <x-adminlte-card title="Voluntarios" theme="teal" icon="fas fa-hands-helping">
+                    <x-slot name="toolsSlot">
+                        <x-adminlte-button label="Crear Nuevo" icon="fas fa-plus" 
+                            class="btn-sm" theme="success" href="{{ route('voluntarios.create') }}"/>
+                    </x-slot>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nombre</th>
+                                    <th>Email</th>
+                                    <th>Ciudad</th>
+                                    <th>Zona</th>
+                                    <th>Dirección</th>
+                                    <th style="width: 240px;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($voluntarios as $voluntario)
                                     <tr>
-                                        <th>No</th>
-                                        <th>Nombre</th>
-                                        <th>Email</th>
-                                        <th>Ciudad</th>
-                                        <th>Zona</th>
-                                        <th>Dirección</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($voluntarios as $voluntario)
-                                        <tr>
-                                            <td>{{ ++$i }}</td>
-                                            <td>{{ $voluntario->user->name }}</td>
-                                            <td>{{ $voluntario->user->email }}</td>
-                                            <td>{{ $voluntario->ciudad }}</td>
-                                            <td>{{ $voluntario->zona }}</td>
-                                            <td>{{ $voluntario->direccion }}</td>
-                                            <td>
-                                                <form action="{{ route('voluntarios.destroy', $voluntario->id) }}" method="POST">
-                                                    <a class="btn btn-sm btn-primary " href="{{ route('voluntarios.show', $voluntario->id) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Ver') }}</a>
-                                                    <a class="btn btn-sm btn-success" href="{{ route('voluntarios.edit', $voluntario->id) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Editar') }}</a>
+                                        <td>{{ ++$i }}</td>
+                                        <td>{{ $voluntario->user->name }}</td>
+                                        <td>{{ $voluntario->user->email }}</td>
+                                        <td>{{ $voluntario->ciudad }}</td>
+                                        <td>{{ $voluntario->zona }}</td>
+                                        <td>{{ $voluntario->direccion }}</td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <x-adminlte-button icon="fas fa-eye" theme="info" 
+                                                    href="{{ route('voluntarios.show', $voluntario->id) }}" size="sm" title="Ver"/>
+                                                <x-adminlte-button icon="fas fa-edit" theme="warning" 
+                                                    href="{{ route('voluntarios.edit', $voluntario->id) }}" size="sm" title="Editar"/>
+                                                <form action="{{ route('voluntarios.destroy', $voluntario->id) }}" method="POST" style="display: inline;" 
+                                                    onsubmit="return confirm('¿Está seguro de eliminar este voluntario?');">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="event.preventDefault(); confirm('¿Está seguro de eliminar este voluntario?') ? this.closest('form').submit() : false;"><i class="fa fa-fw fa-trash"></i> {{ __('Eliminar') }}</button>
+                                                    <x-adminlte-button type="submit" icon="fas fa-trash" 
+                                                        theme="danger" size="sm" title="Eliminar"/>
                                                 </form>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
-                </div>
-                {!! $voluntarios->withQueryString()->links() !!}
+
+                    <div class="mt-3">
+                        {!! $voluntarios->withQueryString()->links() !!}
+                    </div>
+                </x-adminlte-card>
             </div>
         </div>
     </div>

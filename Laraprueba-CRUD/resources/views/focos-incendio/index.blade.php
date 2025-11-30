@@ -1,85 +1,83 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 
-@section('template_title')
-    Focos de Incendios
-@endsection
+@section('subtitle', 'Focos de Incendio')
+@section('content_header_title', 'Gestión de Focos de Incendio')
+@section('content_header_subtitle', 'Listado')
 
-@section('content')
+@section('content_body')
     <div class="container-fluid">
         <div class="row">
-            <div class="col-sm-12">
-                <div class="card">
-                    <div class="card-header">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="col-12">
+                @if ($message = Session::get('success'))
+                    <x-adminlte-alert theme="success" dismissable>
+                        {{ $message }}
+                    </x-adminlte-alert>
+                @endif
 
-                            <span id="card_title">
-                                {{ __('Focos Incendios') }}
-                            </span>
+                <x-adminlte-card title="Focos de Incendios" theme="danger" icon="fas fa-fire">
+                    <x-slot name="toolsSlot">
+                        <x-adminlte-button label="Crear Nuevo" icon="fas fa-plus" 
+                            class="btn-sm" theme="success" href="{{ route('focos-incendios.create') }}"/>
+                    </x-slot>
 
-                             <div class="float-right">
-                                <a href="{{ route('focos-incendios.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
-                                  {{ __('Crear Nuevo') }}
-                                </a>
-                              </div>
-                        </div>
-                    </div>
-                    @if ($message = Session::get('success'))
-                        <div class="alert alert-success m-4">
-                            <p>{{ $message }}</p>
-                        </div>
-                    @endif
-
-                    <div class="card-body bg-white">
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead class="thead">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Fecha</th>
+                                    <th>Ubicación</th>
+                                    <th>Coordenadas</th>
+                                    <th>Intensidad</th>
+                                    <th style="width: 240px;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($focosIncendios as $focosIncendio)
                                     <tr>
-                                        <th>No</th>
-                                        <th>Fecha</th>
-                                        <th>Ubicación</th>
-                                        <th>Coordenadas</th>
-                                        <th>Intensidad</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($focosIncendios as $focosIncendio)
-                                        <tr>
-                                            <td>{{ ++$i }}</td>
-                                            <td>{{ optional($focosIncendio->fecha)->format('d/m/Y H:i') }}</td>
-                                            <td>{{ $focosIncendio->ubicacion }}</td>
-                                            <td>
-                                                @if($focosIncendio->coordenadas)
-                                                    <small class="text-muted">
-                                                        Lat: {{ $focosIncendio->coordenadas[0] }}<br>
-                                                        Lng: {{ $focosIncendio->coordenadas[1] }}
-                                                    </small>
-                                                @else
-                                                    <span class="text-muted">-</span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                <span class="badge badge-{{ $focosIncendio->intensidad > 7 ? 'danger' : ($focosIncendio->intensidad > 4 ? 'warning' : 'info') }}">
-                                                    {{ $focosIncendio->intensidad }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <form action="{{ route('focos-incendios.destroy', $focosIncendio->id) }}" method="POST">
-                                                    <a class="btn btn-sm btn-primary " href="{{ route('focos-incendios.show', $focosIncendio->id) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Ver') }}</a>
-                                                    <a class="btn btn-sm btn-success" href="{{ route('focos-incendios.edit', $focosIncendio->id) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Editar') }}</a>
+                                        <td>{{ ++$i }}</td>
+                                        <td>{{ optional($focosIncendio->fecha)->format('d/m/Y H:i') }}</td>
+                                        <td>{{ $focosIncendio->ubicacion }}</td>
+                                        <td>
+                                            @if($focosIncendio->coordenadas)
+                                                <small class="text-muted">
+                                                    Lat: {{ $focosIncendio->coordenadas[0] }}<br>
+                                                    Lng: {{ $focosIncendio->coordenadas[1] }}
+                                                </small>
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-{{ $focosIncendio->intensidad > 7 ? 'danger' : ($focosIncendio->intensidad > 4 ? 'warning' : 'info') }}">
+                                                {{ $focosIncendio->intensidad }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <x-adminlte-button icon="fas fa-eye" theme="info" 
+                                                    href="{{ route('focos-incendios.show', $focosIncendio->id) }}" size="sm" title="Ver"/>
+                                                <x-adminlte-button icon="fas fa-edit" theme="warning" 
+                                                    href="{{ route('focos-incendios.edit', $focosIncendio->id) }}" size="sm" title="Editar"/>
+                                                <form action="{{ route('focos-incendios.destroy', $focosIncendio->id) }}" method="POST" style="display: inline;" 
+                                                    onsubmit="return confirm('¿Está seguro de eliminar este foco?');">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="event.preventDefault(); confirm('¿Está seguro de eliminar este foco?') ? this.closest('form').submit() : false;"><i class="fa fa-fw fa-trash"></i> {{ __('Eliminar') }}</button>
+                                                    <x-adminlte-button type="submit" icon="fas fa-trash" 
+                                                        theme="danger" size="sm" title="Eliminar"/>
                                                 </form>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
-                </div>
-                {!! $focosIncendios->withQueryString()->links() !!}
+
+                    <div class="mt-3">
+                        {!! $focosIncendios->withQueryString()->links() !!}
+                    </div>
+                </x-adminlte-card>
             </div>
         </div>
     </div>

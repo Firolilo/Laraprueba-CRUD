@@ -1,30 +1,27 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 
-@section('template_title')
-    {{ __('Crear') }} Foco de Incendio
-@endsection
+@section('subtitle', 'Crear Foco de Incendio')
+@section('content_header_title', 'Focos de Incendio')
+@section('content_header_subtitle', 'Crear Nuevo')
 
-@section('content')
-    <section class="content container-fluid">
+@section('content_body')
+    <div class="container-fluid">
         <div class="row">
             <div class="col-md-12">
+                <x-adminlte-card title="Crear Foco de Incendio" theme="success" icon="fas fa-fire">
+                    <x-slot name="toolsSlot">
+                        <x-adminlte-button label="Volver" icon="fas fa-arrow-left" 
+                            class="btn-sm" theme="secondary" href="{{ route('focos-incendios.index') }}"/>
+                    </x-slot>
 
-                <div class="card card-default">
-                    <div class="card-header">
-                        <span class="card-title">{{ __('Crear') }} Foco de Incendio</span>
-                    </div>
-                    <div class="card-body bg-white">
-                        <form method="POST" action="{{ route('focos-incendios.store') }}"  role="form" enctype="multipart/form-data">
-                            @csrf
-
-                            @include('focos-incendio.form')
-
-                        </form>
-                    </div>
-                </div>
+                    <form method="POST" action="{{ route('focos-incendios.store') }}" role="form" enctype="multipart/form-data">
+                        @csrf
+                        @include('focos-incendio.form')
+                    </form>
+                </x-adminlte-card>
             </div>
         </div>
-    </section>
+    </div>
 @endsection
 
 @section('css')

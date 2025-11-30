@@ -1,35 +1,52 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 
-@section('title', 'Ver Tipo de Biomasa')
+@section('subtitle', 'Ver Tipo de Biomasa')
+@section('content_header_title', 'Tipos de Biomasa')
+@section('content_header_subtitle', 'Detalle')
 
-@section('content_header')
-    <h1>Ver Tipo de Biomasa</h1>
-@stop
-
-@section('content')
-    <section class="content container-fluid">
+@section('content_body')
+    <div class="container-fluid">
         <div class="row">
             <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-                        <div class="float-left">
-                            <span class="card-title">{{ __('Mostrar') }} Tipo de Biomasa</span>
+                <x-adminlte-card title="Información del Tipo de Biomasa: {{ $tipoBiomasa->tipo_biomasa }}" theme="info" icon="fas fa-leaf">
+                    <x-slot name="toolsSlot">
+                        <x-adminlte-button label="Volver" icon="fas fa-arrow-left" 
+                            class="btn-sm" theme="secondary" href="{{ route('tipo-biomasas.index') }}"/>
+                        <x-adminlte-button label="Editar" icon="fas fa-edit" 
+                            class="btn-sm" theme="warning" href="{{ route('tipo-biomasas.edit', $tipoBiomasa->id) }}"/>
+                    </x-slot>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <x-adminlte-callout theme="success" title="Tipo de Biomasa">
+                                {{ $tipoBiomasa->tipo_biomasa }}
+                            </x-adminlte-callout>
                         </div>
-                        <div class="float-right">
-                            <a class="btn btn-primary btn-sm" href="{{ route('tipo-biomasas.index') }}"> {{ __('Regresar') }}</a>
+                        <div class="col-md-6">
+                            <x-adminlte-callout theme="info" title="Color Representativo">
+                                <span class="badge badge-lg" style="background-color: {{ $tipoBiomasa->color ?? '#4CAF50' }}; color: white; font-size: 14px; padding: 8px 16px;">
+                                    {{ $tipoBiomasa->color ?? '#4CAF50' }}
+                                </span>
+                            </x-adminlte-callout>
+                        </div>
+                        <div class="col-md-12">
+                            <x-adminlte-callout theme="warning" title="Factor de Propagación del Fuego">
+                                <span class="badge badge-warning" style="font-size: 16px;">{{ $tipoBiomasa->modificador_intensidad ?? 1.0 }}x</span>
+                                <br>
+                                <small class="text-muted">
+                                    @if(($tipoBiomasa->modificador_intensidad ?? 1.0) < 0.8)
+                                        Propagación lenta - Áreas rocosas o con poca vegetación
+                                    @elseif(($tipoBiomasa->modificador_intensidad ?? 1.0) < 1.2)
+                                        Propagación estándar - Vegetación típica
+                                    @else
+                                        Propagación rápida - Bosque seco o vegetación densa
+                                    @endif
+                                </small>
+                            </x-adminlte-callout>
                         </div>
                     </div>
-
-                    <div class="card-body bg-white">
-                        
-                        <div class="form-group mb-2 mb20">
-                            <strong>Tipo de Biomasa:</strong>
-                            {{ $tipoBiomasa->tipo_biomasa }}
-                        </div>
-
-                    </div>
-                </div>
+                </x-adminlte-card>
             </div>
         </div>
-    </section>
-@stop
+    </div>
+@endsection

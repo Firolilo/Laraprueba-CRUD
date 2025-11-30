@@ -6,11 +6,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
@@ -21,6 +22,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'telefono',
+        'cedula_identidad',
     ];
 
     /**
@@ -44,5 +47,59 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    // ============================================
+    // RELACIONES
+    // ============================================
+
+    /**
+     * Relación con Voluntario
+     */
+    public function voluntario()
+    {
+        return $this->hasOne(Voluntario::class);
+    }
+
+    /**
+     * Relación con Administrador
+     */
+    public function administrador()
+    {
+        return $this->hasOne(Administrador::class);
+    }
+
+    // ============================================
+    // MÉTODOS DE VERIFICACIÓN DE ROLES
+    // ============================================
+
+    /**
+     * Check if user is a voluntario
+     */
+    public function isVoluntario()
+    {
+        return $this->voluntario()->exists();
+    }
+
+    /**
+     * Check if user is an administrador
+     */
+    public function isAdministrador()
+    {
+        return $this->administrador()->exists();
+    }
+
+    /**
+     * Get user role type
+     */
+    public function getRoleType()
+    {
+        if ($this->isAdministrador()) {
+            return 'administrador';
+        }
+        if ($this->isVoluntario()) {
+            return 'voluntario';
+        }
+        return 'user';
     }
 }

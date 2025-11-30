@@ -180,7 +180,8 @@
         </div>
     </div>
 
-    <!-- Modal de guardar -->
+    <!-- Modal de guardar - Solo para administradores -->
+    @if(auth()->user()->isAdministrador())
     <div class="modal" :class="{'show d-block': showSaveModal}" tabindex="-1" x-show="showSaveModal" 
          style="background: rgba(0,0,0,0.5);">
         <div class="modal-dialog">
@@ -220,6 +221,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     <!-- Modal de historial -->
     <div class="modal" :class="{'show d-block': showHistory}" tabindex="-1" x-show="showHistory" 
@@ -478,9 +480,12 @@ function fireSimulator() {
                 this.startSimulation();
             } else {
                 this.stopSimulation();
+                // Solo mostrar modal de guardar a administradores
+                @if(auth()->user()->isAdministrador())
                 if (this.timeElapsed > 0) {
                     this.showSaveModal = true;
                 }
+                @endif
             }
         },
         
