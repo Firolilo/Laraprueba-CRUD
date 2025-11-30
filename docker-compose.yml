@@ -1,0 +1,151 @@
+services:
+  # Base de datos PostgreSQL
+  postgres:
+    image: postgres:16-alpine
+    container_name: sipii-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: cruds
+      POSTGRES_USER: laravel
+      POSTGRES_PASSWORD: laravel
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sipii-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U laravel -d cruds"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Aplicación Web Laravel (CRUDs)
+  app:
+    build:
+      context: ./Laraprueba-CRUD
+      dockerfile: Dockerfile
+    container_name: sipii-app
+    restart: unless-stopped
+    environment:
+      APP_NAME: "SIPII Web"
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: http://localhost:8000
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: cruds
+      DB_USERNAME: laravel
+      DB_PASSWORD: laravel
+      SESSION_DRIVER: database
+      CACHE_STORE: database
+      QUEUE_CONNECTION: database
+      RUN_SEEDERS: "false"
+    ports:
+      - "8000:80"
+    volumes:
+      # Montar solo archivos específicos (sin vendor ni node_modules)
+      - ./Laraprueba-CRUD/.env:/var/www/html/.env
+      - ./Laraprueba-CRUD/app:/var/www/html/app:delegated
+      - ./Laraprueba-CRUD/config:/var/www/html/config:delegated
+      - ./Laraprueba-CRUD/database:/var/www/html/database:delegated
+      - ./Laraprueba-CRUD/public:/var/www/html/public:delegated
+      - ./Laraprueba-CRUD/resources:/var/www/html/resources:delegated
+      - ./Laraprueba-CRUD/routes:/var/www/html/routes:delegated
+      # Volúmenes nombrados para directorios que cambian frecuentemente
+      - app_vendor:/var/www/html/vendor
+      - app_node_modules:/var/www/html/node_modules
+      - app_storage:/var/www/html/storage
+      - app_bootstrap_cache:/var/www/html/bootstrap/cache
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - sipii-network
+
+  # API Laravel
+  api:
+    build:
+      context: ./sipii-api
+      dockerfile: Dockerfile
+    container_name: sipii-api
+    restart: unless-stopped
+    environment:
+      APP_NAME: "SIPII API"
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: http://localhost:8001
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: cruds
+      DB_USERNAME: laravel
+      DB_PASSWORD: laravel
+      SESSION_DRIVER: database
+      CACHE_STORE: database
+      QUEUE_CONNECTION: database
+      RUN_SEEDERS: "false"
+    ports:
+      - "8001:80"
+    volumes:
+      # Montar solo archivos específicos (sin vendor)
+      - ./sipii-api/.env:/var/www/html/.env
+      - ./sipii-api/app:/var/www/html/app:delegated
+      - ./sipii-api/config:/var/www/html/config:delegated
+      - ./sipii-api/database:/var/www/html/database:delegated
+      - ./sipii-api/public:/var/www/html/public:delegated
+      - ./sipii-api/resources:/var/www/html/resources:delegated
+      - ./sipii-api/routes:/var/www/html/routes:delegated
+      # Volúmenes nombrados para directorios que cambian frecuentemente
+      - api_vendor:/var/www/html/vendor
+      - api_storage:/var/www/html/storage
+      - api_bootstrap_cache:/var/www/html/bootstrap/cache
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - sipii-network
+
+  # pgAdmin (Opcional - herramienta de gestión de PostgreSQL)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: sipii-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@sipii.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_LISTEN_PORT: 80
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - sipii-network
+
+networks:
+  sipii-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  app_vendor:
+    driver: local
+  app_node_modules:
+    driver: local
+  app_storage:
+    driver: local
+  app_bootstrap_cache:
+    driver: local
+  api_vendor:
+    driver: local
+  api_storage:
+    driver: local
+  api_bootstrap_cache:
+    driver: local
+  pgadmin_data:
+    driver: local
