@@ -2,7 +2,7 @@
 
 @section('subtitle', 'Tipos de Biomasa')
 @section('content_header_title', 'Catálogo de Tipos de Biomasa')
-@section('content_header_subtitle', 'Listado')
+@section('content_header_subtitle', '- Listado')
 
 @section('content_body')
     <div class="container-fluid">
