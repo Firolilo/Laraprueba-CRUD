@@ -2,7 +2,7 @@
 
 @section('subtitle', 'Predicciones')
 @section('content_header_title', 'Predicciones de Propagación')
-@section('content_header_subtitle', 'Listado')
+@section('content_header_subtitle', '- Listado')
 
 @section('content_body')
     <div class="container-fluid">
