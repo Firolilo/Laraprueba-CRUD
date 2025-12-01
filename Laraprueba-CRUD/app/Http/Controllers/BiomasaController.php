@@ -14,22 +14,31 @@ class BiomasaController extends Controller
 {
     /**
      * Display a listing of the resource.
+     * - Voluntarios: solo ven sus propias biomasas
+     * - Administradores: ven todas las biomasas pendientes de moderación
      */
     public function index(Request $request): View
     {
-        // Load all biomasas with tipo and coordinates for map display
-        $biomasas = Biomasa::with('tipoBiomasa')
-            ->whereNotNull('coordenadas')
-            ->get()
-            ->map(function ($biomasa) {
-                // Ensure coordenadas is parsed as array for JSON serialization
-                if (is_string($biomasa->coordenadas)) {
-                    $biomasa->coordenadas = json_decode($biomasa->coordenadas, true);
-                }
-                return $biomasa;
-            });
-
-        return view('biomasa.index', compact('biomasas'));
+        $user = auth()->user();
+        
+        if ($user->isAdministrador()) {
+            // Administradores ven todas las biomasas para moderar
+            $biomasas = Biomasa::with(['tipoBiomasa', 'user'])
+                ->latest()
+                ->paginate(15);
+                
+            return view('biomasa.admin-index', compact('biomasas'))
+                ->with('i', ($request->input('page', 1) - 1) * 15);
+        } else {
+            // Voluntarios solo ven sus propias biomasas
+            $biomasas = Biomasa::with('tipoBiomasa')
+                ->where('user_id', $user->id)
+                ->latest()
+                ->paginate(10);
+                
+            return view('biomasa.index', compact('biomasas'))
+                ->with('i', ($request->input('page', 1) - 1) * 10);
+        }
     }
 
     /**
@@ -45,13 +54,73 @@ class BiomasaController extends Controller
 
     /**
      * Store a newly created resource in storage.
+     * - Voluntarios: biomasas en estado 'pendiente' (requieren aprobación)
+     * - Administradores: biomasas aprobadas automáticamente
      */
     public function store(BiomasaRequest $request): RedirectResponse
     {
-        Biomasa::create($request->validated());
+        \Log::info('INICIO store() - Request recibido', [
+            'user_id' => auth()->id(),
+            'all_data' => $request->all(),
+            'method' => $request->method()
+        ]);
+        
+        try {
+            $data = $request->validated();
+            $data['user_id'] = auth()->id();
+            
+            // Convertir coordenadas si es string JSON
+            if (isset($data['coordenadas']) && is_string($data['coordenadas'])) {
+                $data['coordenadas'] = json_decode($data['coordenadas'], true);
+            }
+            
+            // Valores por defecto
+            if (!isset($data['densidad']) || empty($data['densidad'])) {
+                $data['densidad'] = 'media';
+            }
+            
+            if (!isset($data['area_m2']) || empty($data['area_m2'])) {
+                $data['area_m2'] = 0;
+            }
+            
+            if (!isset($data['fecha_reporte']) || empty($data['fecha_reporte'])) {
+                $data['fecha_reporte'] = now()->toDateString();
+            }
+            
+            // Si el usuario es administrador, aprobar automáticamente
+            if (auth()->user()->isAdministrador()) {
+                $data['estado'] = 'aprobada';
+                $data['aprobada_por'] = auth()->id();
+                $data['fecha_revision'] = now();
+                $successMessage = 'Biomasa creada y aprobada exitosamente.';
+            } else {
+                // Voluntarios: biomasa pendiente de revisión
+                $data['estado'] = 'pendiente';
+                $successMessage = 'Biomasa enviada para revisión. Un administrador la revisará pronto.';
+            }
+            
+            $biomasa = Biomasa::create($data);
+            
+            \Log::info('Biomasa creada exitosamente', [
+                'id' => $biomasa->id,
+                'user_id' => auth()->id(),
+                'estado' => $data['estado']
+            ]);
 
-        return Redirect::route('biomasas.index')
-            ->with('success', 'Biomasa created successfully.');
+            return Redirect::route('biomasas.index')
+                ->with('success', $successMessage);
+                
+        } catch (\Exception $e) {
+            \Log::error('Error al crear biomasa: ' . $e->getMessage(), [
+                'user_id' => auth()->id(),
+                'data' => $request->all(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return Redirect::back()
+                ->withInput()
+                ->with('error', 'Error al crear la biomasa: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -92,5 +161,43 @@ class BiomasaController extends Controller
 
         return Redirect::route('biomasas.index')
             ->with('success', 'Biomasa deleted successfully');
+    }
+    
+    /**
+     * Aprobar una biomasa (solo administradores)
+     */
+    public function aprobar($id): RedirectResponse
+    {
+        $biomasa = Biomasa::findOrFail($id);
+        
+        $biomasa->update([
+            'estado' => 'aprobada',
+            'aprobada_por' => auth()->id(),
+            'fecha_revision' => now(),
+            'motivo_rechazo' => null,
+        ]);
+        
+        return back()->with('success', 'Biomasa aprobada exitosamente. Ahora aparecerá en el mapa.');
+    }
+    
+    /**
+     * Rechazar una biomasa (solo administradores)
+     */
+    public function rechazar(Request $request, $id): RedirectResponse
+    {
+        $request->validate([
+            'motivo_rechazo' => 'required|string|max:500',
+        ]);
+        
+        $biomasa = Biomasa::findOrFail($id);
+        
+        $biomasa->update([
+            'estado' => 'rechazada',
+            'aprobada_por' => auth()->id(),
+            'fecha_revision' => now(),
+            'motivo_rechazo' => $request->motivo_rechazo,
+        ]);
+        
+        return back()->with('success', 'Biomasa rechazada.');
     }
 }

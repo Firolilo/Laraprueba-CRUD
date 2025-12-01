@@ -62,8 +62,7 @@
 
     <div class="col-12 mt-3">
         <x-adminlte-button type="submit" label="Guardar" theme="primary" icon="fas fa-save"/>
-        <x-adminlte-button label="Cancelar" theme="secondary" icon="fas fa-arrow-left" 
-            href="{{ route('focos-incendios.index') }}"/>
+        <a href="{{ route('focos-incendios.index') }}" class="btn btn-secondary "><i class="fas fa-arrow-left"></i> Cancelar</a>
     </div>
 </div>
 

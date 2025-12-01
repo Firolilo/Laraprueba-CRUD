@@ -10,10 +10,8 @@
             <div class="col-md-12">
                 <x-adminlte-card title="Información del Tipo de Biomasa: {{ $tipoBiomasa->tipo_biomasa }}" theme="info" icon="fas fa-leaf">
                     <x-slot name="toolsSlot">
-                        <x-adminlte-button label="Volver" icon="fas fa-arrow-left" 
-                            class="btn-sm" theme="secondary" href="{{ route('tipo-biomasas.index') }}"/>
-                        <x-adminlte-button label="Editar" icon="fas fa-edit" 
-                            class="btn-sm" theme="warning" href="{{ route('tipo-biomasas.edit', $tipoBiomasa->id) }}"/>
+                        <a href="{{ route('tipo-biomasas.index') }}" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Volver</a>
+                        <a href="{{ route('tipo-biomasas.edit', $3) }}" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> Editar</a>
                     </x-slot>
 
                     <div class="row">

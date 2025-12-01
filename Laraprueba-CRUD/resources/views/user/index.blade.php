@@ -16,8 +16,9 @@
 
                 <x-adminlte-card title="Usuarios" theme="primary" icon="fas fa-users">
                     <x-slot name="toolsSlot">
-                        <x-adminlte-button label="Crear Nuevo" icon="fas fa-plus" 
-                            class="btn-sm" theme="success" href="{{ route('users.create') }}"/>
+                        <a href="{{ route('users.create') }}" class="btn btn-success btn-sm">
+                            <i class="fas fa-plus"></i> Crear Nuevo
+                        </a>
                     </x-slot>
 
                     <div class="table-responsive">
@@ -42,16 +43,19 @@
                                         <td>{{ $user->cedula_identidad }}</td>
                                         <td>
                                             <div class="btn-group btn-group-sm" role="group">
-                                                <x-adminlte-button icon="fas fa-eye" theme="info" 
-                                                    href="{{ route('users.show', $user->id) }}" size="sm" title="Ver"/>
-                                                <x-adminlte-button icon="fas fa-edit" theme="success" 
-                                                    href="{{ route('users.edit', $user->id) }}" size="sm" title="Editar"/>
+                                                <a href="{{ route('users.show', $user->id) }}" class="btn btn-info btn-sm" title="Ver">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{{ route('users.edit', $user->id) }}" class="btn btn-success btn-sm" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
                                                 <form action="{{ route('users.destroy', $user->id) }}" method="POST" style="display: inline;" 
                                                     onsubmit="return confirm('¿Está seguro de eliminar este usuario?');">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <x-adminlte-button type="submit" icon="fas fa-trash" 
-                                                        theme="danger" size="sm" title="Eliminar"/>
+                                                    <button type="submit" class="btn btn-danger btn-sm" title="Eliminar">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
                                                 </form>
                                             </div>
                                         </td>

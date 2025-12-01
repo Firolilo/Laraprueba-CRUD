@@ -10,10 +10,8 @@
             <div class="col-md-12">
                 <x-adminlte-card title="Información del Administrador: {{ $administrador->user->name }}" theme="info" icon="fas fa-user-shield">
                     <x-slot name="toolsSlot">
-                        <x-adminlte-button label="Volver" icon="fas fa-arrow-left" 
-                            class="btn-sm" theme="secondary" href="{{ route('administradores.index') }}"/>
-                        <x-adminlte-button label="Editar" icon="fas fa-edit" 
-                            class="btn-sm" theme="warning" href="{{ route('administradores.edit', $administrador->id) }}"/>
+                        <a href="{{ route('administradores.index') }}" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Volver</a>
+                        <a href="{{ route('administradores.edit', $3) }}" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> Editar</a>
                     </x-slot>
 
                     <div class="row">

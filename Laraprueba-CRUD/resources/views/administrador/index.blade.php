@@ -14,10 +14,11 @@
                     </x-adminlte-alert>
                 @endif
 
-                <x-adminlte-card title="Administradores" theme="primary" icon="fas fa-user-shield">
+                <x-adminlte-card title="Administradores" theme="warning" icon="fas fa-user-shield">
                     <x-slot name="toolsSlot">
-                        <x-adminlte-button label="Crear Nuevo" icon="fas fa-plus" 
-                            class="btn-sm" theme="success" href="{{ route('administradores.create') }}"/>
+                        <a href="{{ route('administradores.create') }}" class="btn btn-success btn-sm">
+                            <i class="fas fa-plus"></i> Crear Nuevo
+                        </a>
                     </x-slot>
 
                     <div class="table-responsive">
@@ -50,16 +51,19 @@
                                         </td>
                                         <td>
                                             <div class="btn-group btn-group-sm" role="group">
-                                                <x-adminlte-button icon="fas fa-eye" theme="info" 
-                                                    href="{{ route('administradores.show', $administrador->id) }}" size="sm" title="Ver"/>
-                                                <x-adminlte-button icon="fas fa-edit" theme="warning" 
-                                                    href="{{ route('administradores.edit', $administrador->id) }}" size="sm" title="Editar"/>
+                                                <a href="{{ route('administradores.show', $administrador->id) }}" class="btn btn-info btn-sm" title="Ver">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{{ route('administradores.edit', $administrador->id) }}" class="btn btn-warning btn-sm" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
                                                 <form action="{{ route('administradores.destroy', $administrador->id) }}" method="POST" style="display: inline;" 
                                                     onsubmit="return confirm('¿Está seguro de eliminar este administrador?');">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <x-adminlte-button type="submit" icon="fas fa-trash" 
-                                                        theme="danger" size="sm" title="Eliminar"/>
+                                                    <button type="submit" class="btn btn-danger btn-sm" title="Eliminar">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
                                                 </form>
                                             </div>
                                         </td>

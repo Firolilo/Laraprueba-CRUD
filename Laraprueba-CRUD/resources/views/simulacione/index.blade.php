@@ -16,10 +16,12 @@
 
                 <x-adminlte-card title="Simulaciones" theme="orange" icon="fas fa-play-circle">
                     <x-slot name="toolsSlot">
-                        <x-adminlte-button label="Simulador Avanzado" icon="fas fa-fire" 
-                            class="btn-sm" theme="warning" href="{{ route('simulaciones.simulator') }}"/>
-                        <x-adminlte-button label="Crear Nueva" icon="fas fa-plus" 
-                            class="btn-sm" theme="success" href="{{ route('simulaciones.create') }}"/>
+                        <a href="{{ route('simulaciones.simulator') }}" class="btn btn-warning btn-sm">
+                            <i class="fas fa-fire"></i> Simulador Avanzado
+                        </a>
+                        <a href="{{ route('simulaciones.create') }}" class="btn btn-success btn-sm">
+                            <i class="fas fa-plus"></i> Crear Nueva
+                        </a>
                     </x-slot>
 
                     <div class="table-responsive">
@@ -50,16 +52,19 @@
                                         </td>
                                         <td>
                                             <div class="btn-group btn-group-sm" role="group">
-                                                <x-adminlte-button icon="fas fa-eye" theme="info" 
-                                                    href="{{ route('simulaciones.show', $simulacione->id) }}" size="sm" title="Ver"/>
-                                                <x-adminlte-button icon="fas fa-edit" theme="success" 
-                                                    href="{{ route('simulaciones.edit', $simulacione->id) }}" size="sm" title="Editar"/>
+                                                <a href="{{ route('simulaciones.show', $simulacione->id) }}" class="btn btn-info btn-sm" title="Ver">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{{ route('simulaciones.edit', $simulacione->id) }}" class="btn btn-success btn-sm" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
                                                 <form action="{{ route('simulaciones.destroy', $simulacione->id) }}" method="POST" style="display: inline;" 
                                                     onsubmit="return confirm('¿Está seguro de eliminar esta simulación?');">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <x-adminlte-button type="submit" icon="fas fa-trash" 
-                                                        theme="danger" size="sm" title="Eliminar"/>
+                                                    <button type="submit" class="btn btn-danger btn-sm" title="Eliminar">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
                                                 </form>
                                             </div>
                                         </td>

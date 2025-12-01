@@ -15,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
         ]);
+        
+        // Agregar middleware global para loggear todos los requests
+        $middleware->append(\App\Http\Middleware\LogAllRequests::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

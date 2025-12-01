@@ -10,8 +10,7 @@
             <div class="col-md-12">
                 <x-adminlte-card title="Crear Administrador" theme="success" icon="fas fa-user-shield">
                     <x-slot name="toolsSlot">
-                        <x-adminlte-button label="Volver" icon="fas fa-arrow-left" 
-                            class="btn-sm" theme="secondary" href="{{ route('administradores.index') }}"/>
+                        <a href="{{ route('administradores.index') }}" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Volver</a>
                     </x-slot>
 
                     <form method="POST" action="{{ route('administradores.store') }}" role="form" enctype="multipart/form-data">

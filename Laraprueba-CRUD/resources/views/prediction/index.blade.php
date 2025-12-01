@@ -16,8 +16,9 @@
 
                 <x-adminlte-card title="Predicciones" theme="purple" icon="fas fa-chart-line">
                     <x-slot name="toolsSlot">
-                        <x-adminlte-button label="Generar Predicción" icon="fas fa-plus" 
-                            class="btn-sm" theme="success" href="{{ route('predictions.create') }}"/>
+                        <a href="{{ route('predictions.create') }}" class="btn btn-success btn-sm">
+                            <i class="fas fa-plus"></i> Generar Predicción
+                        </a>
                     </x-slot>
 
                     <div class="table-responsive">
@@ -59,14 +60,16 @@
                                         <td>{{ is_array($prediction->path) ? count($prediction->path) : 0 }}</td>
                                         <td>
                                             <div class="btn-group btn-group-sm" role="group">
-                                                <x-adminlte-button icon="fas fa-eye" theme="info" 
-                                                    href="{{ route('predictions.show', $prediction->id) }}" size="sm" title="Ver"/>
+                                                <a href="{{ route('predictions.show', $prediction->id) }}" class="btn btn-info btn-sm" title="Ver">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
                                                 <form action="{{ route('predictions.destroy', $prediction->id) }}" method="POST" style="display: inline;" 
                                                     onsubmit="return confirm('¿Estás seguro de eliminar?');">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <x-adminlte-button type="submit" icon="fas fa-trash" 
-                                                        theme="danger" size="sm" title="Eliminar"/>
+                                                    <button type="submit" class="btn btn-danger btn-sm" title="Eliminar">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
                                                 </form>
                                             </div>
                                         </td>

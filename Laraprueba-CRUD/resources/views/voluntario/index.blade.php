@@ -14,10 +14,11 @@
                     </x-adminlte-alert>
                 @endif
 
-                <x-adminlte-card title="Voluntarios" theme="teal" icon="fas fa-hands-helping">
+                <x-adminlte-card title="Voluntarios" theme="info" icon="fas fa-hands-helping">
                     <x-slot name="toolsSlot">
-                        <x-adminlte-button label="Crear Nuevo" icon="fas fa-plus" 
-                            class="btn-sm" theme="success" href="{{ route('voluntarios.create') }}"/>
+                        <a href="{{ route('voluntarios.create') }}" class="btn btn-success btn-sm">
+                            <i class="fas fa-plus"></i> Crear Nuevo
+                        </a>
                     </x-slot>
 
                     <div class="table-responsive">
@@ -44,16 +45,19 @@
                                         <td>{{ $voluntario->direccion }}</td>
                                         <td>
                                             <div class="btn-group btn-group-sm" role="group">
-                                                <x-adminlte-button icon="fas fa-eye" theme="info" 
-                                                    href="{{ route('voluntarios.show', $voluntario->id) }}" size="sm" title="Ver"/>
-                                                <x-adminlte-button icon="fas fa-edit" theme="warning" 
-                                                    href="{{ route('voluntarios.edit', $voluntario->id) }}" size="sm" title="Editar"/>
+                                                <a href="{{ route('voluntarios.show', $voluntario->id) }}" class="btn btn-info btn-sm" title="Ver">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{{ route('voluntarios.edit', $voluntario->id) }}" class="btn btn-warning btn-sm" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
                                                 <form action="{{ route('voluntarios.destroy', $voluntario->id) }}" method="POST" style="display: inline;" 
                                                     onsubmit="return confirm('¿Está seguro de eliminar este voluntario?');">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <x-adminlte-button type="submit" icon="fas fa-trash" 
-                                                        theme="danger" size="sm" title="Eliminar"/>
+                                                    <button type="submit" class="btn btn-danger btn-sm" title="Eliminar">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
                                                 </form>
                                             </div>
                                         </td>

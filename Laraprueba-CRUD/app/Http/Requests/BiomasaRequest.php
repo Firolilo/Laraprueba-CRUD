@@ -11,6 +11,12 @@ class BiomasaRequest extends FormRequest
      */
     public function authorize(): bool
     {
+        \Log::info('BiomasaRequest authorize() ejecutándose', [
+            'user_id' => auth()->id(),
+            'method' => $this->method(),
+            'url' => $this->url()
+        ]);
+        
         return true;
     }
 
@@ -21,15 +27,19 @@ class BiomasaRequest extends FormRequest
      */
     public function rules(): array
     {
+        \Log::info('BiomasaRequest rules() ejecutándose', [
+            'all_data' => $this->all()
+        ]);
+        
         return [
-            'fecha_reporte' => ['required','date'],
-            'tipo_biomasa_id' => ['required','exists:tipo_biomasas,id'],
-            'area_m2' => ['nullable','integer','min:0'],
+            'fecha_reporte' => ['nullable','date'],
+            'tipo_biomasa_id' => ['required','exists:tipo_biomasa,id'],
+            'area_m2' => ['nullable','numeric','min:0'],
             'perimetro_m' => ['nullable','numeric','min:0'],
-            'densidad' => ['required','string','in:Baja,Media,Alta'],
-            'coordenadas' => ['required','array'],
-            'coordenadas.*' => ['required','numeric'],
-            'descripcion' => ['nullable','string'],
+            'densidad' => ['nullable','string'],
+            'coordenadas' => ['nullable'],
+            'ubicacion' => ['nullable','string'],
+            'descripcion' => ['nullable','string','max:1000'],
         ];
     }
     
@@ -38,7 +48,15 @@ class BiomasaRequest extends FormRequest
      */
     public function withValidator($validator)
     {
-        // Ya no necesitamos validación extra porque ahora validamos directamente el array
+        $validator->after(function ($validator) {
+            // Validar que coordenadas sea un JSON válido si está presente
+            if ($this->has('coordenadas') && !empty($this->coordenadas)) {
+                $coords = is_string($this->coordenadas) ? json_decode($this->coordenadas, true) : $this->coordenadas;
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    $validator->errors()->add('coordenadas', 'Las coordenadas deben ser un JSON válido');
+                }
+            }
+        });
     }
 
     /**
@@ -46,14 +64,6 @@ class BiomasaRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        // Convertir coordenadas de string JSON a array antes de validar
-        if ($this->has('coordenadas') && is_string($this->coordenadas)) {
-            $decoded = json_decode($this->coordenadas, true);
-            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                $this->merge([
-                    'coordenadas' => $decoded
-                ]);
-            }
-        }
+        // No hacemos nada aquí, dejamos que la validación maneje el JSON como string
     }
 }

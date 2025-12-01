@@ -10,8 +10,7 @@
             <div class="col-md-12">
                 <x-adminlte-card title="Editar Voluntario: {{ $voluntario->user->name }}" theme="warning" icon="fas fa-edit">
                     <x-slot name="toolsSlot">
-                        <x-adminlte-button label="Volver" icon="fas fa-arrow-left" 
-                            class="btn-sm" theme="secondary" href="{{ route('voluntarios.index') }}"/>
+                        <a href="{{ route('voluntarios.index') }}" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Volver</a>
                     </x-slot>
 
                     <form method="POST" action="{{ route('voluntarios.update', $voluntario->id) }}" role="form" enctype="multipart/form-data">

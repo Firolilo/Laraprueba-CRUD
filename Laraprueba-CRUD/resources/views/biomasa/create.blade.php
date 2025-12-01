@@ -8,6 +8,13 @@
     <section class="content container-fluid">
         <div class="row">
             <div class="col-md-12">
+                
+                @if ($message = Session::get('error'))
+                    <div class="alert alert-danger alert-dismissible fade show">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        <i class="fas fa-exclamation-triangle"></i> {{ $message }}
+                    </div>
+                @endif
 
                 <div class="card card-default">
                     <div class="card-header">

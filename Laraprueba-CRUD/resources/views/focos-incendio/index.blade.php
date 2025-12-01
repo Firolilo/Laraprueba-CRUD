@@ -14,10 +14,11 @@
                     </x-adminlte-alert>
                 @endif
 
-                <x-adminlte-card title="Focos de Incendios" theme="danger" icon="fas fa-fire">
+                <x-adminlte-card title="Focos de Incendio" theme="danger" icon="fas fa-fire">
                     <x-slot name="toolsSlot">
-                        <x-adminlte-button label="Crear Nuevo" icon="fas fa-plus" 
-                            class="btn-sm" theme="success" href="{{ route('focos-incendios.create') }}"/>
+                        <a href="{{ route('focos-incendios.create') }}" class="btn btn-success btn-sm">
+                            <i class="fas fa-plus"></i> Crear Nuevo
+                        </a>
                     </x-slot>
 
                     <div class="table-responsive">
@@ -55,16 +56,19 @@
                                         </td>
                                         <td>
                                             <div class="btn-group btn-group-sm" role="group">
-                                                <x-adminlte-button icon="fas fa-eye" theme="info" 
-                                                    href="{{ route('focos-incendios.show', $focosIncendio->id) }}" size="sm" title="Ver"/>
-                                                <x-adminlte-button icon="fas fa-edit" theme="warning" 
-                                                    href="{{ route('focos-incendios.edit', $focosIncendio->id) }}" size="sm" title="Editar"/>
+                                                <a href="{{ route('focos-incendios.show', $focosIncendio->id) }}" class="btn btn-info btn-sm" title="Ver">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{{ route('focos-incendios.edit', $focosIncendio->id) }}" class="btn btn-warning btn-sm" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
                                                 <form action="{{ route('focos-incendios.destroy', $focosIncendio->id) }}" method="POST" style="display: inline;" 
                                                     onsubmit="return confirm('¿Está seguro de eliminar este foco?');">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <x-adminlte-button type="submit" icon="fas fa-trash" 
-                                                        theme="danger" size="sm" title="Eliminar"/>
+                                                    <button type="submit" class="btn btn-danger btn-sm" title="Eliminar">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
                                                 </form>
                                             </div>
                                         </td>

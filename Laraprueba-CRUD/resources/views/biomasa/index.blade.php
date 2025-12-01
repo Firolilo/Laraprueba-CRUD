@@ -1,245 +1,166 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 
-@section('template_title')
-    Mapa de Biomasas
-@endsection
+@section('subtitle', 'Mis Biomasas')
+@section('content_header_title', 'Mis Reportes de Biomasa')
+@section('content_header_subtitle', 'Gestión Personal')
 
-@section('content_header')
-    <div class="d-flex justify-content-between align-items-center">
-        <h1><i class="fas fa-map-marked-alt"></i> Mapa de Zonas de Biomasa</h1>
-        <a href="{{ route('biomasas.create') }}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Agregar Biomasa
-        </a>
-    </div>
-@stop
-
-@section('content')
-    @if ($message = Session::get('success'))
-        <div class="alert alert-success alert-dismissible fade show">
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
-            <i class="fas fa-check-circle"></i> {{ $message }}
-        </div>
-    @endif
-
-    <div class="card">
-        <div class="card-body p-0" style="height: 75vh;">
-            <div id="map" style="width: 100%; height: 100%;"></div>
-        </div>
-        
-        <!-- Legend Card -->
-        <div class="card-footer">
-            <div class="row">
-                <div class="col-md-6">
-                    <h5><i class="fas fa-info-circle"></i> Leyenda de Tipos de Biomasa</h5>
-                    <div id="legend" class="d-flex flex-wrap gap-3"></div>
-                </div>
-                <div class="col-md-6 text-right">
-                    <small class="text-muted">
-                        <i class="fas fa-mouse-pointer"></i> Haga clic en un polígono para ver detalles
-                    </small>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Info Panel for Selected Polygon -->
-    <div id="infoPanel" class="card" style="display: none;">
-        <div class="card-header bg-info">
-            <h5 class="mb-0"><i class="fas fa-info-circle"></i> Información de la Zona</h5>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <p><strong>Tipo de Biomasa:</strong> <span id="info-tipo"></span></p>
-                    <p><strong>Área:</strong> <span id="info-area"></span> m²</p>
-                    <p><strong>Densidad:</strong> <span id="info-densidad"></span></p>
-                </div>
-                <div class="col-md-6">
-                    <p><strong>Fecha de Reporte:</strong> <span id="info-fecha"></span></p>
-                    <p><strong>Ubicación:</strong> <span id="info-ubicacion"></span></p>
-                    <p><strong>Descripción:</strong> <span id="info-descripcion"></span></p>
-                </div>
-            </div>
-            <div class="text-right mt-2">
-                <a id="info-edit" href="#" class="btn btn-success btn-sm">
-                    <i class="fas fa-edit"></i> Editar
+@section('content_body')
+    <div class="container-fluid">
+        <div class="row mb-3">
+            <div class="col-12">
+                <a href="{{ route('biomasas.create') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Reportar Nueva Biomasa
                 </a>
-                <button id="info-delete" onclick="deleteBiomasa()" class="btn btn-danger btn-sm">
-                    <i class="fas fa-trash"></i> Eliminar
-                </button>
-                <button onclick="closeInfoPanel()" class="btn btn-secondary btn-sm">
-                    <i class="fas fa-times"></i> Cerrar
-                </button>
+            </div>
+        </div>
+
+        @if ($message = Session::get('success'))
+            <x-adminlte-alert theme="success" dismissable>
+                {{ $message }}
+            </x-adminlte-alert>
+        @endif
+
+        @if ($message = Session::get('info'))
+            <x-adminlte-alert theme="info" dismissable>
+                {{ $message }}
+            </x-adminlte-alert>
+        @endif
+
+        <div class="row">
+            <div class="col-12">
+                <x-adminlte-card title="Mis Biomasas Reportadas" theme="primary" icon="fas fa-leaf">
+                    
+                    @if($biomasas->count() > 0)
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Proceso de Revisión:</strong> Tus biomasas serán revisadas por un administrador antes de aparecer en el mapa del sistema.
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Tipo</th>
+                                        <th>Ubicación</th>
+                                        <th>Área (m²)</th>
+                                        <th>Estado</th>
+                                        <th>Fecha Reporte</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($biomasas as $biomasa)
+                                        <tr>
+                                            <td>{{ $biomasa->id }}</td>
+                                            <td>
+                                                <span class="badge badge-info">
+                                                    {{ $biomasa->tipoBiomasa->tipo_biomasa ?? 'Sin tipo' }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <i class="fas fa-map-marker-alt text-danger"></i>
+                                                @if(is_array($biomasa->coordenadas) && count($biomasa->coordenadas) > 0)
+                                                    {{ number_format($biomasa->coordenadas[0][0] ?? 0, 5) }}, 
+                                                    {{ number_format($biomasa->coordenadas[0][1] ?? 0, 5) }}
+                                                @else
+                                                    N/A
+                                                @endif
+                                            </td>
+                                            <td>{{ number_format($biomasa->area_m2, 2) }}</td>
+                                            <td>
+                                                @if($biomasa->estado == 'pendiente')
+                                                    <span class="badge badge-warning">
+                                                        <i class="fas fa-clock"></i> Pendiente
+                                                    </span>
+                                                @elseif($biomasa->estado == 'aprobada')
+                                                    <span class="badge badge-success">
+                                                        <i class="fas fa-check-circle"></i> Aprobada
+                                                    </span>
+                                                @else
+                                                    <span class="badge badge-danger">
+                                                        <i class="fas fa-times-circle"></i> Rechazada
+                                                    </span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <small>{{ $biomasa->created_at->format('d/m/Y H:i') }}</small>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="{{ route('biomasas.show', $biomasa->id) }}" 
+                                                       class="btn btn-info btn-sm" title="Ver detalles">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    
+                                                    @if($biomasa->estado == 'pendiente')
+                                                        <a href="{{ route('biomasas.edit', $biomasa->id) }}" 
+                                                           class="btn btn-warning btn-sm" title="Editar">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                        
+                                                        <form action="{{ route('biomasas.destroy', $biomasa->id) }}" 
+                                                              method="POST" style="display:inline;" 
+                                                              onsubmit="return confirm('¿Está seguro de eliminar esta biomasa?');">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-danger btn-sm" title="Eliminar">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        
+                                        @if($biomasa->estado == 'rechazada' && $biomasa->motivo_rechazo)
+                                            <tr class="bg-light">
+                                                <td colspan="7">
+                                                    <div class="alert alert-danger mb-0">
+                                                        <strong><i class="fas fa-exclamation-triangle"></i> Motivo de Rechazo:</strong>
+                                                        {{ $biomasa->motivo_rechazo }}
+                                                        <br>
+                                                        <small class="text-muted">
+                                                            Rechazada el {{ $biomasa->fecha_revision?->format('d/m/Y H:i') }}
+                                                        </small>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endif
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {!! $biomasas->withQueryString()->links() !!}
+                    @else
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            No has reportado ninguna biomasa aún. 
+                            <a href="{{ route('biomasas.create') }}" class="alert-link">¡Reporta la primera!</a>
+                        </div>
+                    @endif
+                </x-adminlte-card>
+
+                <!-- Tarjeta informativa -->
+                <x-adminlte-card title="Información sobre Estados" theme="secondary" icon="fas fa-question-circle" collapsible>
+                    <ul>
+                        <li>
+                            <span class="badge badge-warning"><i class="fas fa-clock"></i> Pendiente</span> - 
+                            Tu reporte está en revisión. Puedes editarlo o eliminarlo mientras tanto.
+                        </li>
+                        <li>
+                            <span class="badge badge-success"><i class="fas fa-check-circle"></i> Aprobada</span> - 
+                            Tu reporte fue aprobado y ahora aparece en el mapa del sistema.
+                        </li>
+                        <li>
+                            <span class="badge badge-danger"><i class="fas fa-times-circle"></i> Rechazada</span> - 
+                            Tu reporte fue rechazado. Revisa el motivo y crea un nuevo reporte si es necesario.
+                        </li>
+                    </ul>
+                </x-adminlte-card>
             </div>
         </div>
     </div>
-
-    <!-- Delete Form (hidden) -->
-    <form id="deleteForm" method="POST" style="display: none;">
-        @csrf
-        @method('DELETE')
-    </form>
 @stop
 
-@section('css')
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <style>
-        .legend-item {
-            display: inline-flex;
-            align-items: center;
-            margin-right: 20px;
-            margin-bottom: 10px;
-        }
-        .legend-color {
-            width: 30px;
-            height: 20px;
-            border: 2px solid #333;
-            border-radius: 3px;
-            margin-right: 8px;
-        }
-        #infoPanel {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 500px;
-            z-index: 1000;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        }
-    </style>
-@stop
-
-@section('js')
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        // Initialize the map centered on a default location
-        const map = L.map('map').setView([-17.8, -61.5], 8); // Chiquitanía, Bolivia
-
-        // Add OpenStreetMap tiles
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors',
-            maxZoom: 19
-        }).addTo(map);
-
-        // Store biomasas data
-        const biomasasData = @json($biomasas);
-        let currentBiomasaId = null;
-        
-        console.log('Biomasas cargadas:', biomasasData.length);
-        
-        // Object to store tipo counts and create legend
-        const tipoColors = {};
-        const polygonLayers = {};
-
-        // Process each biomasa
-        biomasasData.forEach((biomasa, index) => {
-            console.log(`Procesando biomasa ${biomasa.id}:`, biomasa);
-            
-            if (!biomasa.coordenadas || biomasa.coordenadas.length === 0) {
-                console.warn(`Biomasa ${biomasa.id} no tiene coordenadas`);
-                return;
-            }
-
-            const tipo = biomasa.tipo_biomasa?.tipo_biomasa || 'Desconocido';
-            const color = biomasa.tipo_biomasa?.color || '#808080';
-            
-            // Track tipos for legend
-            if (!tipoColors[tipo]) {
-                tipoColors[tipo] = color;
-            }
-
-            // Convert coordinates to Leaflet format [[lat, lng], ...]
-            // Las coordenadas se guardan como arrays: [[lat, lng], [lat, lng], ...]
-            const latLngs = biomasa.coordenadas.map(coord => {
-                // Si coord es un array [lat, lng], usarlo directamente
-                if (Array.isArray(coord)) {
-                    return [parseFloat(coord[0]), parseFloat(coord[1])];
-                }
-                // Si coord es un objeto {lat, lng}, convertirlo
-                return [parseFloat(coord.lat || coord[0]), parseFloat(coord.lng || coord[1])];
-            });
-
-            console.log(`Coordenadas procesadas para biomasa ${biomasa.id}:`, latLngs);
-
-            // Create polygon
-            const polygon = L.polygon(latLngs, {
-                color: color,
-                fillColor: color,
-                fillOpacity: 0.5,
-                weight: 3,
-                opacity: 1
-            }).addTo(map);
-
-            // Add click event to show info
-            polygon.on('click', function() {
-                showBiomasaInfo(biomasa);
-            });
-
-            // Add tooltip on hover
-            polygon.bindTooltip(`
-                <strong>${tipo}</strong><br>
-                Área: ${(biomasa.area_m2 / 1000000).toFixed(2)} km²
-            `, {
-                sticky: true
-            });
-
-            // Store polygon reference
-            polygonLayers[biomasa.id] = polygon;
-        });
-
-        console.log('Total de polígonos creados:', Object.keys(polygonLayers).length);
-
-        // Auto-fit map to show all polygons
-        if (Object.keys(polygonLayers).length > 0) {
-            const group = L.featureGroup(Object.values(polygonLayers));
-            map.fitBounds(group.getBounds(), { padding: [50, 50] });
-        } else {
-            console.warn('No se encontraron polígonos para mostrar');
-        }
-
-        // Build legend
-        const legendDiv = document.getElementById('legend');
-        Object.entries(tipoColors).forEach(([tipo, color]) => {
-            const item = document.createElement('div');
-            item.className = 'legend-item';
-            item.innerHTML = `
-                <div class="legend-color" style="background-color: ${color};"></div>
-                <span><strong>${tipo}</strong></span>
-            `;
-            legendDiv.appendChild(item);
-        });
-
-        // Show biomasa information in panel
-        function showBiomasaInfo(biomasa) {
-            currentBiomasaId = biomasa.id;
-            document.getElementById('info-tipo').textContent = biomasa.tipo_biomasa?.tipo_biomasa || 'N/A';
-            document.getElementById('info-area').textContent = (biomasa.area_m2 / 1000000).toFixed(2) + ' km²';
-            document.getElementById('info-densidad').textContent = biomasa.densidad || 'N/A';
-            document.getElementById('info-fecha').textContent = biomasa.fecha_reporte || 'N/A';
-            document.getElementById('info-ubicacion').textContent = biomasa.ubicacion || 'N/A';
-            document.getElementById('info-descripcion').textContent = biomasa.descripcion || 'Sin descripción';
-            document.getElementById('info-edit').href = `/biomasas/${biomasa.id}/edit`;
-            
-            document.getElementById('infoPanel').style.display = 'block';
-        }
-
-        function closeInfoPanel() {
-            currentBiomasaId = null;
-            document.getElementById('infoPanel').style.display = 'none';
-        }
-
-        function deleteBiomasa() {
-            if (!currentBiomasaId) {
-                alert('No hay biomasa seleccionada');
-                return;
-            }
-
-            if (!confirm('¿Está seguro de que desea eliminar esta zona de biomasa? Esta acción no se puede deshacer.')) {
-                return;
-            }
-
-            const form = document.getElementById('deleteForm');
-            form.action = `/biomasas/${currentBiomasaId}`;
-            form.submit();
-        }
-    </script>
-@stop

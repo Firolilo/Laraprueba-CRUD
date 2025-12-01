@@ -48,6 +48,10 @@
 {{-- Add common Javascript/Jquery code --}}
 
 @push('js')
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""></script>
 <script>
     $(document).ready(function() {
         // Configuración global de DataTables en español
@@ -77,6 +81,10 @@
 {{-- Add common CSS customizations --}}
 
 @push('css')
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""/>
 <style type="text/css">
     /* Mejoras visuales para cards */
     .card-header {
@@ -91,6 +99,28 @@
     /* Botones de acción en tablas */
     .btn-group-sm > .btn {
         padding: 0.25rem 0.5rem;
+    }
+
+    /* Leaflet map container */
+    #map {
+        height: 500px;
+        width: 100%;
+        border-radius: 0.25rem;
+    }
+
+    /* Dashboard weather cards */
+    .weather-card {
+        text-align: center;
+        padding: 1rem;
+    }
+    .weather-card .value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #17a2b8;
+    }
+    .weather-card .label {
+        font-size: 0.9rem;
+        color: #6c757d;
     }
 </style>
 @endpush

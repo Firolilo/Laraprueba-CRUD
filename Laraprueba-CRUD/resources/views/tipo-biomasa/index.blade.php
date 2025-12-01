@@ -16,8 +16,9 @@
 
                 <x-adminlte-card title="Tipos de Biomasa" theme="olive" icon="fas fa-list">
                     <x-slot name="toolsSlot">
-                        <x-adminlte-button label="Crear Nuevo" icon="fas fa-plus" 
-                            class="btn-sm" theme="success" href="{{ route('tipo-biomasas.create') }}"/>
+                        <a href="{{ route('tipo-biomasas.create') }}" class="btn btn-success btn-sm">
+                            <i class="fas fa-plus"></i> Crear Nuevo
+                        </a>
                     </x-slot>
 
                     <div class="table-responsive">
@@ -46,16 +47,19 @@
                                         </td>
                                         <td>
                                             <div class="btn-group btn-group-sm" role="group">
-                                                <x-adminlte-button icon="fas fa-eye" theme="info" 
-                                                    href="{{ route('tipo-biomasas.show', $tipoBiomasa->id) }}" size="sm" title="Ver"/>
-                                                <x-adminlte-button icon="fas fa-edit" theme="success" 
-                                                    href="{{ route('tipo-biomasas.edit', $tipoBiomasa->id) }}" size="sm" title="Editar"/>
+                                                <a href="{{ route('tipo-biomasas.show', $tipoBiomasa->id) }}" class="btn btn-info btn-sm" title="Ver">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{{ route('tipo-biomasas.edit', $tipoBiomasa->id) }}" class="btn btn-success btn-sm" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
                                                 <form action="{{ route('tipo-biomasas.destroy', $tipoBiomasa->id) }}" method="POST" style="display: inline;" 
                                                     onsubmit="return confirm('¿Está seguro de eliminar este tipo de biomasa?');">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <x-adminlte-button type="submit" icon="fas fa-trash" 
-                                                        theme="danger" size="sm" title="Eliminar"/>
+                                                    <button type="submit" class="btn btn-danger btn-sm" title="Eliminar">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
                                                 </form>
                                             </div>
                                         </td>

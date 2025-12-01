@@ -14,25 +14,58 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     
     // Dashboard - accessible to all authenticated users
-    Route::get('/', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/', [\App\Http\Controllers\DashboardController::class, 'index'])
+        ->name('dashboard');
+    
+    // Biomasas GeoJSON endpoint for map
+    Route::get('/dashboard/biomasas', [\App\Http\Controllers\DashboardController::class, 'getBiomasas'])
+        ->name('dashboard.biomasas');
 
     // Test endpoint to preview OpenWeather and FIRMS data
     Route::get('/test', [\App\Http\Controllers\TestController::class, 'index'])
         ->name('test.index');
+    
+    // Debug endpoint para ver biomasas
+    Route::get('/debug/biomasas', function() {
+        $biomasas = \App\Models\Biomasa::with('tipoBiomasa')->get();
+        return response()->json([
+            'total' => $biomasas->count(),
+            'aprobadas' => $biomasas->where('estado', 'aprobada')->count(),
+            'biomasas' => $biomasas->map(function($b) {
+                return [
+                    'id' => $b->id,
+                    'tipo' => $b->tipoBiomasa->tipo_biomasa ?? 'N/A',
+                    'estado' => $b->estado,
+                    'coordenadas' => $b->coordenadas,
+                    'coordenadas_type' => gettype($b->coordenadas),
+                    'area_m2' => $b->area_m2,
+                ];
+            })
+        ]);
+    });
     
     Route::get('/home', function () {
         return redirect('/');
     });
 
     // ============================================
+    // BIOMASAS - Accesible para Voluntarios y Administradores
+    // ============================================
+    Route::middleware('role:voluntario')->group(function () {
+        // RUTA DE TEST
+        Route::get('biomasas/test-create', function() {
+            $tipoBiomasas = \App\Models\TipoBiomasa::all();
+            return view('biomasa.test-create', compact('tipoBiomasas'));
+        })->name('biomasas.test-create');
+        
+        // CRUD de biomasas (voluntarios y administradores)
+        Route::resource('biomasas', App\Http\Controllers\BiomasaController::class);
+    });
+
+    // ============================================
     // VOLUNTARIO ROUTES (Voluntarios y Administradores)
     // ============================================
     Route::middleware('role:voluntario')->group(function () {
-        // Biomasas - Voluntarios pueden crear/ver
-        Route::resource('biomasas', App\Http\Controllers\BiomasaController::class);
-        
         // Simulador avanzado - Voluntarios pueden usar pero NO guardar
         Route::get('simulaciones/simulator', [App\Http\Controllers\SimulacioneController::class, 'simulator'])
             ->name('simulaciones.simulator');
@@ -48,6 +81,12 @@ Route::middleware('auth')->group(function () {
     // ADMINISTRADOR ROUTES (Solo Administradores)
     // ============================================
     Route::middleware('role:administrador')->group(function () {
+        
+        // Biomasas - Moderación (aprobar/rechazar)
+        Route::post('biomasas/{id}/aprobar', [App\Http\Controllers\BiomasaController::class, 'aprobar'])
+            ->name('biomasas.aprobar');
+        Route::post('biomasas/{id}/rechazar', [App\Http\Controllers\BiomasaController::class, 'rechazar'])
+            ->name('biomasas.rechazar');
         
         // Users management
         Route::resource('users', App\Http\Controllers\UserController::class);

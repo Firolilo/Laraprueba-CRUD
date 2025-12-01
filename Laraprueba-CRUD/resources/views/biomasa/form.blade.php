@@ -71,6 +71,21 @@
 @endsection
 
 <div class="row padding-1 p-1">
+    {{-- Mostrar errores de validación --}}
+    @if ($errors->any())
+        <div class="col-md-12">
+            <div class="alert alert-danger alert-dismissible fade show">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <h5><i class="fas fa-exclamation-triangle"></i> Errores de validación:</h5>
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        </div>
+    @endif
+    
     {{-- Información Básica --}}
     <div class="col-md-12">
         <div class="card card-success">

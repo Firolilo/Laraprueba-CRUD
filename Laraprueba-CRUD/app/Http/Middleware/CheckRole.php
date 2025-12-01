@@ -16,6 +16,14 @@ class CheckRole
      */
     public function handle(Request $request, Closure $next, string $role): Response
     {
+        \Log::info('CheckRole middleware ejecutándose', [
+            'url' => $request->url(),
+            'method' => $request->method(),
+            'role_required' => $role,
+            'user_id' => auth()->id(),
+            'all_data' => $request->all()
+        ]);
+        
         if (!auth()->check()) {
             return redirect('/login');
         }
@@ -39,6 +47,11 @@ class CheckRole
             default:
                 abort(403, 'Rol no válido.');
         }
+
+        \Log::info('CheckRole middleware - Usuario autorizado, continuando...', [
+            'user_id' => $user->id,
+            'role' => $role
+        ]);
 
         return $next($request);
     }

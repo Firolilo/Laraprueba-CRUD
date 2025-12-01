@@ -10,8 +10,7 @@
             <div class="col-md-12">
                 <x-adminlte-card title="Nueva Predicción de Propagación" theme="success" icon="fas fa-chart-line">
                     <x-slot name="toolsSlot">
-                        <x-adminlte-button label="Volver" icon="fas fa-arrow-left" 
-                            class="btn-sm" theme="secondary" href="{{ route('predictions.index') }}"/>
+                        <a href="{{ route('predictions.index') }}" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Volver</a>
                     </x-slot>
 
                     <form method="POST" action="{{ route('predictions.store') }}" role="form" enctype="multipart/form-data">

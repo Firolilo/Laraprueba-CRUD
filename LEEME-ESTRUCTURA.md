@@ -1,78 +1,105 @@
-# ✅ SIPII - Aplicaciones Separadas Configuradas
+# ✅ SIPII - Sistema Unificado de Monitoreo de Incendios
 
-## 🎉 TODO LISTO - Ya puedes usar ambas aplicaciones
+## 🎉 Panel Web con API REST Completa Integrada
 
-### 📁 Estructura Final
+### 📁 Estructura Consolidada
 
 ```
 Laraprueba-CRUD/
-├── Laraprueba-CRUD/          # Panel Web AdminLTE (Puerto 8000)
-├── sipii-api/                 # API REST (Puerto 8001)  
-├── sipii_flutter/             # App móvil Flutter
-├── INICIAR-SIPII.bat          # Script para iniciar ambos servidores
-└── LEEME-ESTRUCTURA.md        # Este archivo
+├── Laraprueba-CRUD/          # ⭐ Aplicación Unificada (Puerto 8000)
+│   ├── routes/
+│   │   ├── web.php           # Panel web (Dashboard, CRUDs, Auth sesiones)
+│   │   └── api.php           # 🔥 API REST completa con Sanctum
+│   ├── app/
+│   │   ├── Http/
+│   │   │   ├── Controllers/
+│   │   │   │   ├── Api/
+│   │   │   │   │   ├── AuthController.php         # Login/Register/Logout
+│   │   │   │   │   ├── BiomasaController.php      # CRUD biomasas
+│   │   │   │   │   ├── FocosIncendioController.php # CRUD focos
+│   │   │   │   │   ├── TipoBiomasaController.php  # CRUD tipos
+│   │   │   │   │   ├── SimulacionController.php   # CRUD simulaciones
+│   │   │   │   │   ├── PredictionController.php   # CRUD predicciones
+│   │   │   │   │   ├── WeatherController.php      # Open-Meteo
+│   │   │   │   │   └── FiresController.php        # NASA FIRMS
+│   │   │   │   └── DashboardController.php        # Dashboard web
+│   │   │   ├── Resources/                         # 🎨 API Resources (JSON)
+│   │   │   │   ├── BiomasaResource.php
+│   │   │   │   ├── FocosIncendioResource.php
+│   │   │   │   ├── TipoBiomasaResource.php
+│   │   │   │   ├── SimulacioneResource.php
+│   │   │   │   └── PredictionResource.php
+│   │   │   └── Middleware/
+│   │   │       └── CheckRole.php                  # Middleware role:administrador
+│   │   ├── Services/
+│   │   │   ├── OpenMeteoService.php               # Clima actual/histórico
+│   │   │   ├── FirmsDataService.php               # Focos de calor NASA
+│   │   │   └── WeatherService.php                 # OpenWeatherMap (legacy)
+│   │   └── Models/
+│   │       ├── User.php                           # getRoleType(), isAdministrador()
+│   │       ├── Biomasa.php
+│   │       ├── FocosIncendio.php
+│   │       ├── TipoBiomasa.php
+│   │       ├── Simulacione.php
+│   │       └── Prediction.php
+│   └── resources/views/
+│       ├── dashboard.blade.php                    # Mapa Leaflet interactivo
+│       └── layouts/app.blade.php                  # AdminLTE + Leaflet
+├── sipii-api/                 # ⚠️ OBSOLETO - Solo referencia histórica
+├── sipii_flutter/             # App móvil Flutter (conecta a :8000/api)
+├── INICIAR-SIPII.bat          # Script para iniciar servidor unificado
+└── LEEME-ESTRUCTURA.md        # 📖 Este archivo
 ```
 
 ---
 
-## 🚀 Iniciar Todo el Sistema
+## 🚀 Iniciar el Sistema
 
 ### Opción 1: Script Automático (Recomendado)
-Doble clic en: **`INICIAR-SIPII.bat`**
+Doble clic en: **`INICIAR-SIPII.bat`** → Iniciará panel web unificado en puerto 8000
 
 ### Opción 2: Manual
 
-**Terminal 1 - Panel Web:**
+**Terminal - Panel Web Unificado:**
 ```bash
 cd "C:\Users\lenovo\OneDrive\Desktop\Proyectos\SIPII Laravel\Laraprueba-CRUD\Laraprueba-CRUD"
 php artisan serve --port=8000
 ```
 
-**Terminal 2 - API:**
-```bash
-cd "C:\Users\lenovo\OneDrive\Desktop\Proyectos\SIPII Laravel\Laraprueba-CRUD\sipii-api"
-php artisan serve --port=8001
-```
-
 ---
 
-## 🌐 Aplicaciones
+## 🌐 Aplicación Unificada - Todo en Puerto 8000
 
-### 1. Panel Web AdminLTE
-- **URL:** http://localhost:8000
-- **Uso:** Administración visual con tablas, formularios y mapas
+### Panel Web + API REST Completa (Puerto 8000)
+- **Panel Web:** http://localhost:8000
+- **API REST:** http://localhost:8000/api
 - **Características:**
-  - ✅ CRUD de focos de incendio
-  - ✅ CRUD de biomasas
-  - ✅ CRUD de tipos de biomasa
+  - ✅ Dashboard con mapa Leaflet interactivo
+  - ✅ Focos de calor desde FIRMS (NASA)
+  - ✅ Áreas de biomasa con polígonos
+  - ✅ Clima actual desde Open-Meteo
+  - ✅ CRUD completo de biomasas, focos, tipos
   - ✅ Simulador de incendios
-  - ✅ Gestión de usuarios
-  - ✅ Predicciones con mapas
+  - ✅ Predicciones de propagación
+  - ✅ Gestión de usuarios (Administradores/Voluntarios)
+  - ✅ **API REST con autenticación Sanctum**
+  - ✅ **Endpoints públicos y protegidos**
+  - ✅ **Autorización basada en roles**
 
-### 2. API REST
-- **URL:** http://localhost:8001/api
-- **Uso:** Endpoints JSON para app móvil
-- **Características:**
-  - ✅ GET/POST/PUT/DELETE focos-incendios
-  - ✅ GET/POST/PUT/DELETE biomasas
-  - ✅ GET/POST/PUT/DELETE tipos-biomasa
-  - ✅ Sin autenticación (desarrollo)
-  - ✅ Respuestas JSON
-
-### 3. App Móvil Flutter
-- **Conexión:** http://192.168.0.27:8001/api
-- **Estado:** ✅ Configurada para usar nueva API
+### App Móvil Flutter
+- **Conexión:** http://192.168.0.TU_IP:8000/api
+- **Autenticación:** Bearer token (Sanctum)
 - **Funcionalidades:**
+  - ✅ Login/Registro
   - ✅ Mapa con focos de incendio
-  - ✅ Polígonos de biomasas con colores
-  - ✅ Compartir por WhatsApp/Otras apps
-  - ✅ Click en polígonos para detalles
+  - ✅ Polígonos de biomasas
+  - ✅ CRUD de biomasas
+  - ✅ Compartir por WhatsApp
 
 ---
 
 ## 📊 Base de Datos
 
-**Ambas aplicaciones comparten la MISMA base de datos:**
 - Base de datos: `cruds`
 - Usuario: `laravel`
 - Password: `laravel`
@@ -81,76 +108,315 @@ php artisan serve --port=8001
 
 ---
 
-## 📝 Endpoints API
+## 📝 Endpoints API Completos
 
-### Focos de Incendio
+### 🔐 Autenticación (Sanctum)
+
+#### Registro
 ```
-GET    http://localhost:8001/api/focos-incendios
-POST   http://localhost:8001/api/focos-incendios
-GET    http://localhost:8001/api/focos-incendios/{id}
-PUT    http://localhost:8001/api/focos-incendios/{id}
-DELETE http://localhost:8001/api/focos-incendios/{id}
+POST http://localhost:8000/api/register
+Content-Type: application/json
+
+{
+  "name": "Juan Pérez",
+  "email": "juan@example.com",
+  "password": "password123",
+  "password_confirmation": "password123",
+  "telefono": "12345678",
+  "cedula_identidad": "1234567"
+}
 ```
 
-### Biomasas
-```
-GET    http://localhost:8001/api/biomasas
-POST   http://localhost:8001/api/biomasas
-GET    http://localhost:8001/api/biomasas/{id}
-PUT    http://localhost:8001/api/biomasas/{id}
-DELETE http://localhost:8001/api/biomasas/{id}
+**Respuesta:**
+```json
+{
+  "message": "Usuario registrado exitosamente",
+  "user": { "id": 1, "name": "Juan Pérez", "email": "juan@example.com" },
+  "token": "1|abc123..."
+}
 ```
 
-### Tipos de Biomasa
+#### Login
 ```
-GET    http://localhost:8001/api/tipos-biomasa
-POST   http://localhost:8001/api/tipos-biomasa
-GET    http://localhost:8001/api/tipos-biomasa/{id}
-PUT    http://localhost:8001/api/tipos-biomasa/{id}
-DELETE http://localhost:8001/api/tipos-biomasa/{id}
+POST http://localhost:8000/api/login
+Content-Type: application/json
+
+{
+  "email": "juan@example.com",
+  "password": "password123"
+}
+```
+
+**Respuesta:**
+```json
+{
+  "message": "Inicio de sesión exitoso",
+  "user": { "id": 1, "name": "Juan Pérez", "email": "juan@example.com" },
+  "role": "voluntario",
+  "is_admin": false,
+  "is_volunteer": true,
+  "token": "2|xyz789..."
+}
+```
+
+#### Logout
+```
+POST http://localhost:8000/api/logout
+Authorization: Bearer {token}
 ```
 
 ---
 
-## ⚠️ Reglas Importantes
+### 🌦️ Clima (Open-Meteo)
+```
+GET http://localhost:8000/api/weather?latitude={lat}&longitude={lon}
+GET http://localhost:8000/api/weather?latitude={lat}&longitude={lon}&start_date=YYYY-MM-DD&end_date=YYYY-MM-DD
+```
+
+**Respuesta:**
+```json
+{
+  "ok": true,
+  "status": 200,
+  "data": {
+    "current_weather": { "temperature": 31.6, ... },
+    "hourly": { "temperature_2m": [...], "relative_humidity_2m": [...] }
+  },
+  "cached": false
+}
+```
+
+---
+
+### 🔥 Focos de Calor (NASA FIRMS)
+```
+GET http://localhost:8000/api/fires
+GET http://localhost:8000/api/fires?product=VIIRS_NOAA20_NRT&country=BOL&days=3
+```
+
+**Parámetros:**
+- `product`: VIIRS_SNPP_NRT, VIIRS_NOAA20_NRT, MODIS_NRT, etc.
+- `country`: ISO3 (BOL, ARG, BRA, etc.)
+- `days`: 1-10
+
+**Respuesta:**
+```json
+{
+  "ok": true,
+  "status": 200,
+  "data": [
+    {
+      "lat": -17.123,
+      "lng": -63.456,
+      "date": "2025-11-30",
+      "confidence": "high"
+    }
+  ],
+  "count": 1,
+  "cached": false
+}
+```
+
+---
+
+### 🌳 Endpoints Públicos (sin autenticación)
+
+```
+GET http://localhost:8000/api/public/focos-incendios
+GET http://localhost:8000/api/public/biomasas
+GET http://localhost:8000/api/public/tipos-biomasa
+```
+
+---
+
+### 🔒 Endpoints Protegidos (requieren token)
+
+#### Biomasas (CRUD completo)
+```
+GET    /api/biomasas               → Listar todas
+POST   /api/biomasas               → Crear nueva
+GET    /api/biomasas/{id}          → Ver detalle
+PUT    /api/biomasas/{id}          → Actualizar
+DELETE /api/biomasas/{id}          → Eliminar
+```
+
+#### Focos de Incendio (CRUD completo)
+```
+GET    /api/focos-incendios        → Listar todos
+POST   /api/focos-incendios        → Crear nuevo
+GET    /api/focos-incendios/{id}   → Ver detalle
+PUT    /api/focos-incendios/{id}   → Actualizar
+DELETE /api/focos-incendios/{id}   → Eliminar
+```
+
+#### Predicciones (CRUD completo)
+```
+GET    /api/predictions            → Listar todas
+POST   /api/predictions            → Crear nueva
+GET    /api/predictions/{id}       → Ver detalle
+PUT    /api/predictions/{id}       → Actualizar
+DELETE /api/predictions/{id}       → Eliminar
+```
+
+---
+
+### 👑 Endpoints Solo Administradores
+
+#### Tipos de Biomasa (CRUD completo)
+```
+GET    /api/tipos-biomasa          → Listar todos
+POST   /api/tipos-biomasa          → Crear nuevo
+GET    /api/tipos-biomasa/{id}     → Ver detalle
+PUT    /api/tipos-biomasa/{id}     → Actualizar
+DELETE /api/tipos-biomasa/{id}     → Eliminar
+```
+
+#### Simulaciones
+```
+GET    /api/simulaciones           → Listar todas
+POST   /api/simulaciones           → Crear nueva
+GET    /api/simulaciones/{id}      → Ver detalle
+DELETE /api/simulaciones/{id}      → Eliminar
+```
+
+---
+
+### 🗺️ Biomasas para Mapa (Web Dashboard)
+```
+GET http://localhost:8000/dashboard/biomasas
+```
+
+**Respuesta (GeoJSON):**
+```json
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-63.1, -17.8], ...]]
+      },
+      "properties": {
+        "ubicacion": "Sabana",
+        "area": "4599.08 km²",
+        "densidad": "Media",
+        "tipo": "Pastizal",
+        "fecha": "10/10/2025"
+      }
+    }
+  ]
+}
+```
+
+---
+
+## 🎯 Rutas del Panel Web
+
+### Autenticación
+```
+GET  /login
+POST /login
+POST /logout
+GET  /register
+POST /register
+```
+
+### Dashboard
+```
+GET / → Dashboard con mapa, clima y estadísticas
+```
+
+### Biomasas (Voluntarios + Admins)
+```
+GET    /biomasas
+GET    /biomasas/create
+POST   /biomasas
+GET    /biomasas/{id}
+GET    /biomasas/{id}/edit
+PUT    /biomasas/{id}
+DELETE /biomasas/{id}
+```
+
+### Administración (Solo Admins)
+```
+/users                 → Gestión de usuarios
+/tipo-biomasas         → Catálogo de tipos
+/administradores       → Gestión de administradores
+/voluntarios           → Gestión de voluntarios
+/simulaciones          → Simulaciones guardadas
+/focos-incendios       → Focos de incendio
+/predictions           → Predicciones
+```
+
+---
+
+## ⚠️ Arquitectura Consolidada - Un Solo Servidor
+
+### ✅ Arquitectura Actual (CONSOLIDADA):
+- **Puerto 8000**: Panel web + API REST completa
+- **sipii-api**: Carpeta obsoleta (mantener como referencia histórica)
+- **Todo unificado**: Autenticación, CRUD, datos externos, dashboard web
 
 ### ✅ Hacer:
-- Usar **puerto 8000** para panel web en el navegador
-- Usar **puerto 8001** para API desde Flutter
-- Ambas apps pueden leer/escribir en la BD
+- Usar **puerto 8000** para panel web y API
+- Acceder al dashboard en http://localhost:8000
+- Usar `/api/login`, `/api/register` para autenticación desde Flutter
+- Usar `/api/biomasas`, `/api/focos-incendios`, etc. para CRUD
+- Usar `/api/weather` y `/api/fires` para clima y focos
+- Incluir `Authorization: Bearer {token}` en requests protegidos
 
 ### ❌ NO Hacer:
-- NO acceder a `/api/*` en el puerto 8000 (web)
-- NO abrir el puerto 8001 en el navegador (es solo API)
-- NO mezclar las aplicaciones
+- NO necesitas iniciar sipii-api (puerto 8001)
+- NO hay separación entre panel y API
+- sipii-api existe solo como archivo histórico (NO USAR)
 
 ---
 
 ## 🔧 Comandos Útiles
 
-### Panel Web
 ```bash
 cd Laraprueba-CRUD
-php artisan optimize:clear    # Limpiar cachés
-php artisan route:list         # Ver rutas web
-```
 
-### API
-```bash
-cd sipii-api
-php artisan route:list         # Ver endpoints API
-php artisan tinker             # Consola interactiva
+# Limpiar cachés
+php artisan optimize:clear
+
+# Ver todas las rutas
+php artisan route:list
+
+# Ver rutas API
+php artisan route:list --path=api
+
+# Ver rutas protegidas
+php artisan route:list --path=api | findstr "sanctum"
+
+# Iniciar servidor
+php artisan serve --port=8000
 ```
 
 ---
 
 ## 📱 Configurar App Flutter
 
-La app ya está configurada, pero si necesitas cambiar la IP:
+Para conectar Flutter al backend unificado:
 
 ```dart
 // lib/services/api_service.dart
-static const String baseUrl = 'http://TU_IP_LOCAL:8001/api';
+static const String baseUrl = 'http://TU_IP_LOCAL:8000/api';
+
+// Guardar token después del login
+SharedPreferences prefs = await SharedPreferences.getInstance();
+await prefs.setString('token', response['token']);
+
+// Incluir token en headers
+final token = prefs.getString('token');
+final response = await http.get(
+  Uri.parse('$baseUrl/biomasas'),
+  headers: {
+    'Authorization': 'Bearer $token',
+    'Accept': 'application/json',
+  },
+);
 ```
 
 Para obtener tu IP local:
@@ -161,41 +427,41 @@ ipconfig
 
 ---
 
-## 🎯 Próximos Pasos
+## 🎯 Estado del Proyecto
 
 1. ✅ Panel web funciona en puerto 8000
-2. ✅ API funciona en puerto 8001  
-3. ✅ App Flutter conectada a API
-4. ⏭️ Agregar datos de prueba desde el panel web
-5. ⏭️ Verificar que aparezcan en la app móvil
-6. ⏭️ Implementar autenticación (futuro)
-
----
-
-## 🆘 Solución de Problemas
-
-**Panel web muestra error al guardar:**
-- Asegúrate de estar en puerto 8000
-- NO uses rutas `/api/*` en el navegador
-
-**App móvil no muestra datos:**
-- Verifica que API esté en puerto 8001
-- Cambia IP en Flutter a tu IP local
-- Ejecuta `ipconfig` para ver tu IP
-
-**Base de datos vacía:**
-- Usa el panel web (puerto 8000) para agregar datos
-- Los datos aparecerán automáticamente en la API
+2. ✅ **API REST completa integrada** (mismo puerto 8000)
+3. ✅ **Autenticación Sanctum** (/api/register, /api/login, /api/logout)
+4. ✅ **CRUD APIs**: biomasas, focos, tipos, simulaciones, predicciones
+5. ✅ **Endpoints públicos**: /api/public/* (sin autenticación)
+6. ✅ **Endpoints protegidos**: requieren Bearer token
+7. ✅ **Autorización por roles**: middleware role:administrador
+8. ✅ Dashboard con mapa Leaflet + focos + biomasas
+9. ✅ Clima desde Open-Meteo
+10. ✅ Focos desde NASA FIRMS (directo, sin Node.js)
+11. ✅ Roles: Administrador / Voluntario
+12. ✅ Autenticación web con sesiones (file-based)
+13. ✅ **API Resources** para respuestas JSON limpias
+14. ❌ sipii-api **OBSOLETO** (mantener solo como referencia histórica)
 
 ---
 
 ## 📞 Resumen Rápido
 
-| Aplicación | Puerto | URL | Uso |
-|-----------|--------|-----|-----|
-| **Panel Web** | 8000 | http://localhost:8000 | Administración visual |
-| **API REST** | 8001 | http://localhost:8001/api | App móvil |
-| **Flutter** | - | Conecta a API:8001 | App móvil |
+| Componente | Puerto | URL | Estado |
+|-----------|--------|-----|--------|
+| **Panel Web** | 8000 | http://localhost:8000 | ✅ Activo |
+| **API REST Completa** | 8000 | http://localhost:8000/api | ✅ Activo |
+| **sipii-api** | - | - | ❌ Obsoleto (NO USAR) |
+| **Flutter** | - | Conecta a :8000/api | ⏳ Listo para usar |
 
-**¡Todo está listo para usar!** 🎉
+**¡Todo consolidado en un solo servidor unificado!** 🎉
+
+### 🔑 Flujo de Autenticación API
+
+1. **Registro**: `POST /api/register` → Recibe token
+2. **Login**: `POST /api/login` → Recibe token
+3. **Uso**: Incluir `Authorization: Bearer {token}` en headers
+4. **CRUD**: Acceder a `/api/biomasas`, `/api/focos-incendios`, etc.
+5. **Logout**: `POST /api/logout` con token → Revoca token
 
