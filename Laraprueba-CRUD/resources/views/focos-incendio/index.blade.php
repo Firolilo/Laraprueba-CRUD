@@ -2,7 +2,7 @@
 
 @section('subtitle', 'Focos de Incendio')
 @section('content_header_title', 'Gestión de Focos de Incendio')
-@section('content_header_subtitle', 'Listado')
+@section('content_header_subtitle', '- Listado')
 
 @section('css')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
