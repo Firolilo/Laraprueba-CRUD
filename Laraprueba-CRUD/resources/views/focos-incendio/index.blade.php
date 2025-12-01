@@ -47,7 +47,7 @@
 
                 <x-adminlte-card title="Focos de Incendio" theme="danger" icon="fas fa-fire">
                     <x-slot name="toolsSlot">
-                        <button type="button" class="btn btn-danger btn-sm mr-2" 
+                        <button type="button" class="btn btn-primary btn-sm mr-2" 
                                 onclick="loadFirmsData()"
                                 id="loadFirmsBtn"
                                 title="Cargar focos detectados por NASA FIRMS">
