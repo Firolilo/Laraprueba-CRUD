@@ -16,7 +16,6 @@
 
             @hasSection('content_header_subtitle')
                 <small class="text-dark">
-                    <i class="fas fa-xs fa-angle-right text-muted"></i>
                     @yield('content_header_subtitle')
                 </small>
             @endif
@@ -121,6 +120,18 @@
     .weather-card .label {
         font-size: 0.9rem;
         color: #6c757d;
+    }
+
+    /* Fix para iconos gigantes de Font Awesome */
+    svg.svg-inline--fa {
+        max-width: 1em !important;
+        max-height: 1em !important;
+    }
+    
+    /* Ocultar pseudo-elementos problemáticos */
+    body::after, body::before,
+    .content-wrapper::after, .content-wrapper::before {
+        display: none !important;
     }
 </style>
 @endpush

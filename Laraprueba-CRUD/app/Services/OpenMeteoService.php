@@ -46,7 +46,7 @@ class OpenMeteoService
             $url = 'https://archive-api.open-meteo.com/v1/archive';
             $params['start_date'] = $startDate;
             $params['end_date'] = $endDate;
-            $params['hourly'] = 'temperature_2m,relative_humidity_2m,precipitation';
+            $params['hourly'] = 'temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m';
         } else {
             // Current forecast data
             $url = 'https://api.open-meteo.com/v1/forecast';

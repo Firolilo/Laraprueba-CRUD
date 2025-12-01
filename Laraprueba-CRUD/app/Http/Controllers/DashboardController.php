@@ -14,15 +14,17 @@ class DashboardController extends Controller
      */
     public function index(OpenMeteoService $weather, FirmsDataService $firms)
     {
-        // Default coordinates: Santa Cruz, Bolivia
-        $latitude = -17.8;
-        $longitude = -63.1667;
+        // Coordinates: San José de Chiquitos, Bolivia
+        $latitude = -17.8857;
+        $longitude = -60.7556;
 
         // Get current weather
         $weatherData = $weather->getCurrentWeather($latitude, $longitude);
         
-        // Get fire hotspots
-        $firesData = $firms->getFireData('VIIRS_NOAA20_NRT', 'BOL', 1);
+        // Get fire hotspots from Chiquitanía area (last 2 days for demo, clustered)
+        // Area: west,south,east,north = -62.5,-18.5,-57.5,-14.5
+        // Clustering radius: 20km (fires within 20km are grouped as one hotspot)
+        $firesData = $firms->getFireData('VIIRS_NOAA20_NRT', '-62.5,-18.5,-57.5,-14.5', 2, true, 20.0);
 
         // Count biomasas APROBADAS
         $biomasasCount = Biomasa::aprobadas()->count();

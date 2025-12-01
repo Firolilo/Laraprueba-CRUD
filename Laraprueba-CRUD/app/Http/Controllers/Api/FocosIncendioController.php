@@ -20,9 +20,41 @@ class FocosIncendioController extends Controller
 
     /**
      * Store a newly created foco de incendio.
+     * Supports both single foco and bulk creation.
      */
     public function store(Request $request)
     {
+        // Check if bulk creation (multiple focos)
+        if ($request->has('focos') && is_array($request->focos)) {
+            $validated = $request->validate([
+                'focos' => 'required|array|min:1',
+                'focos.*.fecha' => 'required|date',
+                'focos.*.ubicacion' => 'required|string|max:255',
+                'focos.*.coordenadas' => 'required',
+                'focos.*.intensidad' => 'required|numeric|min:0|max:10',
+            ]);
+
+            $createdFocos = [];
+            foreach ($validated['focos'] as $focoData) {
+                // Ensure coordenadas is properly formatted
+                if (is_array($focoData['coordenadas'])) {
+                    // Already an array, keep it
+                } elseif (is_string($focoData['coordenadas'])) {
+                    $focoData['coordenadas'] = json_decode($focoData['coordenadas'], true);
+                }
+                
+                $foco = FocosIncendio::create($focoData);
+                $createdFocos[] = $foco;
+            }
+
+            return response()->json([
+                'message' => count($createdFocos) . ' focos de incendio creados exitosamente',
+                'data' => FocosIncendioResource::collection(collect($createdFocos)),
+                'count' => count($createdFocos)
+            ], 201);
+        }
+
+        // Single foco creation
         $validated = $request->validate([
             'fecha' => 'required|date',
             'ubicacion' => 'required|string|max:255',

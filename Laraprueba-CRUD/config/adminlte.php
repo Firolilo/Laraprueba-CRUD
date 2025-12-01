@@ -323,6 +323,11 @@ return [
             'url' => '/',
             'icon' => 'fas fa-tachometer-alt',
         ],
+        [
+            'text' => 'Datos Climáticos',
+            'url' => '/datos-climaticos',
+            'icon' => 'fas fa-cloud-sun text-warning',
+        ],
         
         // Módulos disponibles para Voluntarios y Administradores
         ['header' => 'MÓDULOS'],

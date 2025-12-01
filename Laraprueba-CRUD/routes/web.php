@@ -17,6 +17,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/', [\App\Http\Controllers\DashboardController::class, 'index'])
         ->name('dashboard');
     
+    // Datos Climáticos - históricos de la última semana
+    Route::get('/datos-climaticos', [\App\Http\Controllers\DatosClimaticosController::class, 'index'])
+        ->name('datos-climaticos.index');
+    
     // Biomasas GeoJSON endpoint for map
     Route::get('/dashboard/biomasas', [\App\Http\Controllers\DashboardController::class, 'getBiomasas'])
         ->name('dashboard.biomasas');
@@ -111,6 +115,10 @@ Route::middleware('auth')->group(function () {
         
         // Focos de incendio - Full CRUD
         Route::resource('focos-incendios', App\Http\Controllers\FocosIncendioController::class);
+        
+        // Importar focos desde FIRMS (ruta web para evitar problemas de autenticación)
+        Route::post('focos-incendios/import/firms', [App\Http\Controllers\FocosIncendioController::class, 'importFromFirms'])
+            ->name('focos-incendios.import-firms');
         
         // Predictions - Full CRUD (create, edit, delete)
         Route::post('predictions', [App\Http\Controllers\PredictionController::class, 'store'])

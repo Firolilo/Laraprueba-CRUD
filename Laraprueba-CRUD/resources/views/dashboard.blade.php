@@ -151,6 +151,56 @@
         font-weight: bold;
         color: #007bff;
     }
+    
+    /* Estilos para marcadores de fuego personalizados */
+    .custom-fire-marker {
+        background: transparent !important;
+        border: none !important;
+    }
+    
+    /* Animación de pulso para marcadores de fuego */
+    @keyframes fire-pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+        }
+        50% {
+            box-shadow: 0 0 0 10px rgba(220, 38, 38, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+        }
+    }
+    
+    .custom-fire-marker:hover > div > div {
+        animation: fire-pulse 1.5s infinite;
+    }
+    
+    /* Estilo mejorado para popups de fuego */
+    .custom-fire-popup .leaflet-popup-content-wrapper {
+        border-radius: 8px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        padding: 0;
+    }
+    
+    .custom-fire-popup .leaflet-popup-content {
+        margin: 15px 20px;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+    
+    .custom-fire-popup .leaflet-popup-tip {
+        background: white;
+    }
+    
+    /* Transición suave para marcadores */
+    .leaflet-marker-icon {
+        transition: transform 0.2s ease;
+    }
+    
+    .leaflet-marker-icon:hover {
+        transform: scale(1.1);
+        z-index: 1000 !important;
+    }
 </style>
 @endpush
 
@@ -178,31 +228,198 @@
         maxZoom: 18,
     }).addTo(map);
 
-    // Fire icon
-    const fireIcon = L.icon({
-        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
-    });
+    // Función para crear icono de fuego personalizado según intensidad
+    function createFireIcon(fire) {
+        const isCluster = fire.is_cluster || false;
+        const size = fire.cluster_size || 1;
+        
+        // Determinar color según confianza
+        let color = '#ff6b35'; // naranja por defecto
+        if (fire.confidence === 'h') color = '#dc2626'; // rojo para alta confianza
+        else if (fire.confidence === 'l') color = '#fb923c'; // naranja claro para baja
+        
+        // Determinar tamaño del icono según cluster
+        let iconSize = isCluster && size > 1 ? [35, 45] : [28, 38];
+        
+        // Crear HTML personalizado para el icono
+        const iconHtml = `
+            <div style="position: relative;">
+                <div style="
+                    background: ${color};
+                    width: ${iconSize[0]}px;
+                    height: ${iconSize[0]}px;
+                    border-radius: 50% 50% 50% 0;
+                    transform: rotate(-45deg);
+                    border: 3px solid white;
+                    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                ">
+                    <i class="fas fa-fire" style="
+                        color: white;
+                        font-size: ${isCluster && size > 1 ? '18px' : '14px'};
+                        transform: rotate(45deg);
+                    "></i>
+                </div>
+                ${isCluster && size > 1 ? `
+                    <div style="
+                        position: absolute;
+                        top: -8px;
+                        right: -8px;
+                        background: #1e40af;
+                        color: white;
+                        border-radius: 50%;
+                        width: 22px;
+                        height: 22px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 11px;
+                        font-weight: bold;
+                        border: 2px solid white;
+                        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+                    ">${size}</div>
+                ` : ''}
+            </div>
+        `;
+        
+        return L.divIcon({
+            html: iconHtml,
+            className: 'custom-fire-marker',
+            iconSize: [iconSize[0], iconSize[1]],
+            iconAnchor: [iconSize[0]/2, iconSize[1]],
+            popupAnchor: [0, -iconSize[1] + 5]
+        });
+    }
 
-    // Load fire hotspots
+    // Función para crear popup mejorado
+    function createFirePopup(fire) {
+        const isCluster = fire.is_cluster || false;
+        const size = fire.cluster_size || 1;
+        const confidence = fire.confidence || 'n';
+        const confidenceText = confidence === 'h' ? 'Alta' : confidence === 'l' ? 'Baja' : 'Normal';
+        const confidenceColor = confidence === 'h' ? '#dc2626' : confidence === 'l' ? '#fb923c' : '#f59e0b';
+        
+        return `
+            <div style="min-width: 250px; font-family: system-ui, -apple-system, sans-serif;">
+                <div style="
+                    background: linear-gradient(135deg, #dc2626 0%, #f59e0b 100%);
+                    color: white;
+                    padding: 12px;
+                    margin: -15px -20px 10px -20px;
+                    border-radius: 3px 3px 0 0;
+                ">
+                    <h4 style="margin: 0; font-size: 16px; font-weight: 600;">
+                        <i class="fas fa-fire"></i> 
+                        ${isCluster && size > 1 ? 'Punto Caliente' : 'Foco de Calor'}
+                    </h4>
+                </div>
+                
+                <div style="padding: 5px 0;">
+                    ${isCluster && size > 1 ? `
+                        <div style="
+                            background: #eff6ff;
+                            border-left: 3px solid #3b82f6;
+                            padding: 8px 12px;
+                            margin-bottom: 10px;
+                            border-radius: 3px;
+                        ">
+                            <strong style="color: #1e40af;">
+                                <i class="fas fa-layer-group"></i> ${size} focos agrupados
+                            </strong>
+                        </div>
+                    ` : ''}
+                    
+                    <table style="width: 100%; font-size: 13px;">
+                        <tr>
+                            <td style="padding: 5px 0; color: #6b7280;">
+                                <i class="fas fa-calendar-alt" style="width: 20px;"></i> Fecha:
+                            </td>
+                            <td style="padding: 5px 0; font-weight: 500;">
+                                ${fire.date}
+                            </td>
+                        </tr>
+                        ${fire.time ? `
+                        <tr>
+                            <td style="padding: 5px 0; color: #6b7280;">
+                                <i class="fas fa-clock" style="width: 20px;"></i> Hora:
+                            </td>
+                            <td style="padding: 5px 0; font-weight: 500;">
+                                ${fire.time.substring(0,2)}:${fire.time.substring(2,4)}
+                            </td>
+                        </tr>
+                        ` : ''}
+                        <tr>
+                            <td style="padding: 5px 0; color: #6b7280;">
+                                <i class="fas fa-shield-alt" style="width: 20px;"></i> Confianza:
+                            </td>
+                            <td style="padding: 5px 0;">
+                                <span style="
+                                    background: ${confidenceColor};
+                                    color: white;
+                                    padding: 2px 8px;
+                                    border-radius: 10px;
+                                    font-size: 11px;
+                                    font-weight: 600;
+                                ">${confidenceText}</span>
+                            </td>
+                        </tr>
+                        ${fire.frp ? `
+                        <tr>
+                            <td style="padding: 5px 0; color: #6b7280;">
+                                <i class="fas fa-bolt" style="width: 20px;"></i> Potencia:
+                            </td>
+                            <td style="padding: 5px 0; font-weight: 500;">
+                                ${fire.frp.toFixed(1)} MW
+                            </td>
+                        </tr>
+                        ` : ''}
+                        <tr>
+                            <td style="padding: 5px 0; color: #6b7280;">
+                                <i class="fas fa-map-marker-alt" style="width: 20px;"></i> Ubicación:
+                            </td>
+                            <td style="padding: 5px 0; font-family: monospace; font-size: 11px;">
+                                ${fire.lat.toFixed(4)}, ${fire.lng.toFixed(4)}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div style="
+                    margin-top: 10px;
+                    padding-top: 10px;
+                    border-top: 1px solid #e5e7eb;
+                    font-size: 11px;
+                    color: #9ca3af;
+                    text-align: center;
+                ">
+                    <i class="fas fa-satellite"></i> NASA FIRMS - VIIRS
+                </div>
+            </div>
+        `;
+    }
+
+    // Load fire hotspots con visualización mejorada
     fetch('/api/fires')
         .then(res => res.json())
         .then(result => {
             if (result.ok && result.data && result.data.length > 0) {
+                console.log(`🔥 Cargados ${result.count} puntos calientes`);
+                
                 result.data.forEach(fire => {
-                    const marker = L.marker([fire.lat, fire.lng], { icon: fireIcon }).addTo(map);
-                    marker.bindPopup(`
-                        <strong><i class="fas fa-fire text-danger"></i> Foco de Calor</strong><br>
-                        <strong>Fecha:</strong> ${fire.date}<br>
-                        <strong>Confianza:</strong> ${fire.confidence || 'N/A'}<br>
-                        <strong>Lat:</strong> ${fire.lat.toFixed(4)}<br>
-                        <strong>Lng:</strong> ${fire.lng.toFixed(4)}
-                    `);
+                    const marker = L.marker(
+                        [fire.lat, fire.lng], 
+                        { icon: createFireIcon(fire) }
+                    ).addTo(map);
+                    
+                    marker.bindPopup(createFirePopup(fire), {
+                        maxWidth: 300,
+                        className: 'custom-fire-popup'
+                    });
                 });
+            } else {
+                console.log('ℹ️ No se encontraron focos de calor en los últimos 2 días');
             }
         })
         .catch(err => console.error('Error loading fires:', err));

@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\FocosIncendioRequest;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use App\Services\FirmsDataService;
 
 class FocosIncendioController extends Controller
 {
@@ -80,5 +81,39 @@ class FocosIncendioController extends Controller
 
         return Redirect::route('focos-incendios.index')
             ->with('success', 'FocosIncendio deleted successfully');
+    }
+
+    /**
+     * Import fire hotspots from NASA FIRMS
+     */
+    public function importFromFirms(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'focos' => 'required|array|min:1',
+                'focos.*.fecha' => 'required|date',
+                'focos.*.ubicacion' => 'required|string|max:255',
+                'focos.*.coordenadas' => 'required',
+                'focos.*.intensidad' => 'required|numeric|min:0|max:10',
+            ]);
+
+            $createdFocos = [];
+            foreach ($validated['focos'] as $focoData) {
+                $foco = FocosIncendio::create($focoData);
+                $createdFocos[] = $foco;
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => count($createdFocos) . ' focos de incendio importados exitosamente',
+                'count' => count($createdFocos)
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al importar focos: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

@@ -126,40 +126,106 @@
 
 
             <!-- Controles de parámetros -->
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label>Temperatura (°C): <span x-text="temperature"></span></label>
-                        <input type="range" class="form-control-range" min="0" max="50" 
-                               x-model.number="temperature" :disabled="simulationActive">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h3 class="card-title"><i class="fas fa-sliders-h"></i> Parámetros Ambientales</h3>
+                    <div class="card-tools">
+                        <button type="button" 
+                                class="btn btn-sm btn-danger mr-2" 
+                                @click="loadFireHotspots()"
+                                :disabled="loadingFires">
+                            <i class="fas" :class="loadingFires ? 'fa-spinner fa-spin' : 'fa-fire'"></i>
+                            <span x-text="loadingFires ? 'Cargando...' : 'Cargar Focos de Calor'"></span>
+                        </button>
+                        <button type="button" 
+                                class="btn btn-sm btn-primary" 
+                                @click="loadCurrentWeather()"
+                                :disabled="loadingWeather">
+                            <i class="fas" :class="loadingWeather ? 'fa-spinner fa-spin' : 'fa-cloud-sun'"></i>
+                            <span x-text="loadingWeather ? 'Cargando...' : 'Cargar Clima Actual'"></span>
+                        </button>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label>Humedad (%): <span x-text="humidity"></span></label>
-                        <input type="range" class="form-control-range" min="0" max="100" 
-                               x-model.number="humidity" :disabled="simulationActive">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="font-weight-bold">
+                                    <i class="fas fa-thermometer-half text-danger"></i> Temperatura
+                                </label>
+                                <div class="input-group">
+                                    <input type="range" class="custom-range" min="0" max="50" step="0.5"
+                                           x-model.number="temperature" :disabled="simulationActive">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text bg-danger text-white font-weight-bold" 
+                                              x-text="temperature + '°C'" style="min-width: 70px;"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="font-weight-bold">
+                                    <i class="fas fa-tint text-info"></i> Humedad
+                                </label>
+                                <div class="input-group">
+                                    <input type="range" class="custom-range" min="0" max="100" step="1"
+                                           x-model.number="humidity" :disabled="simulationActive">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text bg-info text-white font-weight-bold" 
+                                              x-text="humidity + '%'" style="min-width: 70px;"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="font-weight-bold">
+                                    <i class="fas fa-wind text-success"></i> Velocidad del Viento
+                                </label>
+                                <div class="input-group">
+                                    <input type="range" class="custom-range" min="0" max="50" step="0.5"
+                                           x-model.number="windSpeed" :disabled="simulationActive">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text bg-success text-white font-weight-bold" 
+                                              x-text="windSpeed + ' km/h'" style="min-width: 90px;"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="font-weight-bold">
+                                    <i class="fas fa-compass text-primary"></i> Dirección del Viento
+                                </label>
+                                <div class="input-group">
+                                    <input type="range" class="custom-range" min="0" max="360" step="15"
+                                           x-model.number="windDirection" :disabled="simulationActive">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text bg-primary text-white font-weight-bold" 
+                                              x-text="windDirection + '°'" style="min-width: 70px;"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label>Velocidad del viento (km/h): <span x-text="windSpeed"></span></label>
-                        <input type="range" class="form-control-range" min="0" max="100" 
-                               x-model.number="windSpeed" :disabled="simulationActive">
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label>Dirección del viento (°): <span x-text="windDirection"></span></label>
-                        <input type="range" class="form-control-range" min="0" max="360" 
-                               x-model.number="windDirection" :disabled="simulationActive">
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label>Velocidad de simulación: <span x-text="simulationSpeed"></span>x</label>
-                        <input type="range" class="form-control-range" min="0.1" max="5" step="0.1"
-                               x-model.number="simulationSpeed">
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="font-weight-bold">
+                                    <i class="fas fa-tachometer-alt text-warning"></i> Velocidad de Simulación
+                                </label>
+                                <div class="input-group">
+                                    <input type="range" class="custom-range" min="1" max="10" step="1"
+                                           x-model.number="simulationSpeed">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text bg-warning text-dark font-weight-bold" 
+                                              x-text="simulationSpeed + 'x'" style="min-width: 70px;"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -278,6 +344,7 @@
 
 @section('css')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <style>
     .leaflet-container {
         cursor: crosshair;
@@ -294,13 +361,116 @@
         font-weight: bold !important;
         box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
     }
+    
+    /* Estilos para marcadores de fuego */
+    .custom-fire-marker {
+        background: transparent !important;
+        border: none !important;
+        animation: fire-pulse 2s ease-in-out infinite;
+    }
+    
+    .custom-fire-marker:hover {
+        animation: none;
+        transform: scale(1.1);
+        transition: transform 0.2s ease;
+    }
+    
+    @keyframes fire-pulse {
+        0%, 100% {
+            filter: drop-shadow(0 0 3px rgba(220, 38, 38, 0.6));
+        }
+        50% {
+            filter: drop-shadow(0 0 8px rgba(220, 38, 38, 0.9));
+        }
+    }
+    
+    .leaflet-popup-content-wrapper {
+        border-radius: 8px !important;
+        padding: 0 !important;
+        overflow: hidden;
+    }
+    
+    .leaflet-popup-content {
+        margin: 15px 20px !important;
+    }
 </style>
 @stop
 
 @section('js')
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 <script>
+// Helper functions para notificaciones
+const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+    }
+});
+
+function showSuccess(message) {
+    Toast.fire({
+        icon: 'success',
+        title: message
+    });
+}
+
+function showError(message) {
+    Toast.fire({
+        icon: 'error',
+        title: message
+    });
+}
+
+function showInfo(message) {
+    Toast.fire({
+        icon: 'info',
+        title: message
+    });
+}
+
+function showWarning(message) {
+    Toast.fire({
+        icon: 'warning',
+        title: message
+    });
+}
+
+function showConfirm(title, text, confirmText = 'Sí, eliminar') {
+    return Swal.fire({
+        title: title,
+        text: text,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: confirmText,
+        cancelButtonText: 'Cancelar'
+    });
+}
+
+function showWeatherData(temp, humidity, wind) {
+    Swal.fire({
+        title: '✅ Datos Climáticos Cargados',
+        html: `
+            <div style="text-align: left; font-size: 1.1em;">
+                <p><i class="fas fa-thermometer-half" style="color: #ff6b6b;"></i> <strong>Temperatura:</strong> ${temp}°C</p>
+                <p><i class="fas fa-tint" style="color: #4ecdc4;"></i> <strong>Humedad:</strong> ${humidity}%</p>
+                <p><i class="fas fa-wind" style="color: #95e1d3;"></i> <strong>Viento:</strong> ${wind} km/h</p>
+            </div>
+        `,
+        icon: 'success',
+        confirmButtonText: 'Entendido',
+        confirmButtonColor: '#28a745'
+    });
+}
+
 function fireSimulator() {
     return {
         // State
@@ -322,6 +492,8 @@ function fireSimulator() {
         interval: null,
         biomasas: @json($biomasas ?? []),
         biomasaLayers: [],
+        loadingWeather: false,
+        loadingFires: false,
         
         // Parameters
         temperature: 25,
@@ -469,7 +641,7 @@ function fireSimulator() {
         
         toggleSimulation() {
             if (this.fires.length === 0 && !this.simulationActive) {
-                alert('Añade focos haciendo clic en el mapa');
+                showInfo('Añade focos haciendo clic en el mapa');
                 return;
             }
             
@@ -480,13 +652,155 @@ function fireSimulator() {
                 this.startSimulation();
             } else {
                 this.stopSimulation();
-                // Solo mostrar modal de guardar a administradores
-                @if(auth()->user()->isAdministrador())
+                // Notificar finalización si hubo simulación
                 if (this.timeElapsed > 0) {
-                    this.showSaveModal = true;
+                    this.showSimulationComplete();
                 }
-                @endif
             }
+        },
+        
+        async showSimulationComplete() {
+            const activeFires = this.fires.filter(f => f.active).length;
+            const totalFires = this.fires.length;
+            const affectedArea = (totalFires * 0.01).toFixed(2); // Estimación simple
+            
+            const isAdmin = {{ auth()->user()->isAdministrador() ? 'true' : 'false' }};
+            
+            const result = await Swal.fire({
+                icon: 'info',
+                title: 'Simulación Completada',
+                html: `
+                    <div style="text-align: left; padding: 10px;">
+                        <h5 class="mb-3"><i class="fas fa-chart-line"></i> Resultados:</h5>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><i class="fas fa-clock text-primary"></i> Tiempo transcurrido:</td>
+                                <td><strong>${this.timeElapsed}h</strong></td>
+                            </tr>
+                            <tr>
+                                <td><i class="fas fa-fire text-danger"></i> Focos activos:</td>
+                                <td><strong>${activeFires} / ${totalFires}</strong></td>
+                            </tr>
+                            <tr>
+                                <td><i class="fas fa-map-marked-alt text-success"></i> Área afectada:</td>
+                                <td><strong>~${affectedArea} km²</strong></td>
+                            </tr>
+                            <tr>
+                                <td><i class="fas fa-users text-info"></i> Voluntarios sugeridos:</td>
+                                <td><strong>${this.requiredVolunteers}</strong></td>
+                            </tr>
+                            <tr>
+                                <td><i class="fas fa-exclamation-triangle text-warning"></i> Nivel de riesgo:</td>
+                                <td><strong>${this.fireRisk.toFixed(0)}%</strong></td>
+                            </tr>
+                        </table>
+                        <hr>
+                        <p class="text-muted mb-2"><i class="fas fa-info-circle"></i> ¿Qué deseas hacer?</p>
+                    </div>
+                `,
+                showCancelButton: true,
+                showDenyButton: true,
+                confirmButtonText: isAdmin ? '<i class="fas fa-save"></i> Guardar' : '<i class="fas fa-share-alt"></i> Compartir',
+                denyButtonText: '<i class="fas fa-redo"></i> Repetir',
+                cancelButtonText: '<i class="fas fa-times"></i> Nueva',
+                confirmButtonColor: '#28a745',
+                denyButtonColor: '#ffc107',
+                cancelButtonColor: '#6c757d',
+                reverseButtons: true,
+                allowOutsideClick: false
+            });
+            
+            if (result.isConfirmed) {
+                // Guardar (admin) o Compartir (usuario regular)
+                if (isAdmin) {
+                    this.showSaveModal = true;
+                } else {
+                    this.shareSimulation();
+                }
+            } else if (result.isDenied) {
+                // Repetir la misma simulación
+                this.repeatCurrentSimulation();
+            } else {
+                // Nueva simulación (cancelar)
+                this.clearFires();
+            }
+        },
+        
+        repeatCurrentSimulation() {
+            const currentParams = {
+                temperature: this.temperature,
+                humidity: this.humidity,
+                windSpeed: this.windSpeed,
+                windDirection: this.windDirection,
+                simulationSpeed: this.simulationSpeed
+            };
+            const currentInitialFires = [...this.initialFires];
+            
+            this.clearFires();
+            
+            // Restaurar parámetros
+            this.temperature = currentParams.temperature;
+            this.humidity = currentParams.humidity;
+            this.windSpeed = currentParams.windSpeed;
+            this.windDirection = currentParams.windDirection;
+            this.simulationSpeed = currentParams.simulationSpeed;
+            
+            // Restaurar focos iniciales
+            currentInitialFires.forEach(fire => {
+                this.addFire(fire.position[0], fire.position[1], fire.intensity);
+            });
+            
+            showSuccess('Simulación reiniciada con los mismos parámetros');
+        },
+        
+        async shareSimulation() {
+            const shareData = {
+                timeElapsed: this.timeElapsed,
+                activeFires: this.fires.filter(f => f.active).length,
+                totalFires: this.fires.length,
+                volunteersNeeded: this.requiredVolunteers,
+                fireRisk: this.fireRisk.toFixed(0),
+                parameters: {
+                    temperature: this.temperature,
+                    humidity: this.humidity,
+                    windSpeed: this.windSpeed,
+                    windDirection: this.windDirection
+                }
+            };
+            
+            const shareText = `📊 Resultados de Simulación SIPII:\n` +
+                `⏱️ Tiempo: ${shareData.timeElapsed}h\n` +
+                `🔥 Focos: ${shareData.activeFires}/${shareData.totalFires}\n` +
+                `👥 Voluntarios: ${shareData.volunteersNeeded}\n` +
+                `⚠️ Riesgo: ${shareData.fireRisk}%\n` +
+                `🌡️ Condiciones: ${shareData.parameters.temperature}°C, ` +
+                `${shareData.parameters.humidity}% humedad, ` +
+                `viento ${shareData.parameters.windSpeed} km/h`;
+            
+            // Intentar usar Web Share API si está disponible
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Simulación SIPII',
+                        text: shareText
+                    });
+                    showSuccess('Simulación compartida exitosamente');
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        this.copyToClipboard(shareText);
+                    }
+                }
+            } else {
+                this.copyToClipboard(shareText);
+            }
+        },
+        
+        copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showSuccess('Resultados copiados al portapapeles');
+            }).catch(() => {
+                showError('No se pudo copiar al portapapeles');
+            });
         },
         
         startSimulation() {
@@ -497,8 +811,9 @@ function fireSimulator() {
                 this.calculateVolunteers();
                 this.updateMitigationStrategies();
                 
-                // Auto stop at 20h
-                if (this.timeElapsed >= 20) {
+                // Auto stop at 20h o cuando no haya focos activos
+                const activeFiresCount = this.fires.filter(f => f.active).length;
+                if (this.timeElapsed >= 20 || activeFiresCount === 0) {
                     this.toggleSimulation();
                 }
             }, 1000 / this.simulationSpeed);
@@ -726,7 +1041,7 @@ function fireSimulator() {
         async saveSimulation() {
             // Validar que se haya seleccionado un administrador
             if (!this.adminId) {
-                alert('Por favor selecciona un administrador antes de guardar');
+                showWarning('Por favor selecciona un administrador antes de guardar');
                 return;
             }
             
@@ -781,7 +1096,7 @@ function fireSimulator() {
                 if (!contentType || !contentType.includes('application/json')) {
                     const text = await response.text();
                     console.error('Server returned non-JSON response:', text);
-                    alert('Error del servidor. Por favor revisa la consola para más detalles.');
+                    showError('Error del servidor. Por favor revisa la consola para más detalles.');
                     return;
                 }
                 
@@ -789,24 +1104,24 @@ function fireSimulator() {
                 
                 if (response.status === 422) {
                     console.error('Validation errors:', result);
-                    alert('Error de validación: ' + JSON.stringify(result.errors || result.message));
+                    showError('Error de validación: ' + JSON.stringify(result.errors || result.message));
                     return;
                 }
                 
                 if (result.success) {
-                    alert('Simulación guardada exitosamente');
+                    showSuccess('Simulación guardada exitosamente');
                     this.showSaveModal = false;
                     this.simulationName = '';
                     this.adminId = null;
                     this.loadHistory();
                     this.clearFires();
                 } else {
-                    alert('Error al guardar la simulación: ' + (result.message || 'Error desconocido'));
+                    showError('Error al guardar la simulación: ' + (result.message || 'Error desconocido'));
                     console.error('Error details:', result);
                 }
             } catch (error) {
                 console.error('Exception:', error);
-                alert('Error al guardar la simulación: ' + error.message);
+                showError('Error al guardar la simulación: ' + error.message);
             }
         },
         
@@ -816,6 +1131,124 @@ function fireSimulator() {
                 this.historyData = await response.json();
             } catch (error) {
                 console.error(error);
+            }
+        },
+        
+        async loadCurrentWeather() {
+            this.loadingWeather = true;
+            try {
+                // Coordenadas de San José de Chiquitos
+                const latitude = -17.8857;
+                const longitude = -60.7556;
+                
+                // Llamar a la API de Open-Meteo
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m&timezone=America/La_Paz`;
+                
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error('Error al obtener datos del clima');
+                }
+                
+                const data = await response.json();
+                
+                // Actualizar parámetros con datos actuales
+                this.temperature = Math.round(data.current.temperature_2m);
+                this.humidity = Math.round(data.current.relative_humidity_2m);
+                this.windSpeed = Math.round(data.current.wind_speed_10m);
+                this.windDirection = Math.round(data.current.wind_direction_10m);
+                
+                // Recalcular riesgo con nuevos datos
+                this.calculateFireRisk();
+                
+                // Notificar éxito
+                showWeatherData(this.temperature, this.humidity, this.windSpeed);
+                
+            } catch (error) {
+                console.error('Error loading weather:', error);
+                showError('Error al cargar datos climáticos. Intenta nuevamente.');
+            } finally {
+                this.loadingWeather = false;
+            }
+        },
+        
+        async loadFireHotspots() {
+            this.loadingFires = true;
+            try {
+                // Llamar a la API de focos de calor
+                const response = await fetch('/api/fires?cluster=true&radius=20&days=2');
+                
+                if (!response.ok) {
+                    throw new Error('Error al obtener datos de focos de calor');
+                }
+                
+                const data = await response.json();
+                const fires = data.data || [];
+                
+                if (fires.length === 0) {
+                    showWarning('No se encontraron focos de calor en los últimos 2 días.');
+                    return;
+                }
+                
+                // Agregar focos a la simulación
+                let addedCount = 0;
+                fires.forEach(fire => {
+                    // Calcular intensidad basada en FRP y tamaño del cluster
+                    const clusterSize = fire.cluster_size || 1;
+                    const frp = fire.frp || 5;
+                    // Intensidad entre 1-5 basada en FRP normalizado
+                    const intensity = Math.min(5, Math.max(1, Math.round(frp / 50)));
+                    
+                    // Agregar el foco a la simulación
+                    this.addFire(fire.lat, fire.lng, intensity);
+                    addedCount++;
+                    
+                    // Si es un cluster grande, agregar focos adicionales cercanos
+                    if (clusterSize > 3) {
+                        const extraFires = Math.min(3, Math.floor(clusterSize / 5));
+                        for (let i = 0; i < extraFires; i++) {
+                            // Offset aleatorio pequeño (±0.005 grados ≈ 500m)
+                            const offsetLat = (Math.random() - 0.5) * 0.01;
+                            const offsetLng = (Math.random() - 0.5) * 0.01;
+                            this.addFire(
+                                fire.lat + offsetLat, 
+                                fire.lng + offsetLng, 
+                                Math.max(1, intensity - 1)
+                            );
+                            addedCount++;
+                        }
+                    }
+                });
+                
+                // Notificar éxito
+                const totalFires = fires.reduce((sum, f) => sum + (f.cluster_size || 1), 0);
+                const clusters = fires.filter(f => f.is_cluster).length;
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Focos de Calor Cargados',
+                    html: `
+                        <div style="text-align: left; padding: 10px;">
+                            <p><i class="fas fa-fire text-danger"></i> <strong>${totalFires}</strong> focos detectados</p>
+                            <p><i class="fas fa-layer-group text-primary"></i> <strong>${clusters}</strong> puntos calientes</p>
+                            <p><i class="fas fa-plus-circle text-success"></i> <strong>${addedCount}</strong> focos agregados a la simulación</p>
+                            <p class="mt-2 text-muted" style="font-size: 0.9em;">
+                                <i class="fas fa-info-circle"></i> Los focos están listos para simular
+                            </p>
+                        </div>
+                    `,
+                    timer: 5000,
+                    timerProgressBar: true,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+                
+            } catch (error) {
+                console.error('Error loading fire hotspots:', error);
+                showError('Error al cargar focos de calor. Intenta nuevamente.');
+            } finally {
+                this.loadingFires = false;
             }
         },
         
@@ -836,7 +1269,12 @@ function fireSimulator() {
         },
         
         async deleteSimulation(id) {
-            if (!confirm('¿Eliminar esta simulación?')) return;
+            const result = await showConfirm(
+                '¿Eliminar simulación?',
+                'Esta acción no se puede deshacer'
+            );
+            
+            if (!result.isConfirmed) return;
             
             try {
                 const response = await fetch(`/simulaciones/delete/${id}`, {
