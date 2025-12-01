@@ -63,6 +63,9 @@
                                                 <a href="{{ route('predictions.show', $prediction->id) }}" class="btn btn-info btn-sm" title="Ver">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
+                                                <a href="{{ route('predictions.pdf', $prediction->id) }}" class="btn btn-primary btn-sm" title="Ver Informe" target="_blank">
+                                                    <i class="fas fa-file-pdf"></i>
+                                                </a>
                                                 <form action="{{ route('predictions.destroy', $prediction->id) }}" method="POST" style="display: inline;" 
                                                     onsubmit="return confirm('¿Estás seguro de eliminar?');">
                                                     @csrf

@@ -252,6 +252,15 @@ class SimulacioneController extends Controller
     }
 
     /**
+     * Display printable PDF report for a simulation.
+     */
+    public function showPdf($id): View
+    {
+        $simulacion = Simulacione::with('admin.user')->findOrFail($id);
+        return view('reports.simulacion', compact('simulacion'));
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit($id): View

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\PredictionResource;
 use App\Models\Prediction;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PredictionController extends Controller
 {
@@ -73,5 +74,28 @@ class PredictionController extends Controller
         return response()->json([
             'message' => 'Predicción eliminada exitosamente',
         ]);
+    }
+
+    /**
+     * Generate PDF report for prediction.
+     */
+    public function generatePdf($id)
+    {
+        $prediction = Prediction::with('focoIncendio')->findOrFail($id);
+        
+        // Decodificar el path si está en JSON string
+        $path = $prediction->path;
+        if (is_string($path)) {
+            $path = json_decode($path, true);
+        }
+        
+        $pdf = Pdf::loadView('pdfs.prediction', [
+            'prediction' => $prediction,
+            'path' => $path ?? []
+        ]);
+        
+        $filename = 'prediccion_' . $prediction->id . '_' . date('YmdHis') . '.pdf';
+        
+        return $pdf->download($filename);
     }
 }

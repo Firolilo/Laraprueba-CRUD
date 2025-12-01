@@ -47,6 +47,10 @@ Route::prefix('public')->group(function () {
     Route::get('/focos-incendios', [FocosIncendioController::class, 'index']);
     Route::get('/biomasas', [BiomasaController::class, 'index']);
     Route::get('/tipos-biomasa', [TipoBiomasaController::class, 'index']);
+    
+    // PDF Generation endpoints (accessible to all users)
+    Route::get('/predictions/{id}/pdf', [PredictionController::class, 'generatePdf'])->name('api.predictions.pdf');
+    Route::get('/simulaciones/{id}/pdf', [SimulacionController::class, 'generatePdf'])->name('api.simulaciones.pdf');
 });
 
 // ============================================================================

@@ -1,4 +1,4 @@
-@section('css')
+<?php $__env->startSection('css'); ?>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
     .biomasa-map {
@@ -68,25 +68,25 @@
         margin-right: 8px;
     }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
 <div class="row padding-1 p-1">
-    {{-- Mostrar errores de validación --}}
-    @if ($errors->any())
+    
+    <?php if($errors->any()): ?>
         <div class="col-md-12">
             <div class="alert alert-danger alert-dismissible fade show">
                 <button type="button" class="close" data-dismiss="alert">&times;</button>
                 <h5><i class="fas fa-exclamation-triangle"></i> Errores de validación:</h5>
                 <ul class="mb-0">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
+                    <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <li><?php echo e($error); ?></li>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </ul>
             </div>
         </div>
-    @endif
+    <?php endif; ?>
     
-    {{-- Información Básica --}}
+    
     <div class="col-md-12">
         <div class="card card-success">
             <div class="card-header">
@@ -100,10 +100,24 @@
                             <input type="date" 
                                    name="fecha_reporte" 
                                    id="fecha_reporte" 
-                                   class="form-control @error('fecha_reporte') is-invalid @enderror" 
-                                   value="{{ old('fecha_reporte', $biomasa->fecha_reporte ?? date('Y-m-d')) }}" 
+                                   class="form-control <?php $__errorArgs = ['fecha_reporte'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                                   value="<?php echo e(old('fecha_reporte', $biomasa->fecha_reporte ?? date('Y-m-d'))); ?>" 
                                    required>
-                            @error('fecha_reporte')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <?php $__errorArgs = ['fecha_reporte'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><div class="invalid-feedback"><?php echo e($message); ?></div><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         </div>
                     </div>
                     
@@ -112,29 +126,58 @@
                             <label for="tipo_biomasa_id"><i class="fas fa-tree"></i> Tipo de Biomasa</label>
                             <select name="tipo_biomasa_id" 
                                     id="tipo_biomasa_id" 
-                                    class="form-control @error('tipo_biomasa_id') is-invalid @enderror"
+                                    class="form-control <?php $__errorArgs = ['tipo_biomasa_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"
                                     required>
                                 <option value="">-- Seleccione un tipo --</option>
-                                @foreach($tipoBiomasas as $tipo)
-                                    <option value="{{ $tipo->id }}" 
-                                            {{ old('tipo_biomasa_id', $biomasa->tipo_biomasa_id) == $tipo->id ? 'selected' : '' }}>
-                                        {{ $tipo->tipo_biomasa }}
+                                <?php $__currentLoopData = $tipoBiomasas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tipo): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($tipo->id); ?>" 
+                                            <?php echo e(old('tipo_biomasa_id', $biomasa->tipo_biomasa_id) == $tipo->id ? 'selected' : ''); ?>>
+                                        <?php echo e($tipo->tipo_biomasa); ?>
+
                                     </option>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
-                            @error('tipo_biomasa_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <?php $__errorArgs = ['tipo_biomasa_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><div class="invalid-feedback"><?php echo e($message); ?></div><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         </div>
                     </div>
 
                     <div class="col-md-4">
                         <div class="form-group mb-3">
                             <label for="densidad"><i class="fas fa-chart-bar"></i> Densidad de Vegetación</label>
-                            <select name="densidad" id="densidad" class="form-control @error('densidad') is-invalid @enderror" required>
-                                <option value="baja" {{ old('densidad', $biomasa->densidad) == 'baja' ? 'selected' : '' }}>Baja (0-30%)</option>
-                                <option value="media" {{ old('densidad', $biomasa->densidad) == 'media' ? 'selected' : '' }} selected>Media (30-70%)</option>
-                                <option value="alta" {{ old('densidad', $biomasa->densidad) == 'alta' ? 'selected' : '' }}>Alta (70-100%)</option>
+                            <select name="densidad" id="densidad" class="form-control <?php $__errorArgs = ['densidad'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" required>
+                                <option value="baja" <?php echo e(old('densidad', $biomasa->densidad) == 'baja' ? 'selected' : ''); ?>>Baja (0-30%)</option>
+                                <option value="media" <?php echo e(old('densidad', $biomasa->densidad) == 'media' ? 'selected' : ''); ?> selected>Media (30-70%)</option>
+                                <option value="alta" <?php echo e(old('densidad', $biomasa->densidad) == 'alta' ? 'selected' : ''); ?>>Alta (70-100%)</option>
                             </select>
-                            @error('densidad')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <?php $__errorArgs = ['densidad'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><div class="invalid-feedback"><?php echo e($message); ?></div><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         </div>
                     </div>
                     
@@ -144,9 +187,23 @@
                             <textarea name="descripcion" 
                                       id="descripcion" 
                                       rows="2" 
-                                      class="form-control @error('descripcion') is-invalid @enderror"
-                                      placeholder="Describe características relevantes de la biomasa observada...">{{ old('descripcion', $biomasa->descripcion) }}</textarea>
-                            @error('descripcion')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                      class="form-control <?php $__errorArgs = ['descripcion'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"
+                                      placeholder="Describe características relevantes de la biomasa observada..."><?php echo e(old('descripcion', $biomasa->descripcion)); ?></textarea>
+                            <?php $__errorArgs = ['descripcion'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><div class="invalid-feedback"><?php echo e($message); ?></div><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         </div>
                     </div>
                 </div>
@@ -154,7 +211,7 @@
         </div>
     </div>
 
-    {{-- Delimitación del Área en Mapa --}}
+    
     <div class="col-md-12">
         <div class="card card-primary">
             <div class="card-header">
@@ -196,10 +253,10 @@
                     <div id="pointsList" style="margin-top: 15px;"></div>
                 </div>
 
-                {{-- Campos ocultos para guardar los datos --}}
-                <input type="hidden" name="coordenadas" id="coordenadas" value="{{ old('coordenadas', is_array($biomasa->coordenadas) ? json_encode($biomasa->coordenadas) : $biomasa->coordenadas) }}">
-                <input type="hidden" name="area_m2" id="area_m2" value="{{ old('area_m2', $biomasa->area_m2) }}">
-                <input type="hidden" name="ubicacion" id="ubicacion" value="{{ old('ubicacion', $biomasa->ubicacion) }}">
+                
+                <input type="hidden" name="coordenadas" id="coordenadas" value="<?php echo e(old('coordenadas', is_array($biomasa->coordenadas) ? json_encode($biomasa->coordenadas) : $biomasa->coordenadas)); ?>">
+                <input type="hidden" name="area_m2" id="area_m2" value="<?php echo e(old('area_m2', $biomasa->area_m2)); ?>">
+                <input type="hidden" name="ubicacion" id="ubicacion" value="<?php echo e(old('ubicacion', $biomasa->ubicacion)); ?>">
             </div>
         </div>
     </div>
@@ -208,13 +265,13 @@
         <button type="submit" class="btn btn-success btn-lg btn-block">
             <i class="fas fa-save"></i> Guardar Zona de Biomasa
         </button>
-        <a href="{{ route('biomasas.index') }}" class="btn btn-danger btn-lg btn-block mt-2">
+        <a href="<?php echo e(route('biomasas.index')); ?>" class="btn btn-danger btn-lg btn-block mt-2">
             <i class="fas fa-arrow-left"></i> Cancelar y Volver
         </a>
     </div>
 </div>
 
-@push('js')
+<?php $__env->startPush('js'); ?>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
 <script>
@@ -227,9 +284,9 @@
     
     // Cargar colores de tipos de biomasa
     const tipoColors = {
-        @foreach($tipoBiomasas as $tipo)
-        {{ $tipo->id }}: '{{ $tipo->color ?? "#4CAF50" }}',
-        @endforeach
+        <?php $__currentLoopData = $tipoBiomasas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tipo): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <?php echo e($tipo->id); ?>: '<?php echo e($tipo->color ?? "#4CAF50"); ?>',
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
     };
     
     // Actualizar color cuando cambie el tipo de biomasa
@@ -452,4 +509,5 @@
         alert(`Polígono completado con ${polygonPoints.length} puntos. Área: ${document.getElementById('areaDisplay').textContent} km²`);
     }
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php /**PATH C:\Users\lenovo\OneDrive\Desktop\Proyectos\SIPII Laravel\Laraprueba-CRUD\Laraprueba-CRUD\resources\views/biomasa/form.blade.php ENDPATH**/ ?>

@@ -82,6 +82,12 @@ Route::middleware('auth')->group(function () {
             ->name('predictions.create');
         Route::get('predictions/{prediction}', [App\Http\Controllers\PredictionController::class, 'show'])
             ->name('predictions.show');
+        
+        // PDF Reports - Accesible para todos los usuarios autenticados
+        Route::get('predictions/{prediction}/pdf', [App\Http\Controllers\PredictionController::class, 'showPdf'])
+            ->name('predictions.pdf');
+        Route::get('simulaciones/{simulacione}/pdf', [App\Http\Controllers\SimulacioneController::class, 'showPdf'])
+            ->name('simulaciones.pdf');
     });
 
     // ============================================

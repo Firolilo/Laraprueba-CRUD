@@ -99,6 +99,15 @@ class PredictionController extends Controller
     }
 
     /**
+     * Display printable PDF report for a prediction.
+     */
+    public function showPdf($id): View
+    {
+        $prediction = Prediction::with('focoIncendio')->findOrFail($id);
+        return view('reports.prediction', compact('prediction'));
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit($id): View

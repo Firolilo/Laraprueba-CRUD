@@ -43,10 +43,53 @@ class Biomasa extends Model
     protected $casts = [
         'area_m2' => 'float',
         'perimetro_m' => 'float',
-        'coordenadas' => 'array',
+        // NO usar cast 'array' - el accessor se encarga de la conversión
         'fecha_reporte' => 'date',
         'fecha_revision' => 'datetime',
     ];
+    
+    /**
+     * Accessor para asegurar que coordenadas siempre se devuelvan como array
+     * Lee el valor crudo de la base de datos y lo convierte
+     */
+    public function getCoordenadasAttribute()
+    {
+        // Obtener el valor crudo directamente de attributes
+        $value = $this->attributes['coordenadas'] ?? null;
+        
+        // Si el valor es null, retornar array vacío
+        if ($value === null || $value === '') {
+            return [];
+        }
+        
+        // Si es un string, intentar parsearlo como JSON
+        if (is_string($value)) {
+            try {
+                $decoded = json_decode($value, true);
+                
+                // Verificar si tenemos un string (doble encoding)
+                if (is_string($decoded)) {
+                    $decoded = json_decode($decoded, true);
+                }
+                
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                    return $decoded;
+                }
+                \Log::warning("Error decodificando coordenadas de biomasa {$this->id}: " . json_last_error_msg());
+                return [];
+            } catch (\Exception $e) {
+                \Log::error("Exception decodificando coordenadas de biomasa {$this->id}: " . $e->getMessage());
+                return [];
+            }
+        }
+        
+        // Si ya es un array, retornarlo
+        if (is_array($value)) {
+            return $value;
+        }
+        
+        return [];
+    }
     
     /**
      * Scopes para filtrar por estado

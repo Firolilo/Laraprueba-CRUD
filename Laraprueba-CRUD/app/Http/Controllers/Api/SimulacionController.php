@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\SimulacioneResource;
 use App\Models\Simulacione;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class SimulacionController extends Controller
 {
@@ -64,5 +65,21 @@ class SimulacionController extends Controller
         return response()->json([
             'message' => 'Simulación eliminada exitosamente',
         ]);
+    }
+
+    /**
+     * Generate PDF report for simulation.
+     */
+    public function generatePdf($id)
+    {
+        $simulacion = Simulacione::with('administrador')->findOrFail($id);
+        
+        $pdf = Pdf::loadView('pdfs.simulacion', [
+            'simulacion' => $simulacion
+        ]);
+        
+        $filename = 'simulacion_' . $simulacion->id . '_' . date('YmdHis') . '.pdf';
+        
+        return $pdf->download($filename);
     }
 }

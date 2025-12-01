@@ -52,6 +52,9 @@
                                                 <a href="{{ route('simulaciones.show', $simulacione->id) }}" class="btn btn-info btn-sm" title="Ver">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
+                                                <a href="{{ route('simulaciones.pdf', $simulacione->id) }}" class="btn btn-primary btn-sm" title="Ver Informe" target="_blank">
+                                                    <i class="fas fa-file-pdf"></i>
+                                                </a>
                                                 <a href="{{ route('simulaciones.edit', $simulacione->id) }}" class="btn btn-success btn-sm" title="Editar">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
