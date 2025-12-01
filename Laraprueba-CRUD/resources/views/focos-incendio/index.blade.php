@@ -18,6 +18,20 @@
         background: transparent !important;
         border: none !important;
     }
+    /* Evitar que la paginación ocupe todo el ancho y se sobreponga */
+    .pagination {
+        display: inline-flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 4px;
+    }
+    .pagination .page-item {
+        display: inline-block;
+    }
+    .pagination .page-link {
+        white-space: nowrap;
+    }
+    /* No eliminar por CSS las flechas: usamos una vista de paginación personalizada sin prev/next */
 </style>
 @endsection
 
@@ -110,8 +124,8 @@
                         </table>
                     </div>
 
-                    <div class="mt-3">
-                        {!! $focosIncendios->withQueryString()->links() !!}
+                    <div class="mt-3 d-flex justify-content-center">
+                        {!! $focosIncendios->withQueryString()->links('vendor.pagination.no-prev-next') !!}
                     </div>
                 </x-adminlte-card>
             </div>
@@ -344,7 +358,10 @@ async function saveFires() {
     try {
         const focosData = fires.map(fire => ({
             ubicacion: fire.ubicacion,
-            coordenadas: [fire.lat, fire.lng], // Array [lat, lng] para PostgreSQL
+            coordenadas: {
+                lat: fire.lat,
+                lng: fire.lng
+            },
             intensidad: fire.intensidad,
             fecha: new Date().toISOString().split('T')[0]
         }));
@@ -455,7 +472,10 @@ async function loadFirmsData() {
             
             focosWithLocation.push({
                 ubicacion: ubicacion,
-                coordenadas: [fire.lat, fire.lng], // Array [lat, lng] para PostgreSQL
+                coordenadas: {
+                    lat: fire.lat,
+                    lng: fire.lng
+                },
                 intensidad: calculateIntensity(fire.frp, fire.confidence),
                 fecha: fire.date
             });
