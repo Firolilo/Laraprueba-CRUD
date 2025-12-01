@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('subtitle', 'Datos Climáticos')
-@section('content_header_title', 'Datos Climáticos Históricos')
+@section('content_header_title', 'Datos Climáticos Históricos -')
 @section('content_header_subtitle')
     {{ $ubicacion }} - Última Semana
 @endsection
