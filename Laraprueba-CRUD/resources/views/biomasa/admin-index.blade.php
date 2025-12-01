@@ -2,7 +2,7 @@
 
 @section('subtitle', 'Moderación de Biomasas')
 @section('content_header_title', 'Gestión de Biomasas')
-@section('content_header_subtitle', 'Moderación y Aprobación')
+@section('content_header_subtitle', '- Moderación y Aprobación')
 
 @section('content_body')
     <div class="container-fluid">
