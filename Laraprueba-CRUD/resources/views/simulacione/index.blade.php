@@ -2,7 +2,7 @@
 
 @section('subtitle', 'Simulaciones')
 @section('content_header_title', 'Simulaciones de Incendios')
-@section('content_header_subtitle', 'Listado')
+@section('content_header_subtitle', '- Listado')
 
 @section('content_body')
     <div class="container-fluid">
@@ -18,9 +18,6 @@
                     <x-slot name="toolsSlot">
                         <a href="{{ route('simulaciones.simulator') }}" class="btn btn-warning btn-sm">
                             <i class="fas fa-fire"></i> Simulador Avanzado
-                        </a>
-                        <a href="{{ route('simulaciones.create') }}" class="btn btn-success btn-sm">
-                            <i class="fas fa-plus"></i> Crear Nueva
                         </a>
                     </x-slot>
 
