@@ -1,7 +1,7 @@
 @extends('adminlte::page')
 
 @section('template_title')
-    {{ __('Create') }} Biomasa
+    {{ __('Crear') }} Biomasa
 @endsection
 
 @section('content')
