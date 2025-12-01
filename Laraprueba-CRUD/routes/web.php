@@ -77,6 +77,9 @@ Route::middleware('auth')->group(function () {
         // Predictions - Voluntarios pueden ver
         Route::get('predictions', [App\Http\Controllers\PredictionController::class, 'index'])
             ->name('predictions.index');
+        // IMPORTANTE: create debe ir ANTES que {prediction} para evitar conflictos
+        Route::get('predictions/create', [App\Http\Controllers\PredictionController::class, 'create'])
+            ->name('predictions.create');
         Route::get('predictions/{prediction}', [App\Http\Controllers\PredictionController::class, 'show'])
             ->name('predictions.show');
     });
@@ -120,11 +123,9 @@ Route::middleware('auth')->group(function () {
         Route::post('focos-incendios/import/firms', [App\Http\Controllers\FocosIncendioController::class, 'importFromFirms'])
             ->name('focos-incendios.import-firms');
         
-        // Predictions - Full CRUD (create, edit, delete)
+        // Predictions - Full CRUD (solo edit, update, delete ya que create está arriba para todos)
         Route::post('predictions', [App\Http\Controllers\PredictionController::class, 'store'])
             ->name('predictions.store');
-        Route::get('predictions/create', [App\Http\Controllers\PredictionController::class, 'create'])
-            ->name('predictions.create');
         Route::get('predictions/{prediction}/edit', [App\Http\Controllers\PredictionController::class, 'edit'])
             ->name('predictions.edit');
         Route::patch('predictions/{prediction}', [App\Http\Controllers\PredictionController::class, 'update'])

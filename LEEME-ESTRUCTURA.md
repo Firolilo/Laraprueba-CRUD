@@ -398,31 +398,89 @@ php artisan serve --port=8000
 
 ## 📱 Configurar App Flutter
 
-Para conectar Flutter al backend unificado:
+### 1. Instalar Dependencias
 
-```dart
-// lib/services/api_service.dart
-static const String baseUrl = 'http://TU_IP_LOCAL:8000/api';
-
-// Guardar token después del login
-SharedPreferences prefs = await SharedPreferences.getInstance();
-await prefs.setString('token', response['token']);
-
-// Incluir token en headers
-final token = prefs.getString('token');
-final response = await http.get(
-  Uri.parse('$baseUrl/biomasas'),
-  headers: {
-    'Authorization': 'Bearer $token',
-    'Accept': 'application/json',
-  },
-);
+```bash
+cd sipii_flutter
+flutter pub get
 ```
 
-Para obtener tu IP local:
+### 2. Obtener tu IP Local
+
+**Windows:**
 ```bash
 ipconfig
 # Busca "Dirección IPv4" en tu adaptador de red
+```
+
+**macOS/Linux:**
+```bash
+ifconfig
+# Busca la dirección IP en en0 o wlan0
+```
+
+### 3. Configurar URL del API
+
+Edita `sipii_flutter/lib/services/api_service.dart`:
+
+```dart
+class ApiService {
+  // Cambia por tu IP local
+  static const String baseUrl = 'http://TU_IP_LOCAL:8000/api';
+  
+  // Ejemplo:
+  // static const String baseUrl = 'http://192.168.1.100:8000/api';
+}
+```
+
+### 4. Ejecutar la App
+
+```bash
+cd sipii_flutter
+flutter run
+```
+
+**Nota:** Si usas emulador Android, puedes usar `http://10.0.2.2:8000/api`
+
+### 5. Funcionalidades de la App
+
+✅ **Autenticación Sanctum:**
+- Login con email/contraseña
+- Registro de nuevos usuarios
+- Logout con revocación de token
+- Token persistente (SharedPreferences)
+
+✅ **Endpoints Implementados:**
+- `POST /api/register` - Crear cuenta
+- `POST /api/login` - Iniciar sesión
+- `POST /api/logout` - Cerrar sesión
+- `GET /api/public/focos-incendios` - Ver focos (sin auth)
+- `GET /api/public/biomasas` - Ver biomasas (sin auth)
+- `GET /api/public/tipos-biomasa` - Ver tipos (sin auth)
+- `POST /api/biomasas` - Crear biomasa (requiere auth)
+- `PUT /api/biomasas/{id}` - Editar biomasa (requiere auth)
+- `DELETE /api/biomasas/{id}` - Eliminar biomasa (requiere auth)
+
+✅ **Pantallas:**
+- LoginScreen - Inicio de sesión
+- RegisterScreen - Registro de usuarios
+- MapScreen - Mapa con focos y biomasas
+
+✅ **Modo Sin Autenticación:**
+- Continuar sin login (solo lectura)
+- Ver focos y biomasas públicas
+- No permite crear/editar/eliminar
+
+### 6. Headers de Autenticación
+
+La app incluye automáticamente el token en las peticiones protegidas:
+
+```dart
+headers: {
+  'Authorization': 'Bearer {token}',
+  'Content-Type': 'application/json',
+  'Accept': 'application/json',
+}
 ```
 
 ---

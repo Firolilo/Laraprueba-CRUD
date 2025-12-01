@@ -145,10 +145,22 @@ class PredictionController extends Controller
         int $hours,
         string $terrainType
     ): array {
-        // Parsear coordenadas si están en JSON
+        // Parsear coordenadas para manejar tanto array [lat, lng] como objeto {lat, lng}
         $coords = is_string($foco->coordenadas) ? json_decode($foco->coordenadas, true) : $foco->coordenadas;
-        $startLat = (float) $coords[0];
-        $startLng = (float) $coords[1];
+        
+        // Extraer lat y lng de forma robusta
+        if (is_array($coords)) {
+            // Puede ser [lat, lng] o ['lat' => lat, 'lng' => lng]
+            $startLat = (float) ($coords[0] ?? $coords['lat'] ?? 0);
+            $startLng = (float) ($coords[1] ?? $coords['lng'] ?? 0);
+        } else {
+            throw new \Exception('El foco de incendio no tiene coordenadas válidas');
+        }
+        
+        if ($startLat == 0 || $startLng == 0) {
+            throw new \Exception('El foco de incendio tiene coordenadas inválidas: lat=' . $startLat . ', lng=' . $startLng);
+        }
+        
         $intensity = (float) ($foco->intensidad ?? 5);
 
         // Factores de propagación según tipo de terreno

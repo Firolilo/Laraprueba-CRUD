@@ -344,10 +344,7 @@ async function saveFires() {
     try {
         const focosData = fires.map(fire => ({
             ubicacion: fire.ubicacion,
-            coordenadas: {
-                lat: fire.lat,
-                lng: fire.lng
-            },
+            coordenadas: [fire.lat, fire.lng], // Array [lat, lng] para PostgreSQL
             intensidad: fire.intensidad,
             fecha: new Date().toISOString().split('T')[0]
         }));
@@ -458,10 +455,7 @@ async function loadFirmsData() {
             
             focosWithLocation.push({
                 ubicacion: ubicacion,
-                coordenadas: {
-                    lat: fire.lat,
-                    lng: fire.lng
-                },
+                coordenadas: [fire.lat, fire.lng], // Array [lat, lng] para PostgreSQL
                 intensidad: calculateIntensity(fire.frp, fire.confidence),
                 fecha: fire.date
             });

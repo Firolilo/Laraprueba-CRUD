@@ -768,11 +768,15 @@
         
         if (typeof initialFoco.coordenadas === 'string') {
             const coords = JSON.parse(initialFoco.coordenadas);
-            lat = parseFloat(coords[0]);
-            lng = parseFloat(coords[1]);
+            lat = parseFloat(coords[0] || coords.lat);
+            lng = parseFloat(coords[1] || coords.lng);
         } else if (Array.isArray(initialFoco.coordenadas)) {
-            lat = parseFloat(initialFoco.coordenadas[0]);
-            lng = parseFloat(initialFoco.coordenadas[1]);
+            lat = parseFloat(initialFoco.coordenadas[0] || initialFoco.coordenadas.lat);
+            lng = parseFloat(initialFoco.coordenadas[1] || initialFoco.coordenadas.lng);
+        } else if (typeof initialFoco.coordenadas === 'object' && initialFoco.coordenadas !== null) {
+            // Manejar objeto {lat: ..., lng: ...}
+            lat = parseFloat(initialFoco.coordenadas.lat || initialFoco.coordenadas[0]);
+            lng = parseFloat(initialFoco.coordenadas.lng || initialFoco.coordenadas[1]);
         } else {
             console.error('Invalid coordinates format:', initialFoco.coordenadas);
             return;

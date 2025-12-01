@@ -14,13 +14,30 @@
             <select name="foco_incendio_id" id="foco_incendio_id" class="form-control @error('foco_incendio_id') is-invalid @enderror" required>
                 <option value="">Seleccione un foco...</option>
                 @foreach($focosIncendios as $foco)
-                    <option value="{{ $foco->id }}" 
-                            data-lat="{{ $foco->coordenadas[0] ?? '' }}" 
-                            data-lng="{{ $foco->coordenadas[1] ?? '' }}"
-                            data-intensity="{{ $foco->intensidad ?? 5 }}"
-                            {{ old('foco_incendio_id', $prediction?->foco_incendio_id) == $foco->id ? 'selected' : '' }}>
-                        {{ $foco->ubicacion }} - {{ $foco->fecha?->format('d/m/Y H:i') }} (Intensidad: {{ $foco->intensidad }})
-                    </option>
+                    @php
+                        // Manejar coordenadas tanto como array [lat, lng] como objeto {lat, lng}
+                        $coords = $foco->coordenadas;
+                        $lat = '';
+                        $lng = '';
+                        
+                        if (is_array($coords)) {
+                            $lat = $coords[0] ?? ($coords['lat'] ?? '');
+                            $lng = $coords[1] ?? ($coords['lng'] ?? '');
+                        }
+                        
+                        // Solo mostrar focos con coordenadas válidas
+                        $hasCoords = !empty($lat) && !empty($lng);
+                    @endphp
+                    
+                    @if($hasCoords)
+                        <option value="{{ $foco->id }}" 
+                                data-lat="{{ $lat }}" 
+                                data-lng="{{ $lng }}"
+                                data-intensity="{{ $foco->intensidad ?? 5 }}"
+                                {{ old('foco_incendio_id', $prediction?->foco_incendio_id) == $foco->id ? 'selected' : '' }}>
+                            {{ $foco->ubicacion }} - {{ $foco->fecha?->format('d/m/Y H:i') }} (Intensidad: {{ $foco->intensidad }})
+                        </option>
+                    @endif
                 @endforeach
             </select>
             {!! $errors->first('foco_incendio_id', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
@@ -66,7 +83,12 @@
     </div>
 
     <div class="col-md-12">
-        <h5 class="mt-3 mb-3"><i class="fas fa-cloud-sun text-warning"></i> Condiciones Ambientales</h5>
+        <h5 class="mt-3 mb-3">
+            <i class="fas fa-cloud-sun text-warning"></i> Condiciones Ambientales
+            <button type="button" id="loadWeatherBtn" class="btn btn-sm btn-info float-right">
+                <i class="fas fa-cloud-download-alt"></i> Cargar Clima Actual (Open-Meteo)
+            </button>
+        </h5>
     </div>
 
     <div class="col-md-3">
@@ -162,6 +184,94 @@ document.addEventListener('DOMContentLoaded', function() {
     if (focoSelect.value) {
         focoSelect.dispatchEvent(new Event('change'));
     }
+
+    // Cargar datos del clima desde Open-Meteo
+    const loadWeatherBtn = document.getElementById('loadWeatherBtn');
+    const temperatureInput = document.querySelector('input[name="temperature"]');
+    const humidityInput = document.querySelector('input[name="humidity"]');
+    const windSpeedInput = document.querySelector('input[name="wind_speed"]');
+    const windDirectionInput = document.querySelector('input[name="wind_direction"]');
+
+    loadWeatherBtn.addEventListener('click', async function() {
+        const selectedOption = focoSelect.options[focoSelect.selectedIndex];
+        
+        if (!selectedOption.value) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Selecciona un Foco',
+                text: 'Primero debes seleccionar un foco de incendio para obtener las coordenadas.',
+                timer: 3000
+            });
+            return;
+        }
+
+        const lat = selectedOption.getAttribute('data-lat');
+        const lng = selectedOption.getAttribute('data-lng');
+
+        if (!lat || !lng) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Sin Coordenadas',
+                text: 'El foco seleccionado no tiene coordenadas definidas.',
+                timer: 3000
+            });
+            return;
+        }
+
+        // Mostrar loading
+        loadWeatherBtn.disabled = true;
+        const originalHtml = loadWeatherBtn.innerHTML;
+        loadWeatherBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
+
+        try {
+            // Llamar a la API de Open-Meteo
+            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m&timezone=America/La_Paz`;
+            
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error('Error al obtener datos del clima');
+            }
+            
+            const data = await response.json();
+            
+            // Actualizar campos del formulario con datos actuales
+            temperatureInput.value = Math.round(data.current.temperature_2m * 10) / 10;
+            humidityInput.value = Math.round(data.current.relative_humidity_2m * 10) / 10;
+            windSpeedInput.value = Math.round(data.current.wind_speed_10m * 10) / 10;
+            windDirectionInput.value = Math.round(data.current.wind_direction_10m);
+            
+            // Notificar éxito con datos
+            Swal.fire({
+                icon: 'success',
+                title: 'Clima Cargado',
+                html: `
+                    <div style="text-align: left;">
+                        <p><i class="fas fa-thermometer-half text-danger"></i> <strong>Temperatura:</strong> ${temperatureInput.value}°C</p>
+                        <p><i class="fas fa-tint text-info"></i> <strong>Humedad:</strong> ${humidityInput.value}%</p>
+                        <p><i class="fas fa-wind text-primary"></i> <strong>Viento:</strong> ${windSpeedInput.value} km/h</p>
+                        <p><i class="fas fa-compass text-secondary"></i> <strong>Dirección:</strong> ${windDirectionInput.value}°</p>
+                        <hr>
+                        <small class="text-muted">Datos obtenidos de Open-Meteo para las coordenadas del foco</small>
+                    </div>
+                `,
+                timer: 5000,
+                timerProgressBar: true
+            });
+            
+        } catch (error) {
+            console.error('Error loading weather:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Error al cargar datos climáticos. Intenta nuevamente.',
+                timer: 3000
+            });
+        } finally {
+            loadWeatherBtn.disabled = false;
+            loadWeatherBtn.innerHTML = originalHtml;
+        }
+    });
 });
 </script>
 @endpush
