@@ -18,15 +18,18 @@
 
         {{-- Sidebar con biomasas listadas --}}
         <div class="col-lg-4">
-            <x-adminlte-card title="Áreas de Biomasa ({{ $biomasasCount }})" theme="success" icon="fas fa-leaf">
-                {{-- Filtros por tipo de biomasa --}}
+            <x-adminlte-card 
+            title="Áreas de Biomasa ({{ $biomasasCount }})"
+            theme="success"
+            icon="fas fa-leaf">
+            {{-- Filtros por tipo de biomasa --}}
                 <div class="mb-3">
                     <div class="dropdown">
                         <button class="btn btn-sm btn-outline-success dropdown-toggle btn-block" type="button" 
                                 id="dropdownFiltros" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <i class="fas fa-filter"></i> Filtrar por tipo de biomasa
                         </button>
-                        <div class="dropdown-menu w-100" aria-labelledby="dropdownFiltros" style="padding: 10px;">
+                        <div class="dropdown-menu" aria-labelledby="dropdownFiltros" style="padding: 10px;">
                             @php
                                 $tiposBiomasa = \App\Models\TipoBiomasa::select('id', 'tipo_biomasa', 'color')->get();
                             @endphp
@@ -54,7 +57,7 @@
                     </div>
                 </div>
                 
-                <div id="biomasas-list" style="max-height: 350px; overflow-y: auto;">
+                <div id="biomasas-list" style="height: 460px; overflow-y: auto;">
                     <p class="text-muted text-center">
                         <i class="fas fa-spinner fa-spin"></i> Cargando biomasas...
                     </p>
@@ -137,11 +140,24 @@
         width: 100%;
         border-radius: 4px;
     }
-    .weather-card {
-        text-align: center;
-        padding: 15px;
+
+    .row:first-child .col-lg-4 .card {
+        height: 615px;
+        display: flex;
+        flex-direction: column;
     }
-    .weather-card .label {
+
+    .row:first-child .col-lg-4 .card-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    #biomasas-list {
+        flex: 1;
+        overflow-y: auto;
+    }    .weather-card .label {
         font-size: 14px;
         color: #6c757d;
         margin-bottom: 8px;
