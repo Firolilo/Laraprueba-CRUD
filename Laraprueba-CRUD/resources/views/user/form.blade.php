@@ -68,7 +68,7 @@
 
     <div class="col-12 mt-3">
         <x-adminlte-button type="submit" label="Guardar" theme="primary" icon="fas fa-save"/>
-        <x-adminlte-button label="Cancelar" theme="secondary" icon="fas fa-times" 
+        <x-adminlte-button label="Cancelar" theme="danger" icon="fas fa-times" 
             onclick="window.history.back();"/>
     </div>
 </div>
