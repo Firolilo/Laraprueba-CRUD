@@ -2,7 +2,7 @@
 
 @section('subtitle', 'Usuarios')
 @section('content_header_title', 'Gestión de Usuarios')
-@section('content_header_subtitle', 'Listado')
+@section('content_header_subtitle', '- Listado')
 
 @section('content_body')
     <div class="container-fluid">
