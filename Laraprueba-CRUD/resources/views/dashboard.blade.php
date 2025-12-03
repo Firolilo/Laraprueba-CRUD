@@ -317,6 +317,16 @@
         const confidenceText = confidence === 'h' ? 'Alta' : confidence === 'l' ? 'Baja' : 'Normal';
         const confidenceColor = confidence === 'h' ? '#dc2626' : confidence === 'l' ? '#fb923c' : '#f59e0b';
         
+        // Calcular intensidad basada en FRP para el simulador
+        const frp = fire.frp || 5;
+        const intensity = Math.min(5, Math.max(1, Math.round(frp / 50)));
+        
+        // Crear URL para el simulador con parámetros del foco
+        const simulatorUrl = `/simulaciones/simulator?fire_lat=${fire.lat}&fire_lng=${fire.lng}&fire_intensity=${intensity}&fire_frp=${frp}`;
+        
+        // Crear URL para predicción con parámetros del foco
+        const predictionUrl = `/predictions/create?fire_lat=${fire.lat}&fire_lng=${fire.lng}&fire_intensity=${intensity}&fire_frp=${frp}`;
+        
         return `
             <div style="min-width: 250px; font-family: system-ui, -apple-system, sans-serif;">
                 <div style="
@@ -402,10 +412,56 @@
                     </table>
                 </div>
                 
+                <!-- Botones para simular y predecir -->
                 <div style="
-                    margin-top: 10px;
-                    padding-top: 10px;
+                    margin-top: 12px;
+                    padding-top: 12px;
                     border-top: 1px solid #e5e7eb;
+                    display: flex;
+                    gap: 8px;
+                ">
+                    <a href="${simulatorUrl}" 
+                       style="
+                           flex: 1;
+                           display: block;
+                           background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+                           color: white;
+                           text-align: center;
+                           padding: 10px 12px;
+                           border-radius: 6px;
+                           text-decoration: none;
+                           font-weight: 600;
+                           font-size: 13px;
+                           transition: all 0.2s ease;
+                           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                       "
+                       onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.2)';"
+                       onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)';">
+                        <i class="fas fa-play-circle"></i> Simular
+                    </a>
+                    <a href="${predictionUrl}" 
+                       style="
+                           flex: 1;
+                           display: block;
+                           background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+                           color: white;
+                           text-align: center;
+                           padding: 10px 12px;
+                           border-radius: 6px;
+                           text-decoration: none;
+                           font-weight: 600;
+                           font-size: 13px;
+                           transition: all 0.2s ease;
+                           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                       "
+                       onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.2)';"
+                       onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)';">
+                        <i class="fas fa-chart-line"></i> Predecir
+                    </a>
+                </div>
+                
+                <div style="
+                    margin-top: 8px;
                     font-size: 11px;
                     color: #9ca3af;
                     text-align: center;

@@ -34,7 +34,7 @@ class BiomasaController extends Controller
             'fecha_reporte' => 'required|date',
         ]);
 
-        $validated['coordenadas'] = json_encode($validated['coordenadas']);
+        // El mutator del modelo convierte automáticamente el array a JSON
         $validated['user_id'] = null; // Sin autenticación por ahora
 
         $biomasa = Biomasa::create($validated);
@@ -67,7 +67,7 @@ class BiomasaController extends Controller
         ]);
 
         if (isset($validated['coordenadas'])) {
-            $validated['coordenadas'] = json_encode($validated['coordenadas']);
+            // El mutator del modelo convierte automáticamente el array a JSON
         }
 
         $biomasa->update($validated);

@@ -46,8 +46,13 @@
                                     <tr>
                                         <td>{{ ++$i }}</td>
                                         <td>
-                                            <strong>{{ $prediction->focoIncendio->ubicacion ?? 'N/A' }}</strong><br>
-                                            <small class="text-muted">{{ $prediction->focoIncendio->fecha?->format('d/m/Y') }}</small>
+                                            @if($prediction->focoIncendio)
+                                                <strong>{{ $prediction->focoIncendio->ubicacion ?? 'N/A' }}</strong><br>
+                                                <small class="text-muted">{{ $prediction->focoIncendio->fecha?->format('d/m/Y') }}</small>
+                                            @else
+                                                <strong><i class="fas fa-satellite text-info"></i> Foco FIRMS</strong><br>
+                                                <small class="text-muted">{{ $prediction->predicted_at?->format('d/m/Y') }}</small>
+                                            @endif
                                         </td>
                                         <td>{{ $prediction->predicted_at?->format('d/m/Y H:i') ?? 'N/A' }}</td>
                                         <td>{{ $horas }}h</td>

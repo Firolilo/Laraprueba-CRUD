@@ -92,6 +92,31 @@ class Biomasa extends Model
     }
     
     /**
+     * Mutator para convertir coordenadas a JSON antes de guardar
+     */
+    public function setCoordenadasAttribute($value)
+    {
+        // Si ya es un string JSON, guardarlo directamente
+        if (is_string($value)) {
+            // Verificar si es un JSON válido
+            json_decode($value);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $this->attributes['coordenadas'] = $value;
+                return;
+            }
+        }
+        
+        // Si es un array, convertirlo a JSON
+        if (is_array($value)) {
+            $this->attributes['coordenadas'] = json_encode($value);
+            return;
+        }
+        
+        // Si es null o vacío
+        $this->attributes['coordenadas'] = null;
+    }
+    
+    /**
      * Scopes para filtrar por estado
      */
     public function scopePendientes($query)

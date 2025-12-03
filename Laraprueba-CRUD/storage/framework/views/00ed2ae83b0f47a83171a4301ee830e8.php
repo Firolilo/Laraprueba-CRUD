@@ -33,9 +33,11 @@
                             <dl class="row">
                                 <dt class="col-sm-5">Foco de Incendio:</dt>
                                 <dd class="col-sm-7">
-                                    <strong><?php echo e($prediction->focoIncendio->ubicacion ?? 'N/A'); ?></strong><br>
+                                    <strong><?php echo e($foco->ubicacion ?? 'Foco FIRMS'); ?></strong><br>
                                     <small class="text-muted">
-                                        Fecha: <?php echo e($prediction->focoIncendio->fecha?->format('d/m/Y H:i')); ?><br>
+                                        <?php if(isset($foco->fecha) && $foco->fecha): ?>
+                                            Fecha: <?php echo e(is_object($foco->fecha) ? $foco->fecha->format('d/m/Y H:i') : $foco->fecha); ?><br>
+                                        <?php endif; ?>
                                         Intensidad Inicial: <?php echo e($inputParams['initial_intensity'] ?? 'N/A'); ?>
 
                                     </small>

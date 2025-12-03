@@ -43,7 +43,10 @@ class PredictionController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'foco_incendio_id' => 'required|exists:focos_incendios,id',
+            'fire_lat' => 'required|numeric',
+            'fire_lng' => 'required|numeric',
+            'fire_intensity' => 'required|numeric|min:1|max:10',
+            'fire_frp' => 'nullable|numeric',
             'temperature' => 'required|numeric|min:0|max:60',
             'humidity' => 'required|numeric|min:0|max:100',
             'wind_speed' => 'required|numeric|min:0|max:200',
@@ -52,11 +55,20 @@ class PredictionController extends Controller
             'terrain_type' => 'required|string',
         ]);
 
-        $foco = FocosIncendio::findOrFail($request->foco_incendio_id);
+        // Crear un objeto foco temporal con los datos del formulario
+        $focoData = (object) [
+            'id' => null,
+            'coordenadas' => [$request->fire_lat, $request->fire_lng],
+            'intensidad' => $request->fire_intensity,
+            'frp' => $request->fire_frp,
+            'ubicacion' => "FIRMS ({$request->fire_lat}, {$request->fire_lng})",
+        ];
 
         // Generar predicción usando algoritmo
-        $predictionData = $this->generatePrediction(
-            $foco,
+        $predictionData = $this->generatePredictionFromCoords(
+            $request->fire_lat,
+            $request->fire_lng,
+            $request->fire_intensity,
             $request->temperature,
             $request->humidity,
             $request->wind_speed,
@@ -66,7 +78,7 @@ class PredictionController extends Controller
         );
 
         $prediction = Prediction::create([
-            'foco_incendio_id' => $foco->id,
+            'foco_incendio_id' => null, // No hay foco de incendio asociado
             'predicted_at' => now(),
             'path' => $predictionData['path'],
             'meta' => $predictionData['meta'],
@@ -82,7 +94,27 @@ class PredictionController extends Controller
     public function show($id): View
     {
         $prediction = Prediction::with('focoIncendio')->findOrFail($id);
-        $foco = $prediction->focoIncendio;
+        
+        // Si hay un foco de incendio asociado, usarlo
+        // Si no, crear un objeto temporal con los datos de la predicción
+        if ($prediction->focoIncendio) {
+            $foco = $prediction->focoIncendio;
+        } else {
+            // Crear objeto foco desde los datos de la predicción
+            $meta = $prediction->meta ?? [];
+            $inputParams = $meta['input_parameters'] ?? [];
+            $trajectory = $prediction->path ?? [];
+            $firstPoint = $trajectory[0] ?? null;
+            
+            $foco = (object) [
+                'id' => null,
+                'ubicacion' => 'Foco FIRMS',
+                'coordenadas' => $firstPoint ? [$firstPoint['lat'], $firstPoint['lng']] : null,
+                'intensidad' => $inputParams['initial_intensity'] ?? 3,
+                'fecha' => $prediction->predicted_at,
+                'fecha_deteccion' => $prediction->predicted_at,
+            ];
+        }
         
         // Cargar biomasas para mostrar en el mapa
         $biomasas = Biomasa::with('tipoBiomasa')
@@ -159,18 +191,44 @@ class PredictionController extends Controller
         
         // Extraer lat y lng de forma robusta
         if (is_array($coords)) {
-            // Puede ser [lat, lng] o ['lat' => lat, 'lng' => lng]
             $startLat = (float) ($coords[0] ?? $coords['lat'] ?? 0);
             $startLng = (float) ($coords[1] ?? $coords['lng'] ?? 0);
         } else {
             throw new \Exception('El foco de incendio no tiene coordenadas válidas');
         }
         
-        if ($startLat == 0 || $startLng == 0) {
-            throw new \Exception('El foco de incendio tiene coordenadas inválidas: lat=' . $startLat . ', lng=' . $startLng);
-        }
-        
         $intensity = (float) ($foco->intensidad ?? 5);
+        
+        return $this->generatePredictionFromCoords(
+            $startLat,
+            $startLng,
+            $intensity,
+            $temperature,
+            $humidity,
+            $windSpeed,
+            $windDirection,
+            $hours,
+            $terrainType
+        );
+    }
+
+    /**
+     * Generar predicción desde coordenadas directas (para FIRMS)
+     */
+    private function generatePredictionFromCoords(
+        float $startLat,
+        float $startLng,
+        float $intensity,
+        float $temperature,
+        float $humidity,
+        float $windSpeed,
+        int $windDirection,
+        int $hours,
+        string $terrainType
+    ): array {
+        if ($startLat == 0 || $startLng == 0) {
+            throw new \Exception('Coordenadas inválidas: lat=' . $startLat . ', lng=' . $startLng);
+        }
 
         // Factores de propagación según tipo de terreno
         $terrainFactors = [
@@ -233,19 +291,9 @@ class PredictionController extends Controller
                 ];
             }
             
-            // Si el fuego ya se extinguió, mantener el último estado sin movimiento
+            // Si el fuego ya se extinguió, terminar el loop (no generar más puntos)
             if ($fireExtinguished) {
-                $path[] = [
-                    'hour' => $hour,
-                    'lat' => round($currentLat, 6),
-                    'lng' => round($currentLng, 6),
-                    'intensity' => 1.0,
-                    'spread_radius_km' => round($radius, 3),
-                    'affected_area_km2' => round($area, 3),
-                    'perimeter_km' => round($perimeter, 2),
-                    'extinguished' => true,
-                ];
-                continue;
+                break;
             }
             
             // MODELO REALISTA DE INTENSIDAD
@@ -298,20 +346,19 @@ class PredictionController extends Controller
                 // Si ha estado en intensidad 1 por más de 3 horas consecutivas, el fuego se extingue
                 if ($lowIntensityCount > 3) {
                     $fireExtinguished = true;
-                    $currentIntensity = 1.0;
                     
-                    // El fuego no se mueve más
+                    // Agregar último punto de extinción y terminar
                     $path[] = [
                         'hour' => $hour,
                         'lat' => round($currentLat, 6),
                         'lng' => round($currentLng, 6),
                         'intensity' => 1.0,
-                        'spread_radius_km' => round($radius, 3),
-                        'affected_area_km2' => round($area, 3),
-                        'perimeter_km' => round($perimeter, 2),
+                        'spread_radius_km' => round($radius ?? 0, 3),
+                        'affected_area_km2' => round($area ?? 0, 3),
+                        'perimeter_km' => round($perimeter ?? 0, 2),
                         'extinguished' => true,
                     ];
-                    continue;
+                    break; // Salir del loop, no generar más puntos
                 }
             } else {
                 // Si la intensidad sube, resetear el contador
@@ -368,8 +415,8 @@ class PredictionController extends Controller
         // Punto final predicho
         $finalPoint = end($path);
         
-        // Determinar si el fuego se extinguió antes del tiempo predicho
-        $actualDuration = $fireExtinguished ? ($hour - 1) : $hours;
+        // Determinar duración real (cantidad de puntos generados)
+        $actualDuration = count($path) - 1; // -1 porque hora 0 es el inicio
 
         // Calcular distancia total recorrida
         $totalDistance = $this->calculateDistance(
@@ -446,7 +493,7 @@ class PredictionController extends Controller
             
             // Metadatos del algoritmo
             'algorithm_version' => '1.0',
-            'prediction_confidence' => $this->calculateConfidence($foco, $humidity, $windSpeed),
+            'prediction_confidence' => $this->calculateConfidenceFromParams($intensity, $humidity, $windSpeed),
             'generated_at' => now()->toIso8601String(),
         ];
 
@@ -623,6 +670,26 @@ class PredictionController extends Controller
         // Reducir si falta información
         if (!$foco->coordenadas) $confidence -= 0.3;
         if (!$foco->intensidad) $confidence -= 0.1;
+        
+        // Reducir con condiciones extremas
+        if ($humidity < 20 || $humidity > 90) $confidence -= 0.1;
+        if ($windSpeed > 50) $confidence -= 0.15;
+        
+        return max(0.3, min(0.95, $confidence));
+    }
+
+    /**
+     * Calcular confianza desde parámetros directos (para FIRMS)
+     */
+    private function calculateConfidenceFromParams(
+        float $intensity,
+        float $humidity,
+        float $windSpeed
+    ): float {
+        $confidence = 0.85; // base
+        
+        // Los datos de FIRMS son confiables
+        if ($intensity > 0) $confidence += 0.05;
         
         // Reducir con condiciones extremas
         if ($humidity < 20 || $humidity > 90) $confidence -= 0.1;

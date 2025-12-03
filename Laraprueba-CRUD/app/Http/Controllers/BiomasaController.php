@@ -69,9 +69,13 @@ class BiomasaController extends Controller
             $data = $request->validated();
             $data['user_id'] = auth()->id();
             
-            // Convertir coordenadas si es string JSON
+            // Las coordenadas se convierten automáticamente a JSON en el mutator del modelo
+            // Si viene como string JSON, el mutator lo maneja
             if (isset($data['coordenadas']) && is_string($data['coordenadas'])) {
-                $data['coordenadas'] = json_decode($data['coordenadas'], true);
+                $decoded = json_decode($data['coordenadas'], true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $data['coordenadas'] = $decoded;
+                }
             }
             
             // Valores por defecto

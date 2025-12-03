@@ -494,6 +494,8 @@ function fireSimulator() {
         biomasaLayers: [],
         loadingWeather: false,
         loadingFires: false,
+        pendingFireLat: null,
+        pendingFireLng: null,
         
         // Parameters
         temperature: 25,
@@ -503,8 +505,15 @@ function fireSimulator() {
         simulationSpeed: 1,
         
         // Config
-        MAX_ACTIVE_FIRES: 500,
-        MERGE_DISTANCE: 0.02,
+        MAX_ACTIVE_FIRES: 200,
+        MERGE_DISTANCE: 0.012, // ~1.2km - distancia para fusionar focos (más agresivo)
+        fireIdCounter: 0, // Contador global para IDs únicos cortos
+        
+        // Variables base para varianza climática
+        baseTemperature: 25,
+        baseHumidity: 50,
+        baseWindSpeed: 10,
+        baseWindDirection: 0,
         
         init() {
             console.log('Biomasas cargadas:', this.biomasas.length);
@@ -518,6 +527,145 @@ function fireSimulator() {
             this.$watch('temperature', () => this.calculateFireRisk());
             this.$watch('humidity', () => this.calculateFireRisk());
             this.$watch('windSpeed', () => this.calculateFireRisk());
+            
+            // Verificar si hay parámetros de foco en la URL
+            this.loadFireFromUrl();
+        },
+        
+        loadFireFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const fireLat = urlParams.get('fire_lat');
+            const fireLng = urlParams.get('fire_lng');
+            const fireIntensity = urlParams.get('fire_intensity');
+            const fireFrp = urlParams.get('fire_frp');
+            
+            if (fireLat && fireLng) {
+                const lat = parseFloat(fireLat);
+                const lng = parseFloat(fireLng);
+                const intensity = fireIntensity ? parseFloat(fireIntensity) : 1;
+                
+                // Guardar coordenadas para cargar clima después
+                this.pendingFireLat = lat;
+                this.pendingFireLng = lng;
+                
+                // Centrar el mapa en el foco
+                setTimeout(() => {
+                    this.map.setView([lat, lng], 12);
+                    
+                    // Agregar el foco
+                    this.addFire(lat, lng, intensity);
+                    
+                    // Mostrar notificación con opciones mejoradas
+                    const frpText = fireFrp ? ` (${parseFloat(fireFrp).toFixed(1)} MW)` : '';
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Foco de Calor Cargado',
+                        html: `
+                            <div style="text-align: left; padding: 10px;">
+                                <p><i class="fas fa-map-marker-alt text-danger"></i> <strong>Ubicación:</strong> ${lat.toFixed(4)}, ${lng.toFixed(4)}</p>
+                                <p><i class="fas fa-fire text-warning"></i> <strong>Intensidad:</strong> ${intensity}${frpText}</p>
+                                <hr>
+                                <p class="text-muted mb-0" style="font-size: 0.9em;">
+                                    <i class="fas fa-info-circle"></i> Elige cómo deseas iniciar la simulación:
+                                </p>
+                            </div>
+                        `,
+                        confirmButtonText: '<i class="fas fa-cloud-sun"></i> Simular con Clima Real',
+                        showCancelButton: true,
+                        cancelButtonText: '<i class="fas fa-sliders-h"></i> Personalizar Parámetros',
+                        confirmButtonColor: '#28a745',
+                        cancelButtonColor: '#17a2b8',
+                        reverseButtons: true,
+                        allowOutsideClick: false
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Cargar clima real del punto y luego iniciar simulación
+                            this.loadWeatherFromPoint(lat, lng, true);
+                        } else if (result.dismiss === Swal.DismissReason.cancel) {
+                            // El usuario quiere personalizar - no hacer nada, ya puede editar
+                            showInfo('Ajusta los parámetros y haz clic en "Iniciar Simulación" cuando estés listo');
+                        }
+                    });
+                    
+                    // Limpiar URL para evitar recargar el foco si se refresca
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }, 500);
+            }
+        },
+        
+        async loadWeatherFromPoint(lat, lng, startSimulation = false) {
+            this.loadingWeather = true;
+            try {
+                // Llamar a la API de Open-Meteo con las coordenadas específicas del foco
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m&timezone=America/La_Paz`;
+                
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error('Error al obtener datos del clima');
+                }
+                
+                const data = await response.json();
+                
+                // Actualizar parámetros con datos actuales
+                this.temperature = Math.round(data.current.temperature_2m);
+                this.humidity = Math.round(data.current.relative_humidity_2m);
+                this.windSpeed = Math.round(data.current.wind_speed_10m);
+                this.windDirection = Math.round(data.current.wind_direction_10m);
+                
+                // Recalcular riesgo con nuevos datos
+                this.calculateFireRisk();
+                
+                if (startSimulation) {
+                    // Mostrar datos cargados y empezar simulación
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Clima del Punto Cargado',
+                        html: `
+                            <div style="text-align: left; font-size: 1.1em;">
+                                <p><i class="fas fa-thermometer-half" style="color: #ff6b6b; width: 25px;"></i> <strong>Temperatura:</strong> ${this.temperature}°C</p>
+                                <p><i class="fas fa-tint" style="color: #4ecdc4; width: 25px;"></i> <strong>Humedad:</strong> ${this.humidity}%</p>
+                                <p><i class="fas fa-wind" style="color: #95e1d3; width: 25px;"></i> <strong>Viento:</strong> ${this.windSpeed} km/h</p>
+                                <p><i class="fas fa-compass" style="color: #6c5ce7; width: 25px;"></i> <strong>Dirección:</strong> ${this.windDirection}°</p>
+                                <hr>
+                                <p><i class="fas fa-exclamation-triangle" style="color: ${this.fireRisk > 70 ? '#dc3545' : this.fireRisk > 40 ? '#ffc107' : '#28a745'}; width: 25px;"></i> <strong>Riesgo calculado:</strong> ${this.fireRisk}%</p>
+                            </div>
+                        `,
+                        confirmButtonText: '<i class="fas fa-play-circle"></i> Iniciar Simulación',
+                        confirmButtonColor: '#28a745',
+                        timer: 5000,
+                        timerProgressBar: true
+                    });
+                    
+                    // Iniciar simulación automáticamente
+                    this.toggleSimulation();
+                } else {
+                    // Solo mostrar datos cargados
+                    showWeatherData(this.temperature, this.humidity, this.windSpeed);
+                }
+                
+            } catch (error) {
+                console.error('Error loading weather:', error);
+                showError('Error al cargar clima del punto. Usando valores por defecto.');
+                
+                if (startSimulation) {
+                    // Preguntar si quiere continuar con valores por defecto
+                    const result = await Swal.fire({
+                        icon: 'warning',
+                        title: 'No se pudo cargar el clima',
+                        text: '¿Deseas iniciar la simulación con los parámetros actuales?',
+                        showCancelButton: true,
+                        confirmButtonText: 'Sí, iniciar',
+                        cancelButtonText: 'Cancelar'
+                    });
+                    
+                    if (result.isConfirmed) {
+                        this.toggleSimulation();
+                    }
+                }
+            } finally {
+                this.loadingWeather = false;
+            }
         },
         
         initMap() {
@@ -804,8 +952,21 @@ function fireSimulator() {
         },
         
         startSimulation() {
+            // Guardar valores base para la varianza climática
+            this.baseTemperature = this.temperature;
+            this.baseHumidity = this.humidity;
+            this.baseWindSpeed = this.windSpeed;
+            this.baseWindDirection = this.windDirection;
+            
             this.interval = setInterval(() => {
                 this.timeElapsed++;
+                
+                // Aplicar varianza climática cada hora (tick)
+                this.applyClimateVariance();
+                
+                // Recalcular riesgo con nuevos valores
+                this.calculateFireRisk();
+                
                 this.propagateFires();
                 this.updateActiveFires();
                 this.calculateVolunteers();
@@ -819,6 +980,44 @@ function fireSimulator() {
             }, 1000 / this.simulationSpeed);
         },
         
+        // Simula variación climática realista durante el día
+        applyClimateVariance() {
+            const hour = this.timeElapsed % 24;
+            
+            // Temperatura: más alta al mediodía (12-15h), más baja en la madrugada (3-6h)
+            // Variación de ±8°C respecto a la base según la hora
+            const tempCycle = Math.sin((hour - 6) * Math.PI / 12); // Pico a las 12h
+            const tempVariance = tempCycle * 8; // ±8°C
+            const randomTempNoise = (Math.random() - 0.5) * 2; // ±1°C ruido aleatorio
+            this.temperature = Math.max(5, Math.min(50, 
+                Math.round(this.baseTemperature + tempVariance + randomTempNoise)
+            ));
+            
+            // Humedad: inversa a la temperatura (más húmedo en la noche/madrugada)
+            // Variación de ±15% respecto a la base
+            const humidityVariance = -tempCycle * 15; // Inverso a temperatura
+            const randomHumNoise = (Math.random() - 0.5) * 5; // ±2.5% ruido
+            this.humidity = Math.max(10, Math.min(100, 
+                Math.round(this.baseHumidity + humidityVariance + randomHumNoise)
+            ));
+            
+            // Viento: más variable, con ráfagas aleatorias
+            // Puede aumentar hasta 50% o disminuir hasta 30%
+            const windGust = Math.random() < 0.15 ? (Math.random() * 0.5 + 0.2) : 0; // 15% chance de ráfaga
+            const baseWindVariance = (Math.random() - 0.5) * this.baseWindSpeed * 0.4; // ±20%
+            this.windSpeed = Math.max(0, Math.min(80, 
+                Math.round(this.baseWindSpeed + baseWindVariance + (this.baseWindSpeed * windGust))
+            ));
+            
+            // Dirección del viento: cambios graduales con ocasionales giros
+            const directionShift = (Math.random() - 0.5) * 20; // ±10° por hora normalmente
+            const majorShift = Math.random() < 0.05 ? (Math.random() - 0.5) * 90 : 0; // 5% chance de giro mayor
+            this.windDirection = Math.round((this.baseWindDirection + directionShift + majorShift + 360) % 360);
+            
+            // Actualizar la dirección base gradualmente para simular cambios de patrón
+            this.baseWindDirection = (this.baseWindDirection + directionShift * 0.3 + 360) % 360;
+        },
+        
         stopSimulation() {
             if (this.interval) {
                 clearInterval(this.interval);
@@ -827,143 +1026,182 @@ function fireSimulator() {
         },
         
         propagateFires() {
-            const firesToRemove = [];
             const newFires = [];
             
             this.fires.forEach(fire => {
                 if (!fire.active) return;
                 
-                // Verificar si el foco ha pasado más de 5 segundos sin expandirse
-                if (this.timeElapsed - fire.lastExpansionTime >= 5) {
-                    fire.active = false;
-                    if (fire.circle) this.map.removeLayer(fire.circle);
-                    firesToRemove.push(fire.id);
-                    return;
-                }
-                
-                // Probabilidad de expansión basada en el riesgo de incendio
-                const expansionProbability = this.fireRisk / 100; // 0 a 1
-                const randomValue = Math.random();
-                
-                // Si NO se expande, aumentar contador de tiempo sin expansión
-                if (randomValue > expansionProbability) {
-                    // No se expande este paso, pero sigue activo
-                    return;
-                }
-                
-                // SE EXPANDE: calcular dirección y crear nuevo foco
-                fire.lastExpansionTime = this.timeElapsed; // Actualizar tiempo de última expansión
-                
                 // Detectar si el fuego está en una biomasa
                 const biomasaData = this.getBiomasaModifier(fire.position[0], fire.position[1]);
-                const biomasaModifier = biomasaData.modifier;
+                const biomasaModifier = biomasaData.modifier || 1;
                 
-                const spreadRate = (this.fireRisk / 100) * (this.windSpeed / 20) * 
-                                 (this.temperature / 30) * (1 - (this.humidity / 150)) * biomasaModifier;
-                const spreadDistance = 0.01 * spreadRate * this.simulationSpeed;
+                // ============================================
+                // LÓGICA DE PROPAGACIÓN SIMPLIFICADA Y FUNCIONAL
+                // ============================================
                 
-                if (spreadDistance < 0.001) {
-                    fire.active = false;
-                    if (fire.circle) this.map.removeLayer(fire.circle);
-                    firesToRemove.push(fire.id);
-                    return;
-                }
+                // Probabilidad base alta - el fuego SIEMPRE intenta propagarse
+                // Ajustada por el riesgo de incendio
+                const baseProb = 0.6 + (this.fireRisk / 100) * 0.35; // 60% a 95%
                 
-                // Dirección de propagación con variación aleatoria
-                const finalDirection = fire.direction + (Math.random() - 0.5) * 60; // ±30°
-                const angleRad = (finalDirection * Math.PI) / 180;
+                // Modificadores simples
+                const tempMod = Math.max(0.5, this.temperature / 30); // Más calor = más propagación
+                const humidMod = Math.max(0.3, 1 - (this.humidity / 150)); // Humedad reduce un poco
+                const windMod = 1 + (this.windSpeed / 40); // Viento siempre ayuda
                 
-                const lat = fire.position[0] + Math.cos(angleRad) * spreadDistance;
-                const lng = fire.position[1] + Math.sin(angleRad) * spreadDistance;
+                // Probabilidad final (mínimo 40%, máximo 98%)
+                const propagationProb = Math.min(0.98, Math.max(0.4, 
+                    baseProb * tempMod * humidMod * windMod * biomasaModifier
+                ));
                 
-                // Aplicar modificador de biomasa a la intensidad
-                const intensityDecay = biomasaModifier > 1.0 ? 0.98 : 0.95; // Biomasa densa = declive más lento
-                const newIntensity = fire.intensity * intensityDecay * biomasaModifier;
+                // Número de nuevos focos a crear (1-3 dependiendo de condiciones)
+                const numNewFires = Math.floor(1 + Math.random() * 2 * (this.fireRisk / 100));
                 
-                // Verificar si hay espacio para más focos
-                if (this.fires.length + newFires.length < this.MAX_ACTIVE_FIRES) {
-                    const newFire = {
-                        id: `${fire.id}-${this.timeElapsed}`,
-                        position: [lat, lng],
-                        intensity: newIntensity,
-                        spread: fire.spread + spreadDistance,
-                        direction: finalDirection,
-                        active: newIntensity > 0.2,
-                        history: [...fire.history, [lat, lng]].slice(-10),
-                        circle: null,
-                        lastExpansionTime: this.timeElapsed
-                    };
+                for (let i = 0; i < numNewFires; i++) {
+                    // Verificar si se propaga
+                    if (Math.random() > propagationProb) continue;
+                    if (this.fires.length + newFires.length >= this.MAX_ACTIVE_FIRES) break;
                     
-                    if (newFire.active) {
-                        // Verificar fusión con focos cercanos
-                        let merged = false;
-                        for (let existingFire of [...this.fires, ...newFires]) {
-                            if (existingFire.id === fire.id) continue;
-                            const dist = Math.sqrt(
-                                Math.pow(existingFire.position[0] - lat, 2) + 
-                                Math.pow(existingFire.position[1] - lng, 2)
-                            );
-                            if (dist < this.MERGE_DISTANCE) {
-                                existingFire.intensity = Math.min(2, existingFire.intensity + newFire.intensity * 0.3);
-                                existingFire.lastExpansionTime = this.timeElapsed;
-                                merged = true;
-                                break;
+                    // Dirección: principalmente hacia donde sopla el viento + algo de aleatoriedad
+                    const windSpread = Math.max(30, 120 - this.windSpeed * 2); // Menos spread con más viento
+                    const randomAngle = (Math.random() - 0.5) * windSpread;
+                    const direction = this.windDirection + randomAngle;
+                    
+                    // Distancia de propagación (más lejos con más viento)
+                    const baseDistance = 0.003 + Math.random() * 0.004; // 0.003 a 0.007 grados (~300-700m)
+                    const spreadDistance = baseDistance * (1 + this.windSpeed / 30) * biomasaModifier;
+                    
+                    const angleRad = (direction * Math.PI) / 180;
+                    const newLat = fire.position[0] + Math.cos(angleRad) * spreadDistance;
+                    const newLng = fire.position[1] + Math.sin(angleRad) * spreadDistance;
+                    
+                    // Intensidad del nuevo foco (retiene 80-100% de la intensidad)
+                    const retention = 0.8 + Math.random() * 0.2;
+                    const newIntensity = Math.min(2.5, Math.max(0.5, fire.intensity * retention * biomasaModifier));
+                    
+                    // Verificar si se fusiona con otro foco cercano
+                    let merged = false;
+                    for (let existingFire of [...this.fires, ...newFires]) {
+                        if (!existingFire.active || existingFire.id === fire.id) continue;
+                        const dist = Math.sqrt(
+                            Math.pow(existingFire.position[0] - newLat, 2) + 
+                            Math.pow(existingFire.position[1] - newLng, 2)
+                        );
+                        if (dist < this.MERGE_DISTANCE) {
+                            // MERGE: Acumular intensidad y tamaño
+                            existingFire.intensity = Math.min(3.5, existingFire.intensity + newIntensity * 0.3);
+                            existingFire.mergeCount = (existingFire.mergeCount || 1) + 1;
+                            
+                            // Actualizar visualización del foco fusionado (un poco más grande)
+                            if (existingFire.circle) {
+                                const newRadius = 100 + existingFire.intensity * 80 + existingFire.mergeCount * 20;
+                                existingFire.circle.setStyle({
+                                    radius: newRadius,
+                                    fillOpacity: Math.min(0.75, 0.5 + existingFire.mergeCount * 0.04),
+                                    color: this.getFireColor(existingFire.intensity),
+                                    fillColor: this.getFireColor(existingFire.intensity)
+                                });
+                                
+                                // Tooltip solo si hay 3+ focos unidos
+                                if (existingFire.mergeCount >= 3) {
+                                    existingFire.circle.unbindTooltip();
+                                    existingFire.circle.bindTooltip(
+                                        `Intensidad: ${existingFire.intensity.toFixed(1)}<br>` +
+                                        `Focos unidos: ${existingFire.mergeCount}`,
+                                        { sticky: true }
+                                    );
+                                }
                             }
-                        }
-                        
-                        if (!merged) {
-                            // Detectar biomasa para el nuevo fuego
-                            const newBiomasaData = this.getBiomasaModifier(lat, lng);
-                            
-                            newFire.circle = L.circle([lat, lng], {
-                                color: this.getFireColor(newFire.intensity, newBiomasaData),
-                                fillColor: this.getFireColor(newFire.intensity, newBiomasaData),
-                                fillOpacity: 0.6,
-                                radius: 80 + newFire.spread * 800
-                            }).addTo(this.map);
-                            
-                            // Agregar tooltip si está en biomasa
-                            if (newBiomasaData.inside) {
-                                newFire.circle.bindTooltip(
-                                    `<strong>Intensidad: ${newFire.intensity.toFixed(2)}</strong><br>` +
-                                    `<small>Biomasa: ${newBiomasaData.tipo}</small><br>` +
-                                    `<small>Modificador: ${newBiomasaData.modifier}x</small>`,
-                                    { sticky: true }
-                                );
-                            }
-                            
-                            newFires.push(newFire);
-                            
-                            // Guardar en historial completo con información de biomasa
-                            this.allFiresHistory.push({
-                                fire_id: newFire.id.toString(),
-                                time_step: this.timeElapsed,
-                                lat: lat,
-                                lng: lng,
-                                intensity: newFire.intensity,
-                                spread: newFire.spread,
-                                active: true,
-                                biomasa: newBiomasaData.inside ? {
-                                    tipo: newBiomasaData.tipo,
-                                    modifier: newBiomasaData.modifier,
-                                    id: newBiomasaData.id
-                                } : null
-                            });
+                            merged = true;
+                            break;
                         }
                     }
+                    
+                    if (!merged) {
+                        const newBiomasaData = this.getBiomasaModifier(newLat, newLng);
+                        
+                        // Usar contador global para ID corto y único
+                        this.fireIdCounter++;
+                        const newFire = {
+                            id: `f${this.fireIdCounter}`,
+                            position: [newLat, newLng],
+                            intensity: newIntensity,
+                            spread: fire.spread + spreadDistance,
+                            direction: direction,
+                            active: true,
+                            history: [[newLat, newLng]],
+                            circle: null,
+                            lastExpansionTime: this.timeElapsed,
+                            mergeCount: 1 // Iniciar contador de merges
+                        };
+                        
+                        const radius = 100 + newFire.intensity * 80;
+                        newFire.circle = L.circle([newLat, newLng], {
+                            color: this.getFireColor(newFire.intensity, newBiomasaData),
+                            fillColor: this.getFireColor(newFire.intensity, newBiomasaData),
+                            fillOpacity: 0.55,
+                            radius: radius
+                        }).addTo(this.map);
+                        
+                        if (newBiomasaData.inside) {
+                            newFire.circle.bindTooltip(
+                                `<strong>Intensidad: ${newFire.intensity.toFixed(2)}</strong><br>` +
+                                `<small>Biomasa: ${newBiomasaData.tipo}</small>`,
+                                { sticky: true }
+                            );
+                        }
+                        
+                        newFires.push(newFire);
+                        
+                        this.allFiresHistory.push({
+                            fire_id: newFire.id.toString(),
+                            time_step: this.timeElapsed,
+                            lat: newLat,
+                            lng: newLng,
+                            intensity: newFire.intensity,
+                            spread: newFire.spread,
+                            active: true,
+                            biomasa: newBiomasaData.inside ? {
+                                tipo: newBiomasaData.tipo,
+                                modifier: newBiomasaData.modifier,
+                                id: newBiomasaData.id
+                            } : null
+                        });
+                    }
+                }
+                
+                // El foco original pierde intensidad gradualmente
+                fire.intensity *= 0.97;
+                
+                // Actualizar visualización considerando mergeCount
+                if (fire.circle) {
+                    const mergeCount = fire.mergeCount || 1;
+                    const radius = 100 + fire.intensity * 80 + mergeCount * 15;
+                    fire.circle.setStyle({
+                        fillOpacity: Math.min(0.7, 0.45 + mergeCount * 0.03),
+                        radius: radius,
+                        color: this.getFireColor(fire.intensity),
+                        fillColor: this.getFireColor(fire.intensity)
+                    });
+                }
+                
+                // Solo se apaga con intensidad MUY baja Y condiciones muy desfavorables
+                if (fire.intensity < 0.15 && this.fireRisk < 20 && this.humidity > 70) {
+                    fire.active = false;
+                    if (fire.circle) this.map.removeLayer(fire.circle);
                 }
             });
             
             // Agregar nuevos focos
             this.fires = [...this.fires, ...newFires];
             
-            // Mantener solo focos activos y que no hayan pasado 5 segundos sin expandirse
+            console.log(`Tick ${this.timeElapsed}: ${newFires.length} nuevos focos, ${this.fires.length} total`);
+            
+            // Limpiar focos inactivos
             this.fires = this.fires.filter(f => {
-                const shouldKeep = f.active && (this.timeElapsed - f.lastExpansionTime < 5);
-                if (!shouldKeep && f.circle) {
+                if (!f.active && f.circle) {
                     this.map.removeLayer(f.circle);
                 }
-                return shouldKeep;
+                return f.active;
             });
         },
         
@@ -991,18 +1229,33 @@ function fireSimulator() {
             const strategies = [];
             
             if (this.activeFires.length === 0) {
-                strategies.push("No hay incendios activos. Estado de vigilancia normal.");
+                strategies.push("✅ No hay incendios activos. Estado de vigilancia normal.");
             } else {
-                if (this.activeFires.length > 5) {
-                    strategies.push("🔴 Activación de protocolo de emergencia mayor");
+                if (this.activeFires.length > 10) {
+                    strategies.push("🔴 EMERGENCIA CRÍTICA: Activación de todos los recursos");
+                    strategies.push("🚒 Despliegue de bomberos profesionales y apoyo aéreo");
+                    strategies.push("🏃 Evacuación de zonas de riesgo");
+                } else if (this.activeFires.length > 5) {
+                    strategies.push("🟠 Activación de protocolo de emergencia mayor");
                     strategies.push("🚒 Despliegue de bomberos profesionales");
                 } else {
                     strategies.push("🟡 Activación de protocolo de emergencia básico");
                 }
                 
-                if (this.windSpeed > 30) strategies.push("⚠️ Precaución: Vientos fuertes");
-                if (this.humidity < 30) strategies.push("💧 Humectación de áreas circundantes");
+                // Alertas climáticas
+                if (this.temperature > 35) strategies.push("🌡️ ALERTA: Temperatura extrema (" + this.temperature + "°C)");
+                if (this.humidity < 25) strategies.push("💧 CRÍTICO: Humedad muy baja (" + this.humidity + "%)");
+                if (this.windSpeed > 40) strategies.push("💨 PELIGRO: Vientos muy fuertes (" + this.windSpeed + " km/h)");
+                else if (this.windSpeed > 25) strategies.push("⚠️ Precaución: Vientos moderados");
+                
+                if (this.fireRisk > 80) {
+                    strategies.push("🔥 RIESGO EXTREMO: Condiciones ideales para propagación");
+                } else if (this.fireRisk > 60) {
+                    strategies.push("⚠️ RIESGO ALTO: Monitoreo constante requerido");
+                }
+                
                 strategies.push(`👥 Se requieren aproximadamente ${this.requiredVolunteers} voluntarios`);
+                strategies.push(`📍 Focos activos: ${this.activeFires.length} | Hora simulada: ${this.timeElapsed}h`);
             }
             
             this.mitigationStrategies = strategies;

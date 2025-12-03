@@ -33,9 +33,11 @@
                             <dl class="row">
                                 <dt class="col-sm-5">Foco de Incendio:</dt>
                                 <dd class="col-sm-7">
-                                    <strong>{{ $prediction->focoIncendio->ubicacion ?? 'N/A' }}</strong><br>
+                                    <strong>{{ $foco->ubicacion ?? 'Foco FIRMS' }}</strong><br>
                                     <small class="text-muted">
-                                        Fecha: {{ $prediction->focoIncendio->fecha?->format('d/m/Y H:i') }}<br>
+                                        @if(isset($foco->fecha) && $foco->fecha)
+                                            Fecha: {{ is_object($foco->fecha) ? $foco->fecha->format('d/m/Y H:i') : $foco->fecha }}<br>
+                                        @endif
                                         Intensidad Inicial: {{ $inputParams['initial_intensity'] ?? 'N/A' }}
                                     </small>
                                 </dd>

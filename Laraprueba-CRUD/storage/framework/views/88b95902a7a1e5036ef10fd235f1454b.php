@@ -1,5 +1,5 @@
-<?php $__env->startSection('subtitle', 'Predicciones'); ?>
-<?php $__env->startSection('content_header_title', 'Predicciones de Propagación'); ?>
+<?php $__env->startSection('subtitle', 'Voluntarios'); ?>
+<?php $__env->startSection('content_header_title', 'Gestión de Voluntarios'); ?>
 <?php $__env->startSection('content_header_subtitle', '- Listado'); ?>
 
 <?php $__env->startSection('content_body'); ?>
@@ -33,7 +33,7 @@
 
                 <?php if (isset($component)) { $__componentOriginale2b5538aaf81eaeffb0a99a88907fd7b = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginale2b5538aaf81eaeffb0a99a88907fd7b = $attributes; } ?>
-<?php $component = JeroenNoten\LaravelAdminLte\View\Components\Widget\Card::resolve(['title' => 'Predicciones','theme' => 'purple','icon' => 'fas fa-chart-line'] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = JeroenNoten\LaravelAdminLte\View\Components\Widget\Card::resolve(['title' => 'Voluntarios','theme' => 'info','icon' => 'fas fa-hands-helping'] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('adminlte-card'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
@@ -42,8 +42,8 @@
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
                      <?php $__env->slot('toolsSlot', null, []); ?> 
-                        <a href="<?php echo e(route('predictions.create')); ?>" class="btn btn-success btn-sm">
-                            <i class="fas fa-plus"></i> Generar Predicción
+                        <a href="<?php echo e(route('voluntarios.create')); ?>" class="btn btn-success btn-sm">
+                            <i class="fas fa-plus"></i> Crear Nuevo
                         </a>
                      <?php $__env->endSlot(); ?>
 
@@ -52,54 +52,33 @@
                             <thead>
                                 <tr>
                                     <th>No</th>
-                                    <th>Foco de Incendio</th>
-                                    <th>Fecha de Predicción</th>
-                                    <th>Horas</th>
-                                    <th>Riesgo</th>
-                                    <th>Área Afectada</th>
-                                    <th>Puntos</th>
-                                    <th style="width: 180px;">Acciones</th>
+                                    <th>Nombre</th>
+                                    <th>Email</th>
+                                    <th>Ciudad</th>
+                                    <th>Zona</th>
+                                    <th>Dirección</th>
+                                    <th style="width: 240px;">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php $__currentLoopData = $predictions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $prediction): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <?php
-                                        $meta = $prediction->meta ?? [];
-                                        $riesgo = $meta['fire_risk_index'] ?? 0;
-                                        $area = $meta['total_area_affected_km2'] ?? 0;
-                                        $horas = $meta['input_parameters']['prediction_hours'] ?? 0;
-                                    ?>
+                                <?php $__currentLoopData = $voluntarios; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $voluntario): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <tr>
                                         <td><?php echo e(++$i); ?></td>
-                                        <td>
-                                            <?php if($prediction->focoIncendio): ?>
-                                                <strong><?php echo e($prediction->focoIncendio->ubicacion ?? 'N/A'); ?></strong><br>
-                                                <small class="text-muted"><?php echo e($prediction->focoIncendio->fecha?->format('d/m/Y')); ?></small>
-                                            <?php else: ?>
-                                                <strong><i class="fas fa-satellite text-info"></i> Foco FIRMS</strong><br>
-                                                <small class="text-muted"><?php echo e($prediction->predicted_at?->format('d/m/Y')); ?></small>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td><?php echo e($prediction->predicted_at?->format('d/m/Y H:i') ?? 'N/A'); ?></td>
-                                        <td><?php echo e($horas); ?>h</td>
-                                        <td>
-                                            <span class="badge badge-<?php echo e($riesgo > 70 ? 'danger' : ($riesgo > 40 ? 'warning' : 'info')); ?>">
-                                                <?php echo e($riesgo); ?>
-
-                                            </span>
-                                        </td>
-                                        <td><?php echo e(number_format($area, 2)); ?> km²</td>
-                                        <td><?php echo e(is_array($prediction->path) ? count($prediction->path) : 0); ?></td>
+                                        <td><?php echo e($voluntario->user->name); ?></td>
+                                        <td><?php echo e($voluntario->user->email); ?></td>
+                                        <td><?php echo e($voluntario->ciudad); ?></td>
+                                        <td><?php echo e($voluntario->zona); ?></td>
+                                        <td><?php echo e($voluntario->direccion); ?></td>
                                         <td>
                                             <div class="btn-group btn-group-sm" role="group">
-                                                <a href="<?php echo e(route('predictions.show', $prediction->id)); ?>" class="btn btn-info btn-sm" title="Ver">
+                                                <a href="<?php echo e(route('voluntarios.show', $voluntario->id)); ?>" class="btn btn-info btn-sm" title="Ver">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a href="<?php echo e(route('predictions.pdf', $prediction->id)); ?>" class="btn btn-primary btn-sm" title="Ver Informe" target="_blank">
-                                                    <i class="fas fa-file-pdf"></i>
+                                                <a href="<?php echo e(route('voluntarios.edit', $voluntario->id)); ?>" class="btn btn-warning btn-sm" title="Editar">
+                                                    <i class="fas fa-edit"></i>
                                                 </a>
-                                                <form action="<?php echo e(route('predictions.destroy', $prediction->id)); ?>" method="POST" style="display: inline;" 
-                                                    onsubmit="return confirm('¿Estás seguro de eliminar?');">
+                                                <form action="<?php echo e(route('voluntarios.destroy', $voluntario->id)); ?>" method="POST" style="display: inline;" 
+                                                    onsubmit="return confirm('¿Está seguro de eliminar este voluntario?');">
                                                     <?php echo csrf_field(); ?>
                                                     <?php echo method_field('DELETE'); ?>
                                                     <button type="submit" class="btn btn-danger btn-sm" title="Eliminar">
@@ -115,7 +94,7 @@
                     </div>
 
                     <div class="mt-3">
-                        <?php echo $predictions->withQueryString()->links(); ?>
+                        <?php echo $voluntarios->withQueryString()->links(); ?>
 
                     </div>
                  <?php echo $__env->renderComponent(); ?>
@@ -133,4 +112,4 @@
     </div>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\lenovo\OneDrive\Desktop\Proyectos\SIPII Laravel\Laraprueba-CRUD\Laraprueba-CRUD\resources\views/prediction/index.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\lenovo\OneDrive\Desktop\Proyectos\SIPII Laravel\Laraprueba-CRUD\Laraprueba-CRUD\resources\views/voluntario/index.blade.php ENDPATH**/ ?>
