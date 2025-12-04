@@ -81,6 +81,26 @@
                         <span>Descargar JSON</span>
                     </button>
                 </div>
+
+                <!-- Barra de búsqueda de ubicación (alineada a la derecha) -->
+                <div class="col ml-auto mb-2" style="max-width: 350px;">
+                    <div class="input-group input-group-lg">
+                        <input type="text" 
+                               class="form-control" 
+                               placeholder="Buscar ubicación..."
+                               x-model="searchLocation"
+                               @keyup.enter="searchMapLocation()">
+                        <div class="input-group-append">
+                            <button type="button" 
+                                    class="btn btn-info shadow" 
+                                    @click="searchMapLocation()"
+                                    :disabled="!searchLocation">
+                                <i class="fas fa-search"></i>
+                                <span class="d-none d-md-inline ml-2">Buscar</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <style>
@@ -494,6 +514,7 @@ function fireSimulator() {
         loadingFires: false,
         pendingFireLat: null,
         pendingFireLng: null,
+        searchLocation: '', // Variable para búsqueda de ubicación
         
         // Parameters
         temperature: 25,
@@ -1571,6 +1592,61 @@ function fireSimulator() {
             a.href = url;
             a.download = `simulacion-${Date.now()}.json`;
             a.click();
+        },
+        
+        async searchMapLocation() {
+            if (!this.searchLocation.trim()) {
+                showWarning('Por favor ingresa una ubicación');
+                return;
+            }
+            
+            try {
+                // Usar el servicio de geocodificación de OpenStreetMap Nominatim
+                const response = await fetch(
+                    `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(this.searchLocation)}&format=json&limit=1`,
+                    {
+                        headers: {
+                            'User-Agent': 'SIPII-FireSimulator/1.0'
+                        }
+                    }
+                );
+                
+                if (!response.ok) {
+                    throw new Error('Error en la búsqueda');
+                }
+                
+                const results = await response.json();
+                
+                if (results.length === 0) {
+                    showWarning(`No se encontró la ubicación "${this.searchLocation}". Intenta con otro nombre.`);
+                    return;
+                }
+                
+                const result = results[0];
+                const lat = parseFloat(result.lat);
+                const lng = parseFloat(result.lon);
+                
+                // Mover el mapa a la ubicación encontrada
+                this.map.setView([lat, lng], 12);
+                
+                // Agregar un marcador temporal para indicar la ubicación buscada
+                L.popup()
+                    .setLatLng([lat, lng])
+                    .setContent(`
+                        <div style="text-align: center;">
+                            <strong>${result.name}</strong><br>
+                            <small>Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}</small>
+                        </div>
+                    `)
+                    .openOn(this.map);
+                
+                showSuccess(`Se encontró: <strong>${result.name}</strong>`);
+                this.searchLocation = '';
+                
+            } catch (error) {
+                console.error('Error en la búsqueda:', error);
+                showError('Error al buscar la ubicación. Intenta nuevamente.');
+            }
         }
     }
 }
