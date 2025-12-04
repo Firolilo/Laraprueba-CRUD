@@ -5,6 +5,15 @@ use Illuminate\Support\Facades\Route;
 // Authentication routes
 Auth::routes();
 
+// Google OAuth routes
+Route::get('/auth/google', [\App\Http\Controllers\Auth\GoogleController::class, 'redirectToGoogle'])
+    ->name('google.redirect')
+    ->middleware('guest');
+
+Route::get('/auth/google/callback', [\App\Http\Controllers\Auth\GoogleController::class, 'handleGoogleCallback'])
+    ->name('google.callback')
+    ->middleware('guest');
+
 // Public/Guest routes
 Route::middleware('guest')->group(function () {
     // Redirect root to login if not authenticated

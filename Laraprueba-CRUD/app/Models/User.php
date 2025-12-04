@@ -37,7 +37,7 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
-    protected $fillable = ['name', 'email', 'telefono', 'cedula_identidad', 'password'];
+    protected $fillable = ['name', 'email', 'telefono', 'cedula_identidad', 'password', 'google_id'];
 
     protected $casts = [
         'password' => 'hashed',
